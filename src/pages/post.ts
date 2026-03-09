@@ -308,16 +308,15 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     }
 
     .cover-image {
-      width: calc(100% + 40px);
-      margin: 0 -20px 0;
-      border-radius: 20px;
+      width: 100%;
+      margin: 0 0 0;
+      border-radius: 12px;
       overflow: hidden;
     }
 
     .cover-image img {
       width: 100%;
-      max-height: 560px;
-      object-fit: contain;
+      height: auto;
       display: block;
     }
 
@@ -775,8 +774,8 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       .post-title { font-size: 30px; }
       .post-content { font-size: 16px; }
       .cover-image {
-        width: calc(100% + 32px);
-        margin: 0 -16px 28px;
+        width: 100%;
+        margin: 0 0 28px;
       }
     }
   </style>

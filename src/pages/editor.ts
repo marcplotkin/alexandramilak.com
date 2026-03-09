@@ -305,6 +305,64 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       border-radius: 8px;
       margin: 24px 0;
     }
+    .media-figure {
+      margin: 24px 0;
+      text-align: center;
+      position: relative;
+    }
+    .media-figure img,
+    .media-figure video {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 0;
+      cursor: pointer;
+    }
+    .media-figure.selected {
+      outline: 2px solid rgba(255,248,240,0.4);
+      outline-offset: 4px;
+      border-radius: 10px;
+    }
+    .media-toolbar {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      gap: 6px;
+      z-index: 10;
+    }
+    .media-figure.selected .media-toolbar {
+      display: flex;
+    }
+    .media-toolbar button {
+      background: rgba(0,0,0,0.75);
+      color: #FFF8F0;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+    }
+    .media-toolbar button:hover {
+      background: rgba(0,0,0,0.9);
+    }
+    .media-toolbar button.remove-btn:hover {
+      background: #722F37;
+    }
+    .media-caption {
+      font-size: 13px;
+      font-style: italic;
+      color: rgba(255,248,240,0.45);
+      margin-top: 6px;
+      text-align: left;
+      outline: none;
+      min-height: 20px;
+    }
+    .media-caption:empty::before {
+      content: attr(placeholder);
+      color: rgba(255,248,240,0.25);
+    }
     .embed-wrapper {
       margin: 24px 0;
       border-radius: 12px;
@@ -729,6 +787,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         ` : `
           <button class="btn btn-primary" id="publishBtn" type="button">Publish Now</button>
         `}
+        <button class="btn btn-ghost" id="previewBtn" type="button" style="margin-top: 8px;">Preview</button>
       </div>
       <div class="settings-header">
         <h3>Post Settings</h3>
@@ -911,6 +970,53 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       saveDot.className = 'save-dot unsaved';
       saveStatus.textContent = msg || 'Save failed';
     }
+
+    // ---- PREVIEW ----
+    document.getElementById('previewBtn').addEventListener('click', function() {
+      var previewWin = window.open('', '_blank');
+      var title = document.getElementById('titleInput').value || 'Untitled';
+      var subtitle = document.getElementById('subtitleInput').value || '';
+      var coverUrl = coverImageInput.value.trim();
+      var coverCaption = document.getElementById('coverCaptionInput').value.trim();
+      var content = editorContent.innerHTML;
+      var dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      previewWin.document.write('<!DOCTYPE html><html lang="en"><head>');
+      previewWin.document.write('<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">');
+      previewWin.document.write('<title>Preview: ' + title.replace(/</g, '&lt;') + '</title>');
+      previewWin.document.write('<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">');
+      previewWin.document.write('<style>');
+      previewWin.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
+      previewWin.document.write('body { font-family: "DM Sans", sans-serif; background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%); color: #FFF8F0; min-height: 100vh; padding: 40px 20px; }');
+      previewWin.document.write('.container { max-width: 680px; margin: 0 auto; }');
+      previewWin.document.write('.preview-banner { background: rgba(255,248,240,0.1); padding: 10px 16px; border-radius: 8px; margin-bottom: 32px; text-align: center; font-size: 13px; color: rgba(255,248,240,0.6); }');
+      previewWin.document.write('.cover img { width: 100%; max-height: 560px; object-fit: contain; border-radius: 12px; }');
+      previewWin.document.write('.cover-cap { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin: 10px 0 36px; }');
+      previewWin.document.write('.no-cap { margin-bottom: 36px; }');
+      previewWin.document.write('h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 44px; font-weight: 500; line-height: 1.2; margin-bottom: 12px; }');
+      previewWin.document.write('.subtitle { font-size: 18px; color: rgba(255,248,240,0.55); margin-bottom: 8px; }');
+      previewWin.document.write('.date { font-size: 12px; color: rgba(255,248,240,0.35); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 44px; }');
+      previewWin.document.write('.content { font-size: 17px; line-height: 1.8; color: rgba(255,248,240,0.88); }');
+      previewWin.document.write('.content p { margin-bottom: 20px; }');
+      previewWin.document.write('.content img { max-width: 100%; border-radius: 10px; margin: 28px 0; }');
+      previewWin.document.write('.content video { max-width: 100%; border-radius: 10px; margin: 28px 0; }');
+      previewWin.document.write('.content a { color: rgba(255,248,240,0.7); }');
+      previewWin.document.write('.media-figure { margin: 28px 0; }');
+      previewWin.document.write('.media-figure img, .media-figure video { max-width: 100%; border-radius: 10px; margin: 0; }');
+      previewWin.document.write('.media-caption { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin-top: 6px; }');
+      previewWin.document.write('</style></head><body><div class="container">');
+      previewWin.document.write('<div class="preview-banner">This is a preview — not yet published</div>');
+      if (coverUrl) {
+        previewWin.document.write('<div class="cover' + (coverCaption ? '' : ' no-cap') + '"><img src="' + coverUrl + '" alt="Cover"></div>');
+        if (coverCaption) previewWin.document.write('<p class="cover-cap">' + coverCaption.replace(/</g, '&lt;') + '</p>');
+      }
+      previewWin.document.write('<h1>' + title.replace(/</g, '&lt;') + '</h1>');
+      if (subtitle) previewWin.document.write('<p class="subtitle">' + subtitle.replace(/</g, '&lt;') + '</p>');
+      previewWin.document.write('<p class="date">' + dateStr + '</p>');
+      previewWin.document.write('<div class="content">' + content + '</div>');
+      previewWin.document.write('</div></body></html>');
+      previewWin.document.close();
+    });
 
     // ---- AUTO-SAVE ----
     function resetAutoSave() {
@@ -1544,6 +1650,99 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       return isImageFile(file) || isVideoFile(file);
     }
 
+    // ---- MEDIA FIGURE SELECT/EDIT/REMOVE ----
+    function bindMediaFigure(figure) {
+      // Click media (img/video) to select
+      var mediaEl = figure.querySelector('img, video');
+      if (mediaEl) {
+        mediaEl.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Deselect any other
+          editorContent.querySelectorAll('.media-figure.selected').forEach(function(f) { f.classList.remove('selected'); });
+          figure.classList.add('selected');
+        });
+      }
+      // Remove button
+      var removeBtn = figure.querySelector('.remove-btn');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          figure.parentNode.removeChild(figure);
+          markDirty();
+        });
+      }
+      // Replace button
+      var replaceBtn = figure.querySelector('.replace-btn');
+      if (replaceBtn) {
+        replaceBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*,video/*';
+          input.onchange = async function() {
+            if (input.files.length > 0) {
+              var f = input.files[0];
+              try {
+                var newUrl = await uploadFile(f);
+                var oldMedia = figure.querySelector('img, video');
+                if (isImageFile(f)) {
+                  var newImg = document.createElement('img');
+                  newImg.src = newUrl;
+                  newImg.alt = f.name;
+                  if (oldMedia) oldMedia.parentNode.replaceChild(newImg, oldMedia);
+                  newImg.addEventListener('click', function(ev) { ev.stopPropagation(); editorContent.querySelectorAll('.media-figure.selected').forEach(function(x) { x.classList.remove('selected'); }); figure.classList.add('selected'); });
+                } else if (isVideoFile(f)) {
+                  var newVid = document.createElement('video');
+                  newVid.src = newUrl;
+                  newVid.controls = true;
+                  if (oldMedia) oldMedia.parentNode.replaceChild(newVid, oldMedia);
+                  newVid.addEventListener('click', function(ev) { ev.stopPropagation(); editorContent.querySelectorAll('.media-figure.selected').forEach(function(x) { x.classList.remove('selected'); }); figure.classList.add('selected'); });
+                }
+                markDirty();
+              } catch (err) {
+                alert('Upload failed: ' + err.message);
+              }
+            }
+          };
+          input.click();
+        });
+      }
+    }
+
+    // Click outside media to deselect
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.media-figure')) {
+        editorContent.querySelectorAll('.media-figure.selected').forEach(function(f) { f.classList.remove('selected'); });
+      }
+    });
+
+    // Bind existing media figures (when editing existing post)
+    editorContent.querySelectorAll('.media-figure').forEach(function(fig) { bindMediaFigure(fig); });
+
+    // Also handle bare images/videos (not in figures) — wrap them on click
+    editorContent.addEventListener('click', function(e) {
+      var target = e.target;
+      if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && !target.closest('.media-figure')) {
+        // Wrap in a figure
+        var figure = document.createElement('figure');
+        figure.className = 'media-figure selected';
+        figure.contentEditable = 'false';
+        var toolbar = document.createElement('div');
+        toolbar.className = 'media-toolbar';
+        toolbar.innerHTML = '<button type="button" class="replace-btn">Replace</button><button type="button" class="remove-btn">Remove</button>';
+        figure.appendChild(toolbar);
+        target.parentNode.insertBefore(figure, target);
+        figure.appendChild(target);
+        var caption = document.createElement('figcaption');
+        caption.className = 'media-caption';
+        caption.contentEditable = 'true';
+        caption.setAttribute('placeholder', 'Add a caption...');
+        figure.appendChild(caption);
+        bindMediaFigure(figure);
+        markDirty();
+      }
+    });
+
     async function insertMediaFromFile(file) {
       // Create placeholder
       const placeholder = document.createElement('div');
@@ -1562,22 +1761,41 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       try {
         const url = await uploadFile(file);
 
+        const figure = document.createElement('figure');
+        figure.className = 'media-figure';
+        figure.contentEditable = 'false';
+
+        // Toolbar
+        const toolbar = document.createElement('div');
+        toolbar.className = 'media-toolbar';
+        toolbar.innerHTML = '<button type="button" class="replace-btn">Replace</button><button type="button" class="remove-btn">Remove</button>';
+        figure.appendChild(toolbar);
+
         if (isImageFile(file)) {
           const img = document.createElement('img');
           img.src = url;
           img.alt = file.name;
-          img.style.maxWidth = '100%';
-          img.style.borderRadius = '8px';
-          placeholder.parentNode.replaceChild(img, placeholder);
+          figure.appendChild(img);
         } else if (isVideoFile(file)) {
           const video = document.createElement('video');
           video.src = url;
           video.controls = true;
-          video.style.maxWidth = '100%';
-          video.style.borderRadius = '8px';
-          video.style.margin = '16px 0';
-          placeholder.parentNode.replaceChild(video, placeholder);
+          figure.appendChild(video);
         }
+
+        const caption = document.createElement('figcaption');
+        caption.className = 'media-caption';
+        caption.contentEditable = 'true';
+        caption.setAttribute('placeholder', 'Add a caption...');
+        figure.appendChild(caption);
+
+        placeholder.parentNode.replaceChild(figure, placeholder);
+        bindMediaFigure(figure);
+
+        // Add a paragraph after the figure so user can continue typing
+        const p = document.createElement('p');
+        p.innerHTML = '<br>';
+        figure.parentNode.insertBefore(p, figure.nextSibling);
 
         markDirty();
       } catch (err) {
