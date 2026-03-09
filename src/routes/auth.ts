@@ -53,7 +53,8 @@ authRoutes.post('/login', async (c) => {
 
   // Create magic link and send email
   const token = await createMagicLink(c.env.DB, email);
-  await sendMagicLinkEmail(c.env, email, token);
+  const baseUrl = new URL(c.req.url).origin;
+  await sendMagicLinkEmail(c.env, email, token, baseUrl);
 
   return c.html(checkEmailPage());
 });
@@ -132,11 +133,12 @@ authRoutes.post('/request', async (c) => {
       .bind(email)
       .first();
 
+    const baseUrl = new URL(c.req.url).origin;
     await sendApprovalEmail(c.env, {
       id: member!.id as number,
       name,
       email,
-    });
+    }, baseUrl);
 
     return c.html(requestSentPage());
   }
@@ -151,7 +153,8 @@ authRoutes.post('/request', async (c) => {
   const memberId = result.meta.last_row_id;
 
   // Send approval email to admin
-  await sendApprovalEmail(c.env, { id: memberId as number, name, email });
+  const baseUrl = new URL(c.req.url).origin;
+  await sendApprovalEmail(c.env, { id: memberId as number, name, email }, baseUrl);
 
   return c.html(requestSentPage());
 });
@@ -160,7 +163,8 @@ authRoutes.post('/request', async (c) => {
 
 authRoutes.get('/google', async (c) => {
   const state = generateToken();
-  const redirectUri = `${c.env.SITE_URL}/auth/google/callback`;
+  const baseUrl = new URL(c.req.url).origin;
+  const redirectUri = `${baseUrl}/auth/google/callback`;
 
   // Store state in cookie for CSRF validation
   setCookie(c, 'oauth_state', state, {
@@ -190,7 +194,8 @@ authRoutes.get('/google/callback', async (c) => {
   }
 
   try {
-    const redirectUri = `${c.env.SITE_URL}/auth/google/callback`;
+    const baseUrl = new URL(c.req.url).origin;
+    const redirectUri = `${baseUrl}/auth/google/callback`;
     const tokens = await exchangeGoogleCode(
       c.env.GOOGLE_CLIENT_ID,
       c.env.GOOGLE_CLIENT_SECRET,
@@ -233,7 +238,7 @@ authRoutes.get('/google/callback', async (c) => {
         id: newMember.id as number,
         name: userInfo.name || userInfo.email.split('@')[0],
         email: userInfo.email.toLowerCase(),
-      });
+      }, baseUrl);
     }
 
     return c.html(pendingApprovalPage());

@@ -96,7 +96,8 @@ adminRoutes.post('/members/add', async (c) => {
   }
 
   const token = await createMagicLink(c.env.DB, email);
-  await sendWelcomeEmail(c.env, { email, name }, token);
+  const baseUrl = new URL(c.req.url).origin;
+  await sendWelcomeEmail(c.env, { email, name }, token, baseUrl);
 
   return c.redirect('/admin/members');
 });
@@ -142,10 +143,12 @@ adminRoutes.post('/requests/:id/approve', async (c) => {
 
   if (member) {
     const token = await createMagicLink(c.env.DB, member.email as string);
+    const baseUrl = new URL(c.req.url).origin;
     await sendWelcomeEmail(
       c.env,
       { email: member.email as string, name: member.name as string },
-      token
+      token,
+      baseUrl
     );
   }
 
@@ -347,10 +350,12 @@ adminRoutes.post('/posts/:id/publish', async (c) => {
     ).all();
 
     if (members.results && members.results.length > 0) {
+      const baseUrl = new URL(c.req.url).origin;
       await sendNewPostEmail(
         c.env,
         post as unknown as Post,
-        members.results as unknown as Member[]
+        members.results as unknown as Member[],
+        baseUrl
       );
       await c.env.DB.prepare('UPDATE posts SET emailed = 1 WHERE id = ?').bind(id).run();
     }

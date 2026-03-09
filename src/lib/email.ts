@@ -34,7 +34,8 @@ export async function sendEmail(
 
 export async function sendApprovalEmail(
   env: Env['Bindings'],
-  member: { id: number; name: string; email: string }
+  member: { id: number; name: string; email: string },
+  baseUrl?: string
 ): Promise<void> {
   const approveToken = generateToken();
   const denyToken = generateToken();
@@ -51,8 +52,9 @@ export async function sendApprovalEmail(
     .bind(denyToken, member.id, 'deny')
     .run();
 
-  const approveUrl = `${env.SITE_URL}/api/approve/${approveToken}`;
-  const denyUrl = `${env.SITE_URL}/api/deny/${denyToken}`;
+  const siteUrl = baseUrl || env.SITE_URL;
+  const approveUrl = `${siteUrl}/api/approve/${approveToken}`;
+  const denyUrl = `${siteUrl}/api/deny/${denyToken}`;
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -79,9 +81,10 @@ export async function sendApprovalEmail(
 export async function sendWelcomeEmail(
   env: Env['Bindings'],
   member: { email: string; name: string },
-  magicLinkToken: string
+  magicLinkToken: string,
+  baseUrl?: string
 ): Promise<void> {
-  const loginUrl = `${env.SITE_URL}/auth/verify?token=${magicLinkToken}`;
+  const loginUrl = `${baseUrl || env.SITE_URL}/auth/verify?token=${magicLinkToken}`;
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -106,9 +109,10 @@ export async function sendWelcomeEmail(
 export async function sendMagicLinkEmail(
   env: Env['Bindings'],
   email: string,
-  token: string
+  token: string,
+  baseUrl?: string
 ): Promise<void> {
-  const loginUrl = `${env.SITE_URL}/auth/verify?token=${token}`;
+  const loginUrl = `${baseUrl || env.SITE_URL}/auth/verify?token=${token}`;
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -131,9 +135,10 @@ export async function sendMagicLinkEmail(
 export async function sendNewPostEmail(
   env: Env['Bindings'],
   post: Post,
-  members: Member[]
+  members: Member[],
+  baseUrl?: string
 ): Promise<void> {
-  const postUrl = `${env.SITE_URL}/feed/${post.slug}`;
+  const postUrl = `${baseUrl || env.SITE_URL}/feed/${post.slug}`;
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">

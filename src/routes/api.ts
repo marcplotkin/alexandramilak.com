@@ -64,10 +64,12 @@ apiRoutes.get('/approve/:token', async (c) => {
   if (member) {
     // Create magic link and send welcome email
     const magicToken = await createMagicLink(c.env.DB, member.email as string);
+    const baseUrl = new URL(c.req.url).origin;
     await sendWelcomeEmail(
       c.env,
       { email: member.email as string, name: member.name as string },
-      magicToken
+      magicToken,
+      baseUrl
     );
   }
 
