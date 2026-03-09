@@ -416,65 +416,61 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     .plus-menu-item:hover { background: rgba(255,248,240,0.1); }
     .plus-menu-icon { font-size: 16px; width: 22px; text-align: center; }
 
-    /* ---- SIDE PANEL ---- */
-    .settings-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 300;
-      display: none;
-      animation: fade-in 0.15s ease;
+    /* ---- LAYOUT: EDITOR + SIDEBAR ---- */
+    .editor-layout {
+      display: flex;
+      min-height: calc(100vh - 49px);
     }
-    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-    .settings-panel {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 380px;
-      max-width: 90vw;
-      height: 100vh;
-      background: #3D1A22;
-      z-index: 301;
-      display: none;
-      box-shadow: -4px 0 24px rgba(0,0,0,0.3);
+    .editor-main {
+      flex: 1;
+      min-width: 0;
       overflow-y: auto;
-      animation: slide-in 0.2s ease;
     }
-    @keyframes slide-in {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
+
+    /* ---- SIDEBAR ---- */
+    .settings-panel {
+      width: 300px;
+      flex-shrink: 0;
+      background: rgba(45, 10, 16, 0.6);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      height: calc(100vh - 49px);
+      position: sticky;
+      top: 49px;
     }
     .settings-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 24px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      background: #3D1A22;
+      background: rgba(45, 10, 16, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 10;
     }
     .settings-header h3 {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 18px;
+      font-size: 17px;
       color: var(--cream);
     }
-    .settings-close {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 18px;
-      color: var(--text-muted);
+    .settings-body { padding: 20px; }
+
+    /* Publish button in sidebar */
+    .sidebar-publish {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
     }
-    .settings-close:hover { background: rgba(255,248,240,0.1); }
-    .settings-body { padding: 24px; }
+    .sidebar-publish .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 10px 18px;
+    }
     .settings-group { margin-bottom: 24px; }
     .settings-label {
       display: block;
@@ -557,8 +553,16 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       border-top: 1px solid var(--border);
     }
 
-    @media (max-width: 800px) {
-      .editor-wrapper { padding: 32px 20px 200px; }
+    @media (max-width: 900px) {
+      .editor-layout { flex-direction: column; }
+      .settings-panel {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      .editor-wrapper { padding: 32px 20px 60px; }
       .plus-button { left: -36px; width: 28px; height: 28px; font-size: 16px; }
       .title-input { font-size: 28px; }
     }
@@ -578,122 +582,122 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       <span id="saveStatus">Saved</span>
     </div>
     <div class="topbar-right">
-      <button class="btn btn-ghost" id="settingsBtn" type="button">Settings</button>
-      ${postStatus === 'published' ? `
-        <button class="btn btn-ghost" id="saveBtn" type="button">Save</button>
-        <button class="btn btn-danger" id="unpublishBtn" type="button">Unpublish</button>
-      ` : postStatus === 'scheduled' ? `
-        <button class="btn btn-ghost" id="saveBtn" type="button">Save</button>
-        <button class="btn btn-primary" id="publishNowBtn" type="button">Publish Now</button>
-      ` : `
-        <button class="btn btn-ghost" id="saveBtn" type="button">Save Draft</button>
-        <button class="btn btn-primary" id="publishBtn" type="button">Publish</button>
-      `}
+      <button class="btn btn-ghost" id="saveBtn" type="button">${postStatus === 'published' ? 'Save' : 'Save Draft'}</button>
     </div>
   </div>
 
-  <!-- SETTINGS PANEL -->
-  <div class="settings-overlay" id="settingsOverlay"></div>
-  <div class="settings-panel" id="settingsPanel">
-    <div class="settings-header">
-      <h3>Post Settings</h3>
-      <button class="settings-close" id="settingsClose" type="button">&times;</button>
-    </div>
-    <div class="settings-body">
-      <div class="settings-group">
-        <label class="settings-label">Cover Image URL</label>
-        <input type="text" class="settings-input" id="coverImageInput" placeholder="https://example.com/image.jpg" value="${escapeAttr(postCoverImage)}">
-        <div class="settings-hint">Paste a direct link to an image</div>
-      </div>
-
-      <div class="settings-group">
-        <label class="settings-label">Excerpt / Subtitle</label>
-        <textarea class="settings-input" id="excerptSettingsInput" rows="3" placeholder="Brief summary shown in feed...">${escapeHtml(postExcerpt)}</textarea>
-      </div>
-
-      <div class="settings-group">
-        <label class="settings-label">Slug</label>
-        <input type="text" class="settings-input" id="slugInput" placeholder="your-post-slug" value="${escapeAttr(postSlug)}">
-        <div class="settings-hint">Auto-generated from title. Edit to customize.</div>
-      </div>
-
-      <div class="settings-group">
-        <label class="settings-label">Schedule</label>
-        <input type="datetime-local" class="settings-input" id="scheduledAtInput" value="${postScheduledAt ? escapeAttr(postScheduledAt.replace(' ', 'T').substring(0, 16)) : ''}">
-        <div class="settings-hint">Set a date/time to auto-publish</div>
-        ${postStatus !== 'published' ? `<button class="btn btn-blue" id="scheduleBtn" type="button" style="margin-top: 8px; width: 100%; justify-content: center;">Schedule Post</button>` : ''}
-      </div>
-
-      <div class="settings-group">
-        <div class="toggle-row">
-          <span class="toggle-label">Email subscribers when published</span>
-          <label class="toggle">
-            <input type="checkbox" id="emailSubsToggle" ${postEmailSubs ? 'checked' : ''}>
-            <span class="toggle-slider"></span>
-          </label>
+  <div class="editor-layout">
+    <!-- LEFT: Writing area -->
+    <div class="editor-main">
+      <div class="editor-wrapper">
+        <div class="cover-image-preview" id="coverPreview">
+          <img id="coverPreviewImg" src="" alt="Cover">
         </div>
+
+        <textarea class="title-input" id="titleInput" placeholder="Give it a title..." rows="1">${escapeHtml(postTitle)}</textarea>
+        <textarea class="subtitle-input" id="subtitleInput" placeholder="Add a subtitle..." rows="1">${escapeHtml(postExcerpt)}</textarea>
+
+        <div class="editor-divider"></div>
+
+        <!-- Plus button -->
+        <div class="plus-button" id="plusButton">+</div>
+        <div class="plus-menu" id="plusMenu">
+          <button class="plus-menu-item" data-action="image" type="button">
+            <span class="plus-menu-icon">&#128247;</span> Image
+          </button>
+          <button class="plus-menu-item" data-action="divider" type="button">
+            <span class="plus-menu-icon">&mdash;</span> Divider
+          </button>
+          <button class="plus-menu-item" data-action="pullquote" type="button">
+            <span class="plus-menu-icon">&#10077;</span> Pull Quote
+          </button>
+        </div>
+
+        <!-- Floating toolbar -->
+        <div class="floating-toolbar" id="floatingToolbar">
+          <button class="toolbar-btn" data-cmd="bold" title="Bold (Cmd+B)" type="button"><strong>B</strong></button>
+          <button class="toolbar-btn" data-cmd="italic" title="Italic (Cmd+I)" type="button"><em>I</em></button>
+          <button class="toolbar-btn" data-cmd="strikethrough" title="Strikethrough" type="button"><s>S</s></button>
+          <span class="toolbar-divider"></span>
+          <button class="toolbar-btn" data-cmd="h2" title="Heading 2" type="button">H2</button>
+          <button class="toolbar-btn" data-cmd="h3" title="Heading 3" type="button">H3</button>
+          <span class="toolbar-divider"></span>
+          <button class="toolbar-btn" data-cmd="blockquote" title="Quote" type="button">&#10077;</button>
+          <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List" type="button">&#8226;</button>
+          <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List" type="button">1.</button>
+          <span class="toolbar-divider"></span>
+          <button class="toolbar-btn" data-cmd="link" title="Link (Cmd+K)" type="button">&#128279;</button>
+          <button class="toolbar-btn" data-cmd="code" title="Inline Code" type="button">&lt;/&gt;</button>
+          <button class="toolbar-btn" data-cmd="codeblock" title="Code Block" type="button">{ }</button>
+        </div>
+
+        <!-- Content area -->
+        <div class="editor-content" id="editorContent" contenteditable="true">${postContent}</div>
+
+        <div class="word-count" id="wordCount">0 words</div>
       </div>
+    </div>
 
-      <div class="settings-group disabled-field">
-        <label class="settings-label">Tags</label>
-        <input type="text" class="settings-input" placeholder="Coming soon..." disabled>
+    <!-- RIGHT: Settings sidebar -->
+    <div class="settings-panel">
+      <div class="sidebar-publish">
+        ${postStatus === 'published' ? `
+          <button class="btn btn-success" id="publishNowBtn" type="button">Update &amp; Publish</button>
+          <button class="btn btn-ghost" id="unpublishBtn" type="button">Unpublish</button>
+        ` : `
+          <button class="btn btn-primary" id="publishBtn" type="button">Publish Now</button>
+        `}
       </div>
-
-      ${!isNew ? `
-      <div class="settings-group" style="padding-top: 16px; border-top: 1px solid var(--border);">
-        <button class="btn btn-danger" id="deleteBtn" type="button" style="width: 100%; justify-content: center;">Delete Post</button>
+      <div class="settings-header">
+        <h3>Post Settings</h3>
       </div>
-      ` : ''}
+      <div class="settings-body">
+        <div class="settings-group">
+          <label class="settings-label">Cover Image URL</label>
+          <input type="text" class="settings-input" id="coverImageInput" placeholder="https://example.com/image.jpg" value="${escapeAttr(postCoverImage)}">
+          <div class="settings-hint">Paste a direct link to an image</div>
+        </div>
+
+        <div class="settings-group">
+          <label class="settings-label">Excerpt / Subtitle</label>
+          <textarea class="settings-input" id="excerptSettingsInput" rows="3" placeholder="Brief summary shown in feed...">${escapeHtml(postExcerpt)}</textarea>
+        </div>
+
+        <div class="settings-group">
+          <label class="settings-label">Slug</label>
+          <input type="text" class="settings-input" id="slugInput" placeholder="your-post-slug" value="${escapeAttr(postSlug)}">
+          <div class="settings-hint">Auto-generated from title. Edit to customize.</div>
+        </div>
+
+        <div class="settings-group">
+          <label class="settings-label">Schedule</label>
+          <input type="datetime-local" class="settings-input" id="scheduledAtInput" value="${postScheduledAt ? escapeAttr(postScheduledAt.replace(' ', 'T').substring(0, 16)) : ''}">
+          <div class="settings-hint">Set a date/time to auto-publish</div>
+          ${postStatus !== 'published' ? `<button class="btn btn-blue" id="scheduleBtn" type="button" style="margin-top: 8px; width: 100%; justify-content: center;">Schedule Post</button>` : ''}
+        </div>
+
+        <div class="settings-group">
+          <div class="toggle-row">
+            <span class="toggle-label">Email subscribers when published</span>
+            <label class="toggle">
+              <input type="checkbox" id="emailSubsToggle" ${postEmailSubs ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-group disabled-field">
+          <label class="settings-label">Tags</label>
+          <input type="text" class="settings-input" placeholder="Coming soon..." disabled>
+        </div>
+
+        ${!isNew ? `
+        <div class="settings-group" style="padding-top: 16px; border-top: 1px solid var(--border);">
+          <button class="btn btn-danger" id="deleteBtn" type="button" style="width: 100%; justify-content: center;">Delete Post</button>
+        </div>
+        ` : ''}
+      </div>
     </div>
-  </div>
-
-  <!-- EDITOR -->
-  <div class="editor-wrapper">
-    <div class="cover-image-preview" id="coverPreview">
-      <img id="coverPreviewImg" src="" alt="Cover">
-    </div>
-
-    <textarea class="title-input" id="titleInput" placeholder="Give it a title..." rows="1">${escapeHtml(postTitle)}</textarea>
-    <textarea class="subtitle-input" id="subtitleInput" placeholder="Add a subtitle..." rows="1">${escapeHtml(postExcerpt)}</textarea>
-
-    <div class="editor-divider"></div>
-
-    <!-- Plus button -->
-    <div class="plus-button" id="plusButton">+</div>
-    <div class="plus-menu" id="plusMenu">
-      <button class="plus-menu-item" data-action="image" type="button">
-        <span class="plus-menu-icon">&#128247;</span> Image
-      </button>
-      <button class="plus-menu-item" data-action="divider" type="button">
-        <span class="plus-menu-icon">&mdash;</span> Divider
-      </button>
-      <button class="plus-menu-item" data-action="pullquote" type="button">
-        <span class="plus-menu-icon">&#10077;</span> Pull Quote
-      </button>
-    </div>
-
-    <!-- Floating toolbar -->
-    <div class="floating-toolbar" id="floatingToolbar">
-      <button class="toolbar-btn" data-cmd="bold" title="Bold (Cmd+B)" type="button"><strong>B</strong></button>
-      <button class="toolbar-btn" data-cmd="italic" title="Italic (Cmd+I)" type="button"><em>I</em></button>
-      <button class="toolbar-btn" data-cmd="strikethrough" title="Strikethrough" type="button"><s>S</s></button>
-      <span class="toolbar-divider"></span>
-      <button class="toolbar-btn" data-cmd="h2" title="Heading 2" type="button">H2</button>
-      <button class="toolbar-btn" data-cmd="h3" title="Heading 3" type="button">H3</button>
-      <span class="toolbar-divider"></span>
-      <button class="toolbar-btn" data-cmd="blockquote" title="Quote" type="button">&#10077;</button>
-      <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List" type="button">&#8226;</button>
-      <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List" type="button">1.</button>
-      <span class="toolbar-divider"></span>
-      <button class="toolbar-btn" data-cmd="link" title="Link (Cmd+K)" type="button">&#128279;</button>
-      <button class="toolbar-btn" data-cmd="code" title="Inline Code" type="button">&lt;/&gt;</button>
-      <button class="toolbar-btn" data-cmd="codeblock" title="Code Block" type="button">{ }</button>
-    </div>
-
-    <!-- Content area -->
-    <div class="editor-content" id="editorContent" contenteditable="true">${postContent}</div>
-
-    <div class="word-count" id="wordCount">0 words</div>
   </div>
 
   <script>
@@ -715,10 +719,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     const plusMenu = document.getElementById('plusMenu');
     const saveDot = document.getElementById('saveDot');
     const saveStatus = document.getElementById('saveStatus');
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    const settingsClose = document.getElementById('settingsClose');
+    // Settings panel is always visible as sidebar (no toggle needed)
     const slugInput = document.getElementById('slugInput');
     const coverImageInput = document.getElementById('coverImageInput');
     const coverPreview = document.getElementById('coverPreview');
@@ -952,21 +953,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       window.location.href = '/admin/posts';
     });
 
-    // ---- SETTINGS PANEL ----
-    function openSettings() {
-      settingsPanel.style.display = 'block';
-      settingsOverlay.style.display = 'block';
-    }
-    function closeSettings() {
-      settingsPanel.style.display = 'none';
-      settingsOverlay.style.display = 'none';
-    }
-    settingsBtn.addEventListener('click', openSettings);
-    settingsClose.addEventListener('click', closeSettings);
-    settingsOverlay.addEventListener('click', closeSettings);
-
-    // Open settings panel by default
-    openSettings();
+    // Settings panel is always visible in sidebar — no toggle logic needed.
 
     // ---- FLOATING TOOLBAR ----
     function showToolbar() {
