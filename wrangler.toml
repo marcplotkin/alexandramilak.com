@@ -1,0 +1,26 @@
+name = "alexandramilak-com"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[assets]
+directory = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sunday-sauce-db"
+database_id = "PLACEHOLDER"
+
+[vars]
+ADMIN_EMAIL = "alex.milak@gmail.com"
+SITE_URL = "https://alexandramilak.com"
+SITE_NAME = "Sunday Sauce"
+GOOGLE_CLIENT_ID = ""
+
+# Secrets (set via `wrangler secret put`):
+# AUTH_SECRET
+# RESEND_API_KEY
+# GOOGLE_CLIENT_SECRET
+# APPLE_CLIENT_ID
+# APPLE_CLIENT_SECRET
+# APPLE_TEAM_ID
+# APPLE_KEY_ID

@@ -1,0 +1,231 @@
+import { Context } from 'hono';
+import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
+import type { Env, Member } from '../index';
+
+export function generateToken(): string {
+  return crypto.randomUUID();
+}
+
+export async function hashToken(token: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(token));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+export async function createSession(
+  db: D1Database,
+  memberId: number,
+  secret: string
+): Promise<string> {
+  const sessionId = generateToken();
+  const hashedId = await hashToken(sessionId, secret);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  await db
+    .prepare('INSERT INTO sessions (id, member_id, expires_at) VALUES (?, ?, ?)')
+    .bind(hashedId, memberId, expiresAt)
+    .run();
+
+  return sessionId;
+}
+
+export async function getSession(
+  c: Context<Env>
+): Promise<Member | null> {
+  const sessionId = getCookie(c, 'session');
+  if (!sessionId) return null;
+
+  const hashedId = await hashToken(sessionId, c.env.AUTH_SECRET);
+
+  const session = await c.env.DB.prepare(
+    'SELECT s.*, m.id as member_id, m.email, m.name, m.status, m.created_at as member_created_at, m.approved_at, m.removed_at FROM sessions s JOIN members m ON s.member_id = m.id WHERE s.id = ? AND s.expires_at > datetime(\'now\') AND m.status = \'active\''
+  )
+    .bind(hashedId)
+    .first();
+
+  if (!session) return null;
+
+  return {
+    id: session.member_id as number,
+    email: session.email as string,
+    name: session.name as string,
+    status: session.status as string,
+    created_at: session.member_created_at as string,
+    approved_at: session.approved_at as string | null,
+    removed_at: session.removed_at as string | null,
+  };
+}
+
+export async function createMagicLink(
+  db: D1Database,
+  email: string
+): Promise<string> {
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+  await db
+    .prepare('INSERT INTO magic_links (token, email, expires_at) VALUES (?, ?, ?)')
+    .bind(token, email, expiresAt)
+    .run();
+
+  return token;
+}
+
+export async function validateMagicLink(
+  db: D1Database,
+  token: string
+): Promise<string | null> {
+  const link = await db
+    .prepare(
+      'SELECT * FROM magic_links WHERE token = ? AND used = 0 AND expires_at > datetime(\'now\')'
+    )
+    .bind(token)
+    .first();
+
+  if (!link) return null;
+
+  await db
+    .prepare('UPDATE magic_links SET used = 1 WHERE token = ?')
+    .bind(token)
+    .run();
+
+  return link.email as string;
+}
+
+export function isAdmin(email: string, adminEmail: string): boolean {
+  return email.toLowerCase() === adminEmail.toLowerCase();
+}
+
+/**
+ * Find or create a member for social login.
+ * - If active member exists, returns { member, status: 'active' }
+ * - If pending member exists, returns { member: null, status: 'pending' }
+ * - If no member exists, creates as pending and returns { member: null, status: 'created_pending' }
+ * - Admin email is always auto-approved
+ */
+export async function findOrCreateMember(
+  db: D1Database,
+  email: string,
+  name: string,
+  provider: string,
+  providerId: string,
+  adminEmail: string
+): Promise<{ member: Member | null; status: 'active' | 'pending' | 'created_pending' }> {
+  const existing = await db
+    .prepare('SELECT * FROM members WHERE email = ?')
+    .bind(email)
+    .first();
+
+  if (existing) {
+    // Update provider info if not set
+    if (!existing.provider_id) {
+      await db
+        .prepare('UPDATE members SET auth_provider = ?, provider_id = ? WHERE id = ?')
+        .bind(provider, providerId, existing.id)
+        .run();
+    }
+
+    if (existing.status === 'active') {
+      return {
+        member: {
+          id: existing.id as number,
+          email: existing.email as string,
+          name: existing.name as string,
+          status: existing.status as string,
+          created_at: existing.created_at as string,
+          approved_at: existing.approved_at as string | null,
+          removed_at: existing.removed_at as string | null,
+        },
+        status: 'active',
+      };
+    }
+
+    if (existing.status === 'pending') {
+      return { member: null, status: 'pending' };
+    }
+
+    // If removed, re-request
+    if (isAdmin(email, adminEmail)) {
+      await db
+        .prepare(
+          "UPDATE members SET status = 'active', name = ?, removed_at = NULL, approved_at = datetime('now'), auth_provider = ?, provider_id = ? WHERE email = ?"
+        )
+        .bind(name, provider, providerId, email)
+        .run();
+      const updated = await db.prepare('SELECT * FROM members WHERE email = ?').bind(email).first();
+      return {
+        member: {
+          id: updated!.id as number,
+          email: updated!.email as string,
+          name: updated!.name as string,
+          status: 'active',
+          created_at: updated!.created_at as string,
+          approved_at: updated!.approved_at as string | null,
+          removed_at: null,
+        },
+        status: 'active',
+      };
+    }
+
+    await db
+      .prepare(
+        "UPDATE members SET status = 'pending', name = ?, removed_at = NULL, auth_provider = ?, provider_id = ? WHERE email = ?"
+      )
+      .bind(name, provider, providerId, email)
+      .run();
+    return { member: null, status: 'created_pending' };
+  }
+
+  // No existing member — auto-approve admin, otherwise pending
+  if (isAdmin(email, adminEmail)) {
+    const result = await db
+      .prepare(
+        "INSERT INTO members (email, name, status, auth_provider, provider_id, approved_at) VALUES (?, ?, 'active', ?, ?, datetime('now'))"
+      )
+      .bind(email, name, provider, providerId)
+      .run();
+    return {
+      member: {
+        id: result.meta.last_row_id as number,
+        email,
+        name,
+        status: 'active',
+        created_at: new Date().toISOString(),
+        approved_at: new Date().toISOString(),
+        removed_at: null,
+      },
+      status: 'active',
+    };
+  }
+
+  await db
+    .prepare(
+      "INSERT INTO members (email, name, status, auth_provider, provider_id) VALUES (?, ?, 'pending', ?, ?)"
+    )
+    .bind(email, name, provider, providerId)
+    .run();
+  return { member: null, status: 'created_pending' };
+}
+
+export function setSessionCookie(c: Context<Env>, sessionId: string): void {
+  setCookie(c, 'session', sessionId, {
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Lax',
+    maxAge: 30 * 24 * 60 * 60,
+  });
+}
+
+export function clearSessionCookie(c: Context<Env>): void {
+  deleteCookie(c, 'session', { path: '/' });
+}
