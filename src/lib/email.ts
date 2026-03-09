@@ -5,6 +5,41 @@ interface EmailParams {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
+}
+
+// ─── Send via Resend (primary) or Gmail (fallback) ───
+
+async function sendViaResend(apiKey: string, fromEmail: string, params: EmailParams): Promise<boolean> {
+  try {
+    const body: any = {
+      from: `Sunday Sauce <${fromEmail}>`,
+      to: [params.to],
+      subject: params.subject,
+      html: params.html,
+    };
+    if (params.replyTo) {
+      body.reply_to = params.replyTo;
+    }
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Resend send failed:', errorText);
+    }
+    return response.ok;
+  } catch (err) {
+    console.error('Resend send error:', err);
+    return false;
+  }
 }
 
 async function getGmailAccessToken(
@@ -58,10 +93,7 @@ function base64UrlEncode(str: string): string {
     .replace(/=+$/, '');
 }
 
-export async function sendEmail(
-  env: Env['Bindings'],
-  params: EmailParams
-): Promise<boolean> {
+async function sendViaGmail(env: Env['Bindings'], params: EmailParams): Promise<boolean> {
   try {
     const accessToken = await getGmailAccessToken(
       env.GOOGLE_CLIENT_ID,
@@ -69,12 +101,7 @@ export async function sendEmail(
       env.GMAIL_REFRESH_TOKEN
     );
 
-    const rawEmail = buildRawEmail(
-      env.ADMIN_EMAIL,
-      params.to,
-      params.subject,
-      params.html
-    );
+    const rawEmail = buildRawEmail(env.ADMIN_EMAIL, params.to, params.subject, params.html);
 
     const response = await fetch(
       `https://gmail.googleapis.com/gmail/v1/users/me/messages/send`,
@@ -84,9 +111,7 @@ export async function sendEmail(
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          raw: base64UrlEncode(rawEmail),
-        }),
+        body: JSON.stringify({ raw: base64UrlEncode(rawEmail) }),
       }
     );
 
@@ -94,7 +119,6 @@ export async function sendEmail(
       const errorText = await response.text();
       console.error('Gmail send failed:', errorText);
     }
-
     return response.ok;
   } catch (err) {
     console.error('Gmail send error:', err);
@@ -102,9 +126,57 @@ export async function sendEmail(
   }
 }
 
+export async function sendEmail(
+  env: Env['Bindings'],
+  params: EmailParams
+): Promise<boolean> {
+  // Use Resend with noreply@alexandramilak.com, reply-to alex.milak@gmail.com
+  if (env.RESEND_API_KEY) {
+    const sent = await sendViaResend(
+      env.RESEND_API_KEY,
+      'noreply@alexandramilak.com',
+      { ...params, replyTo: params.replyTo || env.ADMIN_EMAIL }
+    );
+    if (sent) return true;
+    console.error('Resend failed, falling back to Gmail');
+  }
+
+  // Fallback to Gmail
+  if (env.GMAIL_REFRESH_TOKEN) {
+    return sendViaGmail(env, params);
+  }
+
+  console.error('No email provider configured');
+  return false;
+}
+
+// ─── Email Footer ───
+
+function emailFooter(baseUrl: string, unsubscribeToken?: string): string {
+  const unsubLink = unsubscribeToken
+    ? `${baseUrl}/api/unsubscribe?token=${unsubscribeToken}`
+    : null;
+  const leaveLink = unsubscribeToken
+    ? `${baseUrl}/api/leave?token=${unsubscribeToken}`
+    : null;
+
+  return `
+    <div style="border-top: 1px solid #e8e0d8; padding-top: 20px; margin-top: 32px; text-align: center; font-size: 12px; color: #7A6B63;">
+      <p style="margin: 0 0 8px;">You're receiving this because you're a member of Sunday Sauce by Alexandra Milak.</p>
+      <p style="margin: 0;">
+        ${unsubLink ? `<a href="${unsubLink}" style="color: #7A6B63; text-decoration: underline;">Unsubscribe from emails</a>` : ''}
+        ${unsubLink && leaveLink ? ' &middot; ' : ''}
+        ${leaveLink ? `<a href="${leaveLink}" style="color: #7A6B63; text-decoration: underline;">Leave Sunday Sauce</a>` : ''}
+      </p>
+    </div>
+  `;
+}
+
+// ─── Email Templates ───
+
 export async function sendApprovalEmail(
   env: Env['Bindings'],
-  member: { id: number; name: string; email: string },
+  member: { id: number; name: string; email: string; referrerName?: string },
   baseUrl?: string
 ): Promise<void> {
   const approveToken = generateToken();
@@ -112,19 +184,19 @@ export async function sendApprovalEmail(
 
   await env.DB.prepare(
     'INSERT INTO approval_tokens (token, member_id, action) VALUES (?, ?, ?)'
-  )
-    .bind(approveToken, member.id, 'approve')
-    .run();
+  ).bind(approveToken, member.id, 'approve').run();
 
   await env.DB.prepare(
     'INSERT INTO approval_tokens (token, member_id, action) VALUES (?, ?, ?)'
-  )
-    .bind(denyToken, member.id, 'deny')
-    .run();
+  ).bind(denyToken, member.id, 'deny').run();
 
   const siteUrl = baseUrl || env.SITE_URL;
   const approveUrl = `${siteUrl}/api/approve/${approveToken}`;
   const denyUrl = `${siteUrl}/api/deny/${denyToken}`;
+
+  const referralInfo = member.referrerName
+    ? `<p style="margin: 0 0 8px; color: #2C1810;"><strong>Referred by:</strong> ${escapeHtml(member.referrerName)}</p>`
+    : '';
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -132,7 +204,8 @@ export async function sendApprovalEmail(
       <p style="color: #7A6B63; font-size: 14px; margin-bottom: 32px;">Sunday Sauce</p>
       <div style="background: #FFF8F0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
         <p style="margin: 0 0 8px; color: #2C1810;"><strong>Name:</strong> ${escapeHtml(member.name)}</p>
-        <p style="margin: 0; color: #2C1810;"><strong>Email:</strong> ${escapeHtml(member.email)}</p>
+        <p style="margin: 0 0 8px; color: #2C1810;"><strong>Email:</strong> ${escapeHtml(member.email)}</p>
+        ${referralInfo}
       </div>
       <div style="text-align: center;">
         <a href="${approveUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; margin-right: 12px;">Approve</a>
@@ -143,7 +216,7 @@ export async function sendApprovalEmail(
 
   await sendEmail(env, {
     to: env.ADMIN_EMAIL,
-    subject: `New membership request from ${member.name}`,
+    subject: `New membership request from ${member.name}${member.referrerName ? ` (referred by ${member.referrerName})` : ''}`,
     html,
   });
 }
@@ -208,21 +281,29 @@ export async function sendNewPostEmail(
   members: Member[],
   baseUrl?: string
 ): Promise<void> {
-  const postUrl = `${baseUrl || env.SITE_URL}/feed/${post.slug}`;
-
-  const html = `
-    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-      <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
-      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 16px;">${escapeHtml(post.title)}</h1>
-      ${post.excerpt ? `<p style="color: #2C1810; line-height: 1.6; margin-bottom: 24px;">${escapeHtml(post.excerpt)}</p>` : ''}
-      <div style="text-align: center; margin: 32px 0;">
-        <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>
-      </div>
-      <p style="color: #7A6B63; font-size: 13px; border-top: 1px solid #e8e0d8; padding-top: 20px;">You're receiving this because you're a member of Sunday Sauce by Alexandra Milak.</p>
-    </div>
-  `;
+  const siteUrl = baseUrl || env.SITE_URL;
+  const postUrl = `${siteUrl}/feed/${post.slug}`;
 
   for (const member of members) {
+    const shareUrl = member.referral_code
+      ? `${siteUrl}/?ref=${member.referral_code}`
+      : siteUrl;
+
+    const html = `
+      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
+        <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 16px;">${escapeHtml(post.title)}</h1>
+        ${post.excerpt ? `<p style="color: #2C1810; line-height: 1.6; margin-bottom: 24px;">${escapeHtml(post.excerpt)}</p>` : ''}
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>
+        </div>
+        <div style="text-align: center; margin: 16px 0;">
+          <p style="color: #7A6B63; font-size: 13px;">Know someone who'd enjoy this? <a href="${shareUrl}" style="color: #722F37;">Invite them to Sunday Sauce</a></p>
+        </div>
+        ${emailFooter(siteUrl, member.unsubscribe_token || undefined)}
+      </div>
+    `;
+
     await sendEmail(env, {
       to: member.email,
       subject: `New post: ${post.title}`,
@@ -270,9 +351,11 @@ export async function sendReplyNotificationEmail(
   postTitle: string,
   postSlug: string,
   replyText: string,
+  recipientUnsubscribeToken?: string,
   baseUrl?: string
 ): Promise<void> {
-  const postUrl = `${baseUrl || env.SITE_URL}/feed/${postSlug}#comments`;
+  const siteUrl = baseUrl || env.SITE_URL;
+  const postUrl = `${siteUrl}/feed/${postSlug}#comments`;
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -285,7 +368,7 @@ export async function sendReplyNotificationEmail(
       <div style="text-align: center; margin: 24px 0;">
         <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Reply</a>
       </div>
-      <p style="color: #7A6B63; font-size: 13px; border-top: 1px solid #e8e0d8; padding-top: 20px;">You're receiving this because someone replied to your comment on Sunday Sauce.</p>
+      ${emailFooter(siteUrl, recipientUnsubscribeToken)}
     </div>
   `;
 

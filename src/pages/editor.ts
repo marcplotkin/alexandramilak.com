@@ -26,6 +26,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
   const postSlug = post?.slug || '';
   const postStatus = post?.status || 'draft';
   const postCoverImage = post?.cover_image_url || '';
+  const postCoverCaption = post?.cover_image_caption || '';
   const postScheduledAt = post?.scheduled_at || '';
   const postEmailSubs = isNew ? true : (post?.email_subscribers ? true : false);
 
@@ -34,6 +35,8 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${isNew ? 'New Post' : escapeHtml(postTitle) || 'Edit Post'} — Sunday Sauce</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,7 +172,15 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     .cover-image-preview img {
       width: 100%;
       max-height: 400px;
-      object-fit: cover;
+      object-fit: contain;
+    }
+    .cover-caption-preview {
+      font-size: 13px;
+      font-style: italic;
+      color: rgba(255,248,240,0.45);
+      margin: 6px 0 0;
+      padding: 0 4px;
+      display: none;
     }
 
     .title-input {
@@ -288,6 +299,19 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       max-width: 100%;
       border-radius: 8px;
       margin: 24px 0;
+    }
+    .editor-content video {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+    .embed-wrapper {
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .embed-wrapper iframe {
+      display: block;
     }
     .editor-content hr {
       border: none;
@@ -553,6 +577,57 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       border-top: 1px solid var(--border);
     }
 
+    /* ---- DRAG & DROP ---- */
+    .editor-content.drag-over {
+      outline: 2px dashed rgba(255,248,240,0.4);
+      outline-offset: -4px;
+      background: rgba(255,248,240,0.03);
+    }
+    .upload-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(255,248,240,0.06);
+      border: 1px solid rgba(255,248,240,0.15);
+      border-radius: 8px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .upload-placeholder .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,248,240,0.2);
+      border-top-color: var(--cream);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .cover-drop-zone {
+      border: 2px dashed rgba(255,248,240,0.2);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .cover-drop-zone:hover,
+    .cover-drop-zone.drag-over {
+      border-color: rgba(255,248,240,0.4);
+      background: rgba(255,248,240,0.05);
+      color: var(--cream);
+    }
+    .cover-drop-zone .upload-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
     @media (max-width: 900px) {
       .editor-layout { flex-direction: column; }
       .settings-panel {
@@ -592,6 +667,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       <div class="editor-wrapper">
         <div class="cover-image-preview" id="coverPreview">
           <img id="coverPreviewImg" src="" alt="Cover">
+          <p class="cover-caption-preview" id="coverCaptionPreview"></p>
         </div>
 
         <textarea class="title-input" id="titleInput" placeholder="Give it a title..." rows="1">${escapeHtml(postTitle)}</textarea>
@@ -604,6 +680,12 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         <div class="plus-menu" id="plusMenu">
           <button class="plus-menu-item" data-action="image" type="button">
             <span class="plus-menu-icon">&#128247;</span> Image
+          </button>
+          <button class="plus-menu-item" data-action="video" type="button">
+            <span class="plus-menu-icon">&#127909;</span> Video
+          </button>
+          <button class="plus-menu-item" data-action="embed" type="button">
+            <span class="plus-menu-icon">&#128279;</span> Embed
           </button>
           <button class="plus-menu-item" data-action="divider" type="button">
             <span class="plus-menu-icon">&mdash;</span> Divider
@@ -653,9 +735,15 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       </div>
       <div class="settings-body">
         <div class="settings-group">
-          <label class="settings-label">Cover Image URL</label>
+          <label class="settings-label">Cover Image</label>
           <input type="text" class="settings-input" id="coverImageInput" placeholder="https://example.com/image.jpg" value="${escapeAttr(postCoverImage)}">
-          <div class="settings-hint">Paste a direct link to an image</div>
+          <div class="cover-drop-zone" id="coverDropZone">
+            <div class="upload-icon">&#128247;</div>
+            Drop an image here or <span style="text-decoration: underline; cursor: pointer;" id="coverFileBtn">browse</span>
+          </div>
+          <input type="file" id="coverFileInput" accept="image/*" style="display: none;">
+          <div class="settings-hint">Drag & drop, browse, or paste a URL</div>
+          <input type="text" class="settings-input" id="coverCaptionInput" placeholder="Photo credit or description..." value="${escapeAttr(postCoverCaption)}" style="margin-top: 8px; font-size: 13px; font-style: italic;">
         </div>
 
         <div class="settings-group">
@@ -766,6 +854,8 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     }
 
     // ---- COVER IMAGE PREVIEW ----
+    const coverCaptionPreview = document.getElementById('coverCaptionPreview');
+    const coverCaptionInput = document.getElementById('coverCaptionInput');
     function updateCoverPreview() {
       const url = coverImageInput.value.trim();
       if (url) {
@@ -774,8 +864,19 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       } else {
         coverPreview.style.display = 'none';
       }
+      updateCaptionPreview();
+    }
+    function updateCaptionPreview() {
+      const caption = coverCaptionInput.value.trim();
+      if (caption && coverPreview.style.display !== 'none') {
+        coverCaptionPreview.textContent = caption;
+        coverCaptionPreview.style.display = 'block';
+      } else {
+        coverCaptionPreview.style.display = 'none';
+      }
     }
     coverImageInput.addEventListener('input', function() { updateCoverPreview(); markDirty(); });
+    coverCaptionInput.addEventListener('input', function() { updateCaptionPreview(); markDirty(); });
     updateCoverPreview();
 
     // ---- WORD COUNT ----
@@ -833,9 +934,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         excerpt: subtitleInput.value.trim() || excerptSettingsInput.value.trim() || null,
         slug: slugInput.value.trim(),
         cover_image_url: coverImageInput.value.trim() || null,
+        cover_image_caption: document.getElementById('coverCaptionInput').value.trim() || null,
         email_subscribers: emailSubsToggle.checked ? 1 : 0,
         status: currentStatus,
-        scheduled_at: scheduledAtInput.value ? scheduledAtInput.value.replace('T', ' ') + ':00' : null,
+        scheduled_at: scheduledAtInput.value ? new Date(scheduledAtInput.value).toISOString().replace('T', ' ').substring(0, 19) : null,
       };
 
       if (!data.title) {
@@ -935,7 +1037,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       const res = await fetch('/admin/posts/' + postId + '/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scheduled_at: dt.replace('T', ' ') + ':00' }),
+        body: JSON.stringify({ scheduled_at: new Date(dt).toISOString().replace('T', ' ').substring(0, 19) }),
       });
       const result = await res.json();
       if (result.success) {
@@ -1205,20 +1307,27 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
         switch (action) {
           case 'image': {
-            const url = prompt('Image URL:');
-            if (url) {
-              const img = document.createElement('img');
-              img.src = url;
-              img.alt = 'Image';
-              img.style.maxWidth = '100%';
-              img.style.borderRadius = '8px';
-              if (currentEmptyLine && currentEmptyLine !== editorContent) {
-                currentEmptyLine.innerHTML = '';
-                currentEmptyLine.appendChild(img);
-              } else {
-                document.execCommand('insertHTML', false, img.outerHTML);
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.onchange = function() {
+              if (fileInput.files.length > 0) {
+                insertMediaFromFile(fileInput.files[0]);
               }
-            }
+            };
+            fileInput.click();
+            break;
+          }
+          case 'video': {
+            var videoInput = document.createElement('input');
+            videoInput.type = 'file';
+            videoInput.accept = 'video/*';
+            videoInput.onchange = function() {
+              if (videoInput.files.length > 0) {
+                insertMediaFromFile(videoInput.files[0]);
+              }
+            };
+            videoInput.click();
             break;
           }
           case 'divider': {
@@ -1237,6 +1346,36 @@ export function editorPage(post: Post | null, isNew: boolean): string {
               sel.addRange(range);
             } else {
               document.execCommand('insertHTML', false, '<hr><p><br></p>');
+            }
+            break;
+          }
+          case 'embed': {
+            var embedUrl = prompt('Paste a URL (Spotify, YouTube, Vimeo, SoundCloud, etc.)');
+            if (embedUrl) {
+              var embedHtml = getEmbedHtml(embedUrl.trim());
+              if (embedHtml) {
+                if (currentEmptyLine && currentEmptyLine !== editorContent) {
+                  var wrapper = document.createElement('div');
+                  wrapper.className = 'embed-wrapper';
+                  wrapper.innerHTML = embedHtml;
+                  currentEmptyLine.parentNode.replaceChild(wrapper, currentEmptyLine);
+                  var np = document.createElement('p');
+                  np.innerHTML = '<br>';
+                  wrapper.parentNode.insertBefore(np, wrapper.nextSibling);
+                  var r = document.createRange();
+                  r.setStart(np, 0);
+                  r.collapse(true);
+                  var s = window.getSelection();
+                  s.removeAllRanges();
+                  s.addRange(r);
+                } else {
+                  document.execCommand('insertHTML', false, '<div class="embed-wrapper">' + embedHtml + '</div><p><br></p>');
+                }
+              } else {
+                // Unknown URL — insert as a styled link
+                var linkHtml = '<a href="' + embedUrl + '" target="_blank" rel="noopener">' + embedUrl + '</a>';
+                document.execCommand('insertHTML', false, linkHtml);
+              }
             }
             break;
           }
@@ -1342,13 +1481,213 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       }
     });
 
+    // ---- EMBED HELPERS ----
+    function getEmbedHtml(url) {
+      // Spotify
+      var spotifyMatch = url.match(/open\\.spotify\\.com\\/(track|album|playlist|episode|show)\\/([a-zA-Z0-9]+)/);
+      if (spotifyMatch) {
+        return '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/' + spotifyMatch[1] + '/' + spotifyMatch[2] + '?utm_source=generator&theme=0" width="100%" height="' + (spotifyMatch[1] === 'track' ? '152' : '352') + '" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>';
+      }
+      // YouTube
+      var ytMatch = url.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([a-zA-Z0-9_-]+)/);
+      if (ytMatch) {
+        return '<iframe width="100%" height="400" src="https://www.youtube.com/embed/' + ytMatch[1] + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" style="border-radius:12px"></iframe>';
+      }
+      // Vimeo
+      var vimeoMatch = url.match(/vimeo\\.com\\/([0-9]+)/);
+      if (vimeoMatch) {
+        return '<iframe src="https://player.vimeo.com/video/' + vimeoMatch[1] + '" width="100%" height="400" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" style="border-radius:12px"></iframe>';
+      }
+      // SoundCloud
+      if (url.includes('soundcloud.com/')) {
+        return '<iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%23C0392B&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false" loading="lazy"></iframe>';
+      }
+      // Instagram
+      if (url.includes('instagram.com/p/') || url.includes('instagram.com/reel/')) {
+        var cleanUrl = url.split('?')[0];
+        if (!cleanUrl.endsWith('/')) cleanUrl += '/';
+        return '<blockquote class="instagram-media" data-instgrm-permalink="' + cleanUrl + '" style="max-width:540px; width:100%;"><a href="' + cleanUrl + '" target="_blank">View on Instagram</a></blockquote><script async src="https://www.instagram.com/embed.js"><\\/script>';
+      }
+      // TikTok
+      if (url.includes('tiktok.com/')) {
+        return '<blockquote class="tiktok-embed" cite="' + url + '" style="max-width:605px; min-width:325px;"><a href="' + url + '" target="_blank">View on TikTok</a></blockquote><script async src="https://www.tiktok.com/embed.js"><\\/script>';
+      }
+      return null;
+    }
+
+    // ---- MEDIA UPLOAD ----
+    async function uploadFile(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Upload failed');
+      }
+      return result.url;
+    }
+
+    function isImageFile(file) {
+      return file.type.startsWith('image/');
+    }
+
+    function isVideoFile(file) {
+      return file.type.startsWith('video/');
+    }
+
+    function isMediaFile(file) {
+      return isImageFile(file) || isVideoFile(file);
+    }
+
+    async function insertMediaFromFile(file) {
+      // Create placeholder
+      const placeholder = document.createElement('div');
+      placeholder.className = 'upload-placeholder';
+      placeholder.innerHTML = '<div class="spinner"></div> Uploading ' + file.name + '...';
+
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        range.collapse(false);
+        range.insertNode(placeholder);
+      } else {
+        editorContent.appendChild(placeholder);
+      }
+
+      try {
+        const url = await uploadFile(file);
+
+        if (isImageFile(file)) {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = file.name;
+          img.style.maxWidth = '100%';
+          img.style.borderRadius = '8px';
+          placeholder.parentNode.replaceChild(img, placeholder);
+        } else if (isVideoFile(file)) {
+          const video = document.createElement('video');
+          video.src = url;
+          video.controls = true;
+          video.style.maxWidth = '100%';
+          video.style.borderRadius = '8px';
+          video.style.margin = '16px 0';
+          placeholder.parentNode.replaceChild(video, placeholder);
+        }
+
+        markDirty();
+      } catch (err) {
+        placeholder.innerHTML = 'Upload failed: ' + err.message;
+        placeholder.style.color = '#e6a09a';
+        setTimeout(function() {
+          if (placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+        }, 3000);
+      }
+    }
+
+    // ---- DRAG & DROP ON EDITOR ----
+    editorContent.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      editorContent.classList.add('drag-over');
+    });
+
+    editorContent.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      editorContent.classList.remove('drag-over');
+    });
+
+    editorContent.addEventListener('drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      editorContent.classList.remove('drag-over');
+
+      const files = e.dataTransfer.files;
+      for (var i = 0; i < files.length; i++) {
+        if (isMediaFile(files[i])) {
+          insertMediaFromFile(files[i]);
+        }
+      }
+    });
+
+    // ---- COVER IMAGE DRAG & DROP ----
+    var coverDropZone = document.getElementById('coverDropZone');
+    var coverFileInput = document.getElementById('coverFileInput');
+    var coverFileBtn = document.getElementById('coverFileBtn');
+
+    coverDropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      coverDropZone.classList.add('drag-over');
+    });
+
+    coverDropZone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      coverDropZone.classList.remove('drag-over');
+    });
+
+    coverDropZone.addEventListener('drop', async function(e) {
+      e.preventDefault();
+      coverDropZone.classList.remove('drag-over');
+
+      var files = e.dataTransfer.files;
+      if (files.length > 0 && isImageFile(files[0])) {
+        coverDropZone.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div>';
+        try {
+          var url = await uploadFile(files[0]);
+          coverImageInput.value = url;
+          updateCoverPreview();
+          markDirty();
+          coverDropZone.innerHTML = '<div class="upload-icon">&#128247;</div>Drop an image here or <span style="text-decoration: underline; cursor: pointer;" id="coverFileBtn">browse</span>';
+          // Re-bind browse click
+          document.getElementById('coverFileBtn').addEventListener('click', function() { coverFileInput.click(); });
+        } catch (err) {
+          coverDropZone.innerHTML = 'Upload failed: ' + err.message;
+          coverDropZone.style.color = '#e6a09a';
+        }
+      }
+    });
+
+    coverFileBtn.addEventListener('click', function() { coverFileInput.click(); });
+
+    coverFileInput.addEventListener('change', async function() {
+      if (this.files.length > 0 && isImageFile(this.files[0])) {
+        coverDropZone.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div>';
+        try {
+          var url = await uploadFile(this.files[0]);
+          coverImageInput.value = url;
+          updateCoverPreview();
+          markDirty();
+          coverDropZone.innerHTML = '<div class="upload-icon">&#128247;</div>Drop an image here or <span style="text-decoration: underline; cursor: pointer;" id="coverFileBtn">browse</span>';
+          document.getElementById('coverFileBtn').addEventListener('click', function() { coverFileInput.click(); });
+        } catch (err) {
+          coverDropZone.innerHTML = 'Upload failed: ' + err.message;
+          coverDropZone.style.color = '#e6a09a';
+        }
+      }
+    });
+
     // ---- PASTE: clean up ----
     editorContent.addEventListener('paste', function(e) {
+      // Handle pasted images (e.g. screenshots)
+      var items = e.clipboardData.items;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          e.preventDefault();
+          var file = items[i].getAsFile();
+          if (file) insertMediaFromFile(file);
+          return;
+        }
+      }
+
       // Allow paste but strip MS Word junk while keeping basic formatting
-      const html = e.clipboardData.getData('text/html');
+      var html = e.clipboardData.getData('text/html');
       if (html && (html.includes('mso-') || html.includes('urn:schemas-microsoft-com'))) {
         e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
+        var text = e.clipboardData.getData('text/plain');
         document.execCommand('insertText', false, text);
       }
     });

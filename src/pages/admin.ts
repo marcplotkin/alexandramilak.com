@@ -157,7 +157,8 @@ export function adminMembersPage(members: Member[]): string {
   return layout('Members', content);
 }
 
-export function adminRequestsPage(requests: Member[]): string {
+export function adminRequestsPage(requests: Member[], referrerNames?: Record<number, string>): string {
+  const refNames = referrerNames || {};
   const requestCards = requests
     .map(
       (r) => `
@@ -165,6 +166,7 @@ export function adminRequestsPage(requests: Member[]): string {
       <div>
         <strong>${escapeHtml(r.name)}</strong>
         <br><span style="color: rgba(255,248,240,0.5); font-size: 14px;">${escapeHtml(r.email)}</span>
+        ${r.referred_by && refNames[r.referred_by] ? `<br><span style="color: rgba(114,47,55,0.9); font-size: 13px; background: rgba(114,47,55,0.15); padding: 2px 8px; border-radius: 4px;">Referred by ${escapeHtml(refNames[r.referred_by])}</span>` : ''}
         <br><span style="color: rgba(255,248,240,0.4); font-size: 13px;">Requested ${formatDate(r.created_at)}</span>
       </div>
       <div style="display: flex; gap: 8px;">

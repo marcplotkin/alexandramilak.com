@@ -72,12 +72,171 @@ function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAd
   return topLevel.map(c => renderComment(c)).join('');
 }
 
+function escapeAttr(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+export function postGatePage(post: Post): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>${escapeHtml(post.title)} — Sunday Sauce</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #2C1810;
+      color: #FFF8F0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .gate {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+    .brand {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 42px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      color: #FFF8F0;
+      margin-bottom: 8px;
+    }
+    .tagline {
+      font-size: 15px;
+      color: rgba(255,248,240,0.5);
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+    .post-preview {
+      background: rgba(255,248,240,0.04);
+      border: 1px solid rgba(255,248,240,0.08);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    ${post.cover_image_url ? `
+    .preview-image {
+      width: calc(100% + 64px);
+      margin: -32px -32px 24px;
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+    }
+    .preview-image img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      display: block;
+    }
+    ` : ''}
+    .preview-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .preview-excerpt {
+      font-size: 15px;
+      color: rgba(255,248,240,0.5);
+      margin-bottom: 8px;
+    }
+    .preview-date {
+      font-size: 13px;
+      color: rgba(255,248,240,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .members-note {
+      font-size: 14px;
+      color: rgba(255,248,240,0.45);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: #C0392B;
+      color: #FFF8F0;
+    }
+    .btn-primary:hover { background: #A93226; }
+    .btn-secondary {
+      background: rgba(255,248,240,0.08);
+      color: #FFF8F0;
+      border: 1px solid rgba(255,248,240,0.12);
+    }
+    .btn-secondary:hover { background: rgba(255,248,240,0.12); }
+  </style>
+</head>
+<body>
+  <div class="gate">
+    <div class="brand">Sunday Sauce</div>
+    <div class="tagline">Monthly emails from Alexandra Milak</div>
+
+    <div class="post-preview">
+      ${post.cover_image_url ? `
+        <div class="preview-image">
+          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}">
+        </div>
+      ` : ''}
+      <div class="preview-title">${escapeHtml(post.title)}</div>
+      ${post.excerpt ? `<div class="preview-excerpt">${escapeHtml(post.excerpt)}</div>` : ''}
+      <div class="preview-date">${formatDate(post.published_at || post.created_at)}</div>
+    </div>
+
+    <p class="members-note">
+      Sunday Sauce is a private newsletter for friends of Alexandra &mdash; thoughts and curations about things she cares about and thinks are nice. Already a member? Log in below. Otherwise, request to join &mdash; if Alexandra knows you, you're in!
+    </p>
+
+    <div class="actions">
+      <a href="/auth/login" class="btn btn-primary">Log In</a>
+      <a href="/auth/request" class="btn btn-secondary">Request Membership</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 export function postPage(post: Post, member: Member, isAdmin: boolean, comments: Comment[] = []): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${escapeHtml(post.title)} — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -150,16 +309,28 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
 
     .cover-image {
       width: calc(100% + 40px);
-      margin: 0 -20px 36px;
+      margin: 0 -20px 0;
       border-radius: 20px;
       overflow: hidden;
     }
 
     .cover-image img {
       width: 100%;
-      max-height: 440px;
-      object-fit: cover;
+      max-height: 560px;
+      object-fit: contain;
       display: block;
+    }
+
+    .cover-caption {
+      text-align: left;
+      font-size: 13px;
+      color: rgba(255,248,240,0.4);
+      font-style: italic;
+      margin: 10px 0 36px;
+    }
+
+    .cover-image-no-caption {
+      margin-bottom: 36px;
     }
 
     .post-title {
@@ -173,11 +344,10 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     }
 
     .post-subtitle {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 18px;
-      letter-spacing: 0.2px;
       color: rgba(255,248,240,0.55);
-      line-height: 1.7;
+      line-height: 1.5;
       margin-bottom: 8px;
     }
 
@@ -191,10 +361,9 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     }
 
     .post-content {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 17px;
-      line-height: 1.9;
-      letter-spacing: 0.15px;
+      line-height: 1.8;
       color: rgba(255,248,240,0.88);
     }
 
@@ -275,6 +444,22 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       max-width: 100%;
       border-radius: 10px;
       margin: 28px 0;
+    }
+
+    .post-content video {
+      max-width: 100%;
+      border-radius: 10px;
+      margin: 28px 0;
+    }
+
+    .embed-wrapper {
+      margin: 28px 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .embed-wrapper iframe {
+      display: block;
     }
 
     .post-content hr {
@@ -608,16 +793,39 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     </nav>
     <article>
       ${post.cover_image_url ? `
-        <div class="cover-image">
+        <div class="cover-image${post.cover_image_caption ? '' : ' cover-image-no-caption'}">
           <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}">
         </div>
+        ${post.cover_image_caption ? `<p class="cover-caption">${escapeHtml(post.cover_image_caption)}</p>` : ''}
       ` : ''}
       <h1 class="post-title">${escapeHtml(post.title)}</h1>
       ${post.excerpt ? `<p class="post-subtitle">${escapeHtml(post.excerpt)}</p>` : ''}
-      <p class="post-date">${formatDate(post.published_at || post.created_at)}</p>
+      <p class="post-date">${formatDate(post.published_at || post.created_at)}${isAdmin ? ` &nbsp;<a href="/admin/posts/${post.id}/edit" style="font-size: 12px; color: rgba(255,248,240,0.35); text-decoration: none; border: 1px solid rgba(255,248,240,0.15); padding: 3px 10px; border-radius: 4px;">&#9998; Edit</a>` : ''}</p>
       <div class="post-content">
         ${post.content}
       </div>
+      <!-- Share -->
+      ${member.referral_code ? `
+      <div style="text-align: center; margin-top: 40px; padding: 24px; background: rgba(255,248,240,0.04); border-radius: 12px; border: 1px solid rgba(255,248,240,0.08);">
+        <p style="font-size: 15px; color: rgba(255,248,240,0.7); margin-bottom: 12px;">Know someone who'd enjoy Sunday Sauce?</p>
+        <button onclick="copyShareLink()" id="shareBtn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; background: rgba(255,248,240,0.1); color: #FFF8F0; border: 1px solid rgba(255,248,240,0.15); border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.15s;">
+          &#128279; Copy Invite Link
+        </button>
+        <input type="hidden" id="shareUrl" value="${escapeAttr(member.referral_code)}">
+      </div>
+      <script>
+        function copyShareLink() {
+          var code = document.getElementById('shareUrl').value;
+          var url = window.location.origin + '/?ref=' + code;
+          navigator.clipboard.writeText(url).then(function() {
+            var btn = document.getElementById('shareBtn');
+            btn.innerHTML = '&#10003; Copied!';
+            setTimeout(function() { btn.innerHTML = '&#128279; Copy Invite Link'; }, 2000);
+          });
+        }
+      </script>
+      ` : ''}
+
       <!-- Comments -->
       <div class="comments-section" id="comments">
         <h2 class="comments-title">Comments${comments.length > 0 ? ` (${comments.length})` : ''}</h2>
@@ -630,6 +838,12 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       </div>
 
       <script>
+        // Open all post content links in new tab
+        document.querySelectorAll('.post-content a').forEach(function(a) {
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener');
+        });
+
         function toggleReply(commentId) {
           var form = document.getElementById('reply-form-' + commentId);
           if (form.style.display === 'block') {
@@ -647,7 +861,6 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
         <a href="/feed">&larr; Back to feed</a>
       </div>
     </article>
-    <div class="footer">&copy; 2026 Alexandra Milak</div>
   </div>
 </body>
 </html>`;

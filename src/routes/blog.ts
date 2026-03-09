@@ -3,18 +3,24 @@ import type { Env, Post, Member, Comment } from '../index';
 import { getSession, isAdmin } from '../lib/auth';
 import { sendCommentNotificationEmail, sendReplyNotificationEmail } from '../lib/email';
 import { feedPage } from '../pages/feed';
-import { postPage } from '../pages/post';
+import { postPage, postGatePage } from '../pages/post';
 import { profilePage } from '../pages/profile';
 
 export const blogRoutes = new Hono<Env>();
 
-// Auth middleware for all blog routes
+// Auth middleware for all blog routes (except post view which has its own gate)
 blogRoutes.use('*', async (c, next) => {
   const member = await getSession(c);
+  c.set('member' as never, (member || null) as never);
+  // Allow post slug routes through for the welcoming gate page
+  const path = c.req.path.replace(/^\/feed/, '');
+  if (!member && path !== '' && path !== '/' && !path.startsWith('/profile') && !path.includes('/comments')) {
+    await next();
+    return;
+  }
   if (!member) {
     return c.redirect('/auth/login');
   }
-  c.set('member' as never, member as never);
   await next();
 });
 
@@ -78,7 +84,7 @@ blogRoutes.post('/profile/avatar/remove', async (c) => {
 
 // Single post page
 blogRoutes.get('/:slug', async (c) => {
-  const member = (c as any).get('member') as Member;
+  const member = (c as any).get('member') as Member | null;
   const slug = c.req.param('slug');
 
   const post = await c.env.DB.prepare(
@@ -89,6 +95,11 @@ blogRoutes.get('/:slug', async (c) => {
 
   if (!post) {
     return c.text('Post not found', 404);
+  }
+
+  // Not logged in — show welcoming gate page
+  if (!member) {
+    return c.html(postGatePage(post as unknown as Post));
   }
 
   // Record view (fire-and-forget, don't block page load)
@@ -163,7 +174,7 @@ blogRoutes.post('/:slug/comments', async (c) => {
   if (parentId) {
     try {
       const parentComment = await c.env.DB.prepare(
-        'SELECT c.member_id, m.email, m.name FROM comments c JOIN members m ON c.member_id = m.id WHERE c.id = ?'
+        'SELECT c.member_id, m.email, m.name, m.unsubscribe_token FROM comments c JOIN members m ON c.member_id = m.id WHERE c.id = ?'
       ).bind(parentId).first();
 
       if (parentComment && parentComment.member_id !== member.id) {
@@ -175,6 +186,7 @@ blogRoutes.post('/:slug/comments', async (c) => {
           post.title as string,
           slug,
           content,
+          (parentComment.unsubscribe_token as string) || undefined,
           baseUrl
         );
       }

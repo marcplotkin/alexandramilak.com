@@ -10,6 +10,7 @@ import { sendNewPostEmail } from './lib/email';
 export type Env = {
   Bindings: {
     DB: D1Database;
+    MEDIA_BUCKET: R2Bucket;
     AUTH_SECRET: string;
     RESEND_API_KEY: string;
     ADMIN_EMAIL: string;
@@ -30,6 +31,10 @@ export type Member = {
   approved_at: string | null;
   removed_at: string | null;
   avatar_url: string | null;
+  referral_code: string | null;
+  referred_by: number | null;
+  email_notifications: number;
+  unsubscribe_token: string | null;
 };
 
 export type Comment = {
@@ -50,6 +55,7 @@ export type Post = {
   content: string;
   excerpt: string | null;
   cover_image_url: string | null;
+  cover_image_caption: string | null;
   status: string;
   emailed: number;
   email_subscribers: number;
@@ -79,7 +85,28 @@ app.get('/', async (c) => {
   if (session) {
     return c.redirect('/feed');
   }
+  // If referral code in URL, redirect to request page with it
+  const ref = c.req.query('ref');
+  if (ref) {
+    return c.redirect(`/auth/request?ref=${encodeURIComponent(ref)}`);
+  }
   return c.html(homePage());
+});
+
+// Serve media from R2
+app.get('/media/*', async (c) => {
+  const key = c.req.path.replace(/^\//, '');
+  const object = await c.env.MEDIA_BUCKET.get(key);
+
+  if (!object) {
+    return c.text('Not found', 404);
+  }
+
+  const headers = new Headers();
+  headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream');
+  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+
+  return new Response(object.body, { headers });
 });
 
 // Mount routes
@@ -111,7 +138,7 @@ export default {
       // Email subscribers if requested
       if (post.email_subscribers && !post.emailed) {
         const members = await env.DB.prepare(
-          "SELECT * FROM members WHERE status = 'active'"
+          "SELECT * FROM members WHERE status = 'active' AND email_notifications = 1"
         ).all();
 
         if (members.results && members.results.length > 0) {

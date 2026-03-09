@@ -47,7 +47,7 @@ export async function getSession(
   const hashedId = await hashToken(sessionId, c.env.AUTH_SECRET);
 
   const session = await c.env.DB.prepare(
-    'SELECT s.*, m.id as member_id, m.email, m.name, m.status, m.created_at as member_created_at, m.approved_at, m.removed_at, m.avatar_url FROM sessions s JOIN members m ON s.member_id = m.id WHERE s.id = ? AND s.expires_at > datetime(\'now\') AND m.status = \'active\''
+    'SELECT s.*, m.id as member_id, m.email, m.name, m.status, m.created_at as member_created_at, m.approved_at, m.removed_at, m.avatar_url, m.referral_code, m.referred_by, m.email_notifications, m.unsubscribe_token FROM sessions s JOIN members m ON s.member_id = m.id WHERE s.id = ? AND s.expires_at > datetime(\'now\') AND m.status = \'active\''
   )
     .bind(hashedId)
     .first();
@@ -63,6 +63,10 @@ export async function getSession(
     approved_at: session.approved_at as string | null,
     removed_at: session.removed_at as string | null,
     avatar_url: session.avatar_url as string | null,
+    referral_code: session.referral_code as string | null,
+    referred_by: session.referred_by as number | null,
+    email_notifications: (session.email_notifications as number) ?? 1,
+    unsubscribe_token: session.unsubscribe_token as string | null,
   };
 }
 
@@ -102,6 +106,23 @@ export async function validateMagicLink(
   return link.email as string;
 }
 
+function mapMember(row: Record<string, unknown>, fallbackAvatar?: string | null): Member {
+  return {
+    id: row.id as number,
+    email: row.email as string,
+    name: row.name as string,
+    status: row.status as string,
+    created_at: row.created_at as string,
+    approved_at: row.approved_at as string | null,
+    removed_at: row.removed_at as string | null,
+    avatar_url: (row.avatar_url as string | null) || fallbackAvatar || null,
+    referral_code: row.referral_code as string | null,
+    referred_by: row.referred_by as number | null,
+    email_notifications: (row.email_notifications as number) ?? 1,
+    unsubscribe_token: row.unsubscribe_token as string | null,
+  };
+}
+
 export function isAdmin(email: string, adminEmail: string): boolean {
   return email.toLowerCase() === adminEmail.toLowerCase();
 }
@@ -138,16 +159,7 @@ export async function findOrCreateMember(
 
     if (existing.status === 'active') {
       return {
-        member: {
-          id: existing.id as number,
-          email: existing.email as string,
-          name: existing.name as string,
-          status: existing.status as string,
-          created_at: existing.created_at as string,
-          approved_at: existing.approved_at as string | null,
-          removed_at: existing.removed_at as string | null,
-          avatar_url: (existing.avatar_url as string | null) || avatarUrl || null,
-        },
+        member: mapMember(existing, avatarUrl),
         status: 'active',
       };
     }
@@ -162,16 +174,7 @@ export async function findOrCreateMember(
           .run();
         const updated = await db.prepare('SELECT * FROM members WHERE email = ?').bind(email).first();
         return {
-          member: {
-            id: updated!.id as number,
-            email: updated!.email as string,
-            name: updated!.name as string,
-            status: 'active',
-            created_at: updated!.created_at as string,
-            approved_at: updated!.approved_at as string | null,
-            removed_at: null,
-            avatar_url: (updated!.avatar_url as string | null) || avatarUrl || null,
-          },
+          member: mapMember(updated!, avatarUrl),
           status: 'active',
         };
       }
@@ -188,16 +191,7 @@ export async function findOrCreateMember(
         .run();
       const updated = await db.prepare('SELECT * FROM members WHERE email = ?').bind(email).first();
       return {
-        member: {
-          id: updated!.id as number,
-          email: updated!.email as string,
-          name: updated!.name as string,
-          status: 'active',
-          created_at: updated!.created_at as string,
-          approved_at: updated!.approved_at as string | null,
-          removed_at: null,
-          avatar_url: updated!.avatar_url as string | null,
-        },
+        member: mapMember(updated!, avatarUrl),
         status: 'active',
       };
     }
@@ -229,6 +223,10 @@ export async function findOrCreateMember(
         approved_at: new Date().toISOString(),
         removed_at: null,
         avatar_url: avatarUrl || null,
+        referral_code: null,
+        referred_by: null,
+        email_notifications: 1,
+        unsubscribe_token: null,
       },
       status: 'active',
     };

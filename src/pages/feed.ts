@@ -60,6 +60,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Feed — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,7 +192,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
 
     .hero-title {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 36px;
+      font-size: 48px;
       font-weight: 400;
       color: #FFF8F0;
       margin-bottom: 6px;
@@ -265,8 +267,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
 
     .post-card-image img {
       width: 100%;
-      max-height: 280px;
-      object-fit: cover;
+      max-height: 320px;
+      object-fit: contain;
       display: block;
     }
 
@@ -355,14 +357,12 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
         <img src="/alexandra.jpg" alt="Alexandra Milak" class="profile-photo" onclick="document.getElementById('lightbox').classList.add('active')">
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
+      <p style="font-size: 14px; color: rgba(255,248,240,0.45); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
+      <p style="font-size: 13px; color: rgba(255,248,240,0.5); font-style: italic; margin-top: 6px;">Thoughts and curations about things I care about and think are nice.</p>
       <div class="hero-border"></div>
     </div>
     <div>
       ${postsHtml}
-    </div>
-    <div class="footer">
-      <div class="footer-border"></div>
-      &copy; 2026 Alexandra Milak
     </div>
   </div>
   <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">

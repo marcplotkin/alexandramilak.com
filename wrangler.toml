@@ -10,6 +10,10 @@ binding = "DB"
 database_name = "sunday-sauce-db"
 database_id = "a8db9b4b-27a8-4ac8-9ff9-dd92872f3def"
 
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "sunday-sauce-media"
+
 [vars]
 ADMIN_EMAIL = "alex.milak@gmail.com"
 SITE_URL = "https://alexandramilak-com.marc-e94.workers.dev"

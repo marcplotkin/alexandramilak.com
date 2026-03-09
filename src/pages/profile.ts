@@ -15,6 +15,8 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Profile — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -296,7 +298,6 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       <a href="/feed">&larr; Back to feed</a>
     </div>
 
-    <div class="footer">&copy; 2026 Alexandra Milak</div>
   </div>
 
   <div class="uploading-overlay" id="uploadingOverlay">Uploading...</div>

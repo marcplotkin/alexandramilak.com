@@ -4,6 +4,8 @@ export function homePage(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Sunday Sauce — Alexandra Milak</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,12 +104,12 @@ export function homePage(): string {
 
     .tagline {
       font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 400;
       letter-spacing: 0.2px;
       line-height: 1.8;
       color: rgba(255, 248, 240, 0.85);
-      max-width: 480px;
+      max-width: 600px;
       margin: 0 auto 40px;
     }
 
@@ -194,7 +196,6 @@ export function homePage(): string {
       <a href="/auth/request" class="btn btn-solid">Request Membership</a>
     </div>
   </div>
-  <div class="footer">&copy; 2026 Alexandra Milak</div>
 </body>
 </html>`;
 }

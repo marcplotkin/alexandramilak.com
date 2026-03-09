@@ -110,7 +110,8 @@ authRoutes.get('/logout', async (c) => {
 
 // Request membership page
 authRoutes.get('/request', async (c) => {
-  return c.html(requestMembershipPage());
+  const ref = c.req.query('ref') || '';
+  return c.html(requestMembershipPage(undefined, ref));
 });
 
 // Handle membership request
@@ -118,9 +119,38 @@ authRoutes.post('/request', async (c) => {
   const body = await c.req.parseBody();
   const name = (body['name'] as string || '').trim();
   const email = (body['email'] as string || '').trim().toLowerCase();
+  const referredByName = (body['referred_by'] as string || '').trim();
+  const refCode = (body['ref_code'] as string || '').trim();
 
   if (!name || !email) {
     return c.html(requestMembershipPage('Please fill in all fields.'));
+  }
+
+  // Look up referrer by code or by name
+  let referrerId: number | null = null;
+  let referrerName: string | undefined;
+
+  if (refCode) {
+    const referrer = await c.env.DB.prepare(
+      "SELECT id, name FROM members WHERE referral_code = ? AND status = 'active'"
+    ).bind(refCode).first();
+    if (referrer) {
+      referrerId = referrer.id as number;
+      referrerName = referrer.name as string;
+    }
+  }
+
+  if (!referrerId && referredByName) {
+    const referrer = await c.env.DB.prepare(
+      "SELECT id, name FROM members WHERE LOWER(name) LIKE ? AND status = 'active' LIMIT 1"
+    ).bind('%' + referredByName.toLowerCase() + '%').first();
+    if (referrer) {
+      referrerId = referrer.id as number;
+      referrerName = referrer.name as string;
+    } else {
+      // Still pass the name even if we can't match it
+      referrerName = referredByName;
+    }
   }
 
   // Check if already exists
@@ -137,9 +167,9 @@ authRoutes.post('/request', async (c) => {
     }
     // If removed, allow re-request by updating status
     await c.env.DB.prepare(
-      "UPDATE members SET status = 'pending', name = ?, removed_at = NULL WHERE email = ?"
+      "UPDATE members SET status = 'pending', name = ?, referred_by = ?, removed_at = NULL WHERE email = ?"
     )
-      .bind(name, email)
+      .bind(name, referrerId, email)
       .run();
 
     const member = await c.env.DB.prepare('SELECT * FROM members WHERE email = ?')
@@ -151,23 +181,28 @@ authRoutes.post('/request', async (c) => {
       id: member!.id as number,
       name,
       email,
+      referrerName,
     }, baseUrl);
 
     return c.html(requestSentPage());
   }
 
+  // Generate unsubscribe token and referral code for new member
+  const unsubscribeToken = generateToken();
+  const referralCode = generateToken().substring(0, 8);
+
   // Create new pending member
   const result = await c.env.DB.prepare(
-    'INSERT INTO members (email, name, status) VALUES (?, ?, ?)'
+    'INSERT INTO members (email, name, status, referred_by, unsubscribe_token, referral_code) VALUES (?, ?, ?, ?, ?, ?)'
   )
-    .bind(email, name, 'pending')
+    .bind(email, name, 'pending', referrerId, unsubscribeToken, referralCode)
     .run();
 
   const memberId = result.meta.last_row_id;
 
   // Send approval email to admin
   const baseUrl = new URL(c.req.url).origin;
-  await sendApprovalEmail(c.env, { id: memberId as number, name, email }, baseUrl);
+  await sendApprovalEmail(c.env, { id: memberId as number, name, email, referrerName }, baseUrl);
 
   return c.html(requestSentPage());
 });

@@ -1,15 +1,29 @@
 import { layout } from './layout';
 
-export function requestMembershipPage(error?: string): string {
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function requestMembershipPage(error?: string, refCode?: string): string {
   const content = `
-    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
-      <div style="width: 100%; max-width: 420px;">
+    <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0;">
+      <div style="width: 100%; max-width: 680px; margin-bottom: 32px;">
+        <img src="/tomatoes.jpg" alt="Tomatoes" style="width: 100%; height: 180px; object-fit: cover; border-radius: 0 0 20px 20px; display: block;">
+      </div>
+      <div style="width: 100%; max-width: 420px; padding: 0 20px;">
         <div style="text-align: center; margin-bottom: 32px;">
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #FFF8F0; text-decoration: none;">Sunday Sauce</a>
+          <p style="font-size: 12px; color: rgba(255,248,240,0.45); font-style: italic; margin-top: 6px;">Thoughts and curations about things I care about and think are nice.</p>
         </div>
         <h2 style="text-align: center; font-size: 22px; margin-bottom: 24px;">Request Membership</h2>
         ${error ? `<div class="message message-error">${error}</div>` : ''}
         <form method="POST" action="/auth/request">
+          ${refCode ? `<input type="hidden" name="ref_code" value="${escapeHtml(refCode)}">` : ''}
           <div class="form-group">
             <label for="name">Your name</label>
             <input type="text" id="name" name="name" required placeholder="Your full name" autocomplete="name">
@@ -17,6 +31,10 @@ export function requestMembershipPage(error?: string): string {
           <div class="form-group">
             <label for="email">Email address</label>
             <input type="email" id="email" name="email" required placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="referred_by">Who referred you? <span style="color: rgba(255,248,240,0.35); font-weight: 400;">(optional)</span></label>
+            <input type="text" id="referred_by" name="referred_by" placeholder="Name of the member who sent you">
           </div>
           <button type="submit" class="btn btn-secondary" style="width: 100%; text-align: center;">Request Access</button>
         </form>
@@ -26,6 +44,7 @@ export function requestMembershipPage(error?: string): string {
         <p style="text-align: center; margin-top: 24px; font-size: 14px;">
           <a href="/" style="color: rgba(255,248,240,0.45);">&larr; Back to home</a>
         </p>
+      </div>
       </div>
     </div>
   `;

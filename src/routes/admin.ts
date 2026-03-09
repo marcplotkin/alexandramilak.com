@@ -125,7 +125,19 @@ adminRoutes.get('/requests', async (c) => {
     "SELECT * FROM members WHERE status = 'pending' ORDER BY created_at DESC"
   ).all();
 
-  return c.html(adminRequestsPage((requests.results || []) as unknown as Member[]));
+  // Look up referrer names
+  const members = (requests.results || []) as unknown as Member[];
+  const referrerIds = members.map(m => m.referred_by).filter(Boolean) as number[];
+  const referrerNames: Record<number, string> = {};
+
+  if (referrerIds.length > 0) {
+    for (const id of referrerIds) {
+      const ref = await c.env.DB.prepare('SELECT name FROM members WHERE id = ?').bind(id).first();
+      if (ref) referrerNames[id] = ref.name as string;
+    }
+  }
+
+  return c.html(adminRequestsPage(members, referrerNames));
 });
 
 // Approve request
@@ -216,6 +228,7 @@ adminRoutes.post('/posts', async (c) => {
     const content = (body.content || '').trim();
     const excerpt = (body.excerpt || '').trim() || null;
     const coverImageUrl = (body.cover_image_url || '').trim() || null;
+    const coverImageCaption = (body.cover_image_caption || '').trim() || null;
     const emailSubscribers = body.email_subscribers ? 1 : 0;
     const status = body.status || 'draft';
     const scheduledAt = body.scheduled_at || null;
@@ -233,9 +246,9 @@ adminRoutes.post('/posts', async (c) => {
     const publishedAt = status === 'published' ? new Date().toISOString() : null;
 
     const result = await c.env.DB.prepare(
-      'INSERT INTO posts (title, slug, content, excerpt, cover_image_url, status, email_subscribers, published_at, scheduled_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO posts (title, slug, content, excerpt, cover_image_url, cover_image_caption, status, email_subscribers, published_at, scheduled_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )
-      .bind(title, slug, content, excerpt, coverImageUrl, status, emailSubscribers, publishedAt, scheduledAt)
+      .bind(title, slug, content, excerpt, coverImageUrl, coverImageCaption, status, emailSubscribers, publishedAt, scheduledAt)
       .run();
 
     return c.json({ success: true, id: result.meta.last_row_id, slug });
@@ -271,6 +284,7 @@ adminRoutes.post('/posts/:id/autosave', async (c) => {
   const content = (body.content || '').trim();
   const excerpt = (body.excerpt || '').trim() || null;
   const coverImageUrl = (body.cover_image_url || '').trim() || null;
+  const coverImageCaption = (body.cover_image_caption || '').trim() || null;
   const emailSubscribers = body.email_subscribers ? 1 : 0;
   const scheduledAt = body.scheduled_at || null;
 
@@ -281,9 +295,9 @@ adminRoutes.post('/posts/:id/autosave', async (c) => {
   slug = await ensureUniqueSlug(c.env.DB, slug, id);
 
   await c.env.DB.prepare(
-    "UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, cover_image_url = ?, email_subscribers = ?, scheduled_at = ?, updated_at = datetime('now') WHERE id = ?"
+    "UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, cover_image_url = ?, cover_image_caption = ?, email_subscribers = ?, scheduled_at = ?, updated_at = datetime('now') WHERE id = ?"
   )
-    .bind(title, slug, content, excerpt, coverImageUrl, emailSubscribers, scheduledAt, id)
+    .bind(title, slug, content, excerpt, coverImageUrl, coverImageCaption, emailSubscribers, scheduledAt, id)
     .run();
 
   return c.json({ success: true, savedAt: new Date().toISOString() });
@@ -300,6 +314,7 @@ adminRoutes.post('/posts/:id', async (c) => {
     const content = (body.content || '').trim();
     const excerpt = (body.excerpt || '').trim() || null;
     const coverImageUrl = (body.cover_image_url || '').trim() || null;
+    const coverImageCaption = (body.cover_image_caption || '').trim() || null;
     const emailSubscribers = body.email_subscribers ? 1 : 0;
     const status = body.status || 'draft';
     const scheduledAt = body.scheduled_at || null;
@@ -314,9 +329,9 @@ adminRoutes.post('/posts/:id', async (c) => {
       : existing?.published_at || null;
 
     await c.env.DB.prepare(
-      "UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, cover_image_url = ?, status = ?, email_subscribers = ?, published_at = ?, scheduled_at = ?, updated_at = datetime('now') WHERE id = ?"
+      "UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, cover_image_url = ?, cover_image_caption = ?, status = ?, email_subscribers = ?, published_at = ?, scheduled_at = ?, updated_at = datetime('now') WHERE id = ?"
     )
-      .bind(title, slug, content, excerpt, coverImageUrl, status, emailSubscribers, publishedAt, scheduledAt, id)
+      .bind(title, slug, content, excerpt, coverImageUrl, coverImageCaption, status, emailSubscribers, publishedAt, scheduledAt, id)
       .run();
 
     return c.json({ success: true });
@@ -355,7 +370,7 @@ adminRoutes.post('/posts/:id/publish', async (c) => {
   const post = await c.env.DB.prepare('SELECT * FROM posts WHERE id = ?').bind(id).first();
   if (post && post.email_subscribers && !post.emailed) {
     const members = await c.env.DB.prepare(
-      "SELECT * FROM members WHERE status = 'active'"
+      "SELECT * FROM members WHERE status = 'active' AND email_notifications = 1"
     ).all();
 
     if (members.results && members.results.length > 0) {
@@ -452,6 +467,47 @@ adminRoutes.get('/analytics', async (c) => {
     (totals?.total_views as number) || 0,
     (totals?.unique_readers as number) || 0,
   ));
+});
+
+// Upload media to R2
+adminRoutes.post('/upload', async (c) => {
+  const body = await c.req.parseBody();
+  const file = body['file'];
+
+  if (!file || typeof file === 'string') {
+    return c.json({ success: false, error: 'No file provided' }, 400);
+  }
+
+  const f = file as File;
+
+  // Validate file type
+  const allowedTypes = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'video/mp4', 'video/webm', 'video/quicktime',
+  ];
+  if (!allowedTypes.includes(f.type)) {
+    return c.json({ success: false, error: 'File type not allowed' }, 400);
+  }
+
+  // 50MB limit
+  if (f.size > 50 * 1024 * 1024) {
+    return c.json({ success: false, error: 'File too large (max 50MB)' }, 400);
+  }
+
+  // Generate unique key
+  const ext = f.name.split('.').pop() || 'bin';
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 10);
+  const key = `media/${timestamp}-${random}.${ext}`;
+
+  await c.env.MEDIA_BUCKET.put(key, f.stream(), {
+    httpMetadata: { contentType: f.type },
+  });
+
+  const baseUrl = new URL(c.req.url).origin;
+  const url = `${baseUrl}/${key}`;
+
+  return c.json({ success: true, url, key });
 });
 
 // ---- Helpers ----
