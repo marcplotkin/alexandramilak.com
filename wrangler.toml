@@ -12,7 +12,7 @@ database_id = "a8db9b4b-27a8-4ac8-9ff9-dd92872f3def"
 
 [vars]
 ADMIN_EMAIL = "alex.milak@gmail.com"
-SITE_URL = "https://alexandramilak.com"
+SITE_URL = "https://alexandramilak-com.marc-e94.workers.dev"
 SITE_NAME = "Sunday Sauce"
 GOOGLE_CLIENT_ID = "289241044241-b0911v6b075uio4skbgorooljjbmb4ql.apps.googleusercontent.com"
 
