@@ -20,6 +20,7 @@ export async function sendEmail(
       },
       body: JSON.stringify({
         from: 'Sunday Sauce <noreply@alexandramilak.com>',
+        reply_to: 'alex.milak@gmail.com',
         to: params.to,
         subject: params.subject,
         html: params.html,
