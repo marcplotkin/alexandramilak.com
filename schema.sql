@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS comments (
   FOREIGN KEY (parent_id) REFERENCES comments(id)
 );
 
+CREATE TABLE IF NOT EXISTS post_views (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id INTEGER NOT NULL,
+  member_id INTEGER NOT NULL,
+  viewed_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (member_id) REFERENCES members(id)
+);
+
 CREATE TABLE IF NOT EXISTS approval_tokens (
   token TEXT PRIMARY KEY,
   member_id INTEGER NOT NULL,

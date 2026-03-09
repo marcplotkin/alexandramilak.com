@@ -91,6 +91,14 @@ blogRoutes.get('/:slug', async (c) => {
     return c.text('Post not found', 404);
   }
 
+  // Record view (fire-and-forget, don't block page load)
+  const viewPromise = c.env.DB.prepare(
+    'INSERT INTO post_views (post_id, member_id) VALUES (?, ?)'
+  ).bind(post.id, member.id).run().catch(() => {});
+  if (c.executionCtx?.waitUntil) {
+    c.executionCtx.waitUntil(viewPromise);
+  }
+
   const comments = await c.env.DB.prepare(
     'SELECT c.*, m.name as member_name, m.avatar_url as member_avatar_url FROM comments c JOIN members m ON c.member_id = m.id WHERE c.post_id = ? ORDER BY c.created_at ASC'
   )

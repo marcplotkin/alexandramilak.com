@@ -8,6 +8,7 @@ import {
   adminRequestsPage,
   adminPostsPage,
   adminActionResultPage,
+  adminAnalyticsPage,
 } from '../pages/admin';
 import { editorPage } from '../pages/editor';
 
@@ -170,12 +171,20 @@ adminRoutes.post('/requests/:id/deny', async (c) => {
 // All posts (with optional filter)
 adminRoutes.get('/posts', async (c) => {
   const posts = await c.env.DB.prepare(
-    'SELECT * FROM posts ORDER BY updated_at DESC'
+    `SELECT p.*,
+      COALESCE(v.view_count, 0) as view_count,
+      COALESCE(v.unique_readers, 0) as unique_readers
+    FROM posts p
+    LEFT JOIN (
+      SELECT post_id, COUNT(*) as view_count, COUNT(DISTINCT member_id) as unique_readers
+      FROM post_views GROUP BY post_id
+    ) v ON p.id = v.post_id
+    ORDER BY p.updated_at DESC`
   ).all();
 
   const filter = c.req.query('filter') || undefined;
 
-  return c.html(adminPostsPage((posts.results || []) as unknown as Post[], filter));
+  return c.html(adminPostsPage((posts.results || []) as unknown as (Post & { view_count: number; unique_readers: number })[], filter));
 });
 
 // New post — editor
@@ -409,6 +418,40 @@ adminRoutes.post('/posts/:id/delete', async (c) => {
   }
 
   return c.redirect('/admin/posts');
+});
+
+// Analytics
+adminRoutes.get('/analytics', async (c) => {
+  const postViews = await c.env.DB.prepare(`
+    SELECT p.title, p.slug, p.published_at,
+      COUNT(v.id) as total_views,
+      COUNT(DISTINCT v.member_id) as unique_readers
+    FROM post_views v
+    JOIN posts p ON v.post_id = p.id
+    GROUP BY v.post_id
+    ORDER BY total_views DESC
+  `).all();
+
+  const recentReaders = await c.env.DB.prepare(`
+    SELECT m.name, p.title, p.slug, v.viewed_at
+    FROM post_views v
+    JOIN members m ON v.member_id = m.id
+    JOIN posts p ON v.post_id = p.id
+    ORDER BY v.viewed_at DESC
+    LIMIT 50
+  `).all();
+
+  const totals = await c.env.DB.prepare(`
+    SELECT COUNT(*) as total_views, COUNT(DISTINCT member_id) as unique_readers
+    FROM post_views
+  `).first();
+
+  return c.html(adminAnalyticsPage(
+    (postViews.results || []) as any[],
+    (recentReaders.results || []) as any[],
+    (totals?.total_views as number) || 0,
+    (totals?.unique_readers as number) || 0,
+  ));
 });
 
 // ---- Helpers ----

@@ -88,6 +88,7 @@ export function adminDashboard(stats: {
         <a href="/admin/posts" class="btn btn-primary" style="text-align: center;">All Posts</a>
         <a href="/admin/members" class="btn btn-primary" style="text-align: center;">Members</a>
         <a href="/admin/requests" class="btn btn-primary" style="text-align: center;">Pending Requests${stats.pendingRequests > 0 ? ` (${stats.pendingRequests})` : ''}</a>
+        <a href="/admin/analytics" class="btn btn-primary" style="text-align: center;">Analytics</a>
       </div>
     </div>
   `;
@@ -192,7 +193,7 @@ export function adminRequestsPage(requests: Member[]): string {
   return layout('Pending Requests', content);
 }
 
-export function adminPostsPage(posts: Post[], filter?: string): string {
+export function adminPostsPage(posts: (Post & { view_count?: number; unique_readers?: number })[], filter?: string): string {
   const currentFilter = filter || 'all';
 
   const filterCounts = {
@@ -218,6 +219,7 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
       <td><a href="/admin/posts/${p.id}/edit" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
       <td>${statusBadge(p.status)}</td>
       <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${getWordCount(p.content)} words</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.4); text-align: center;">${p.view_count || 0} <span style="opacity: 0.5;">/ ${p.unique_readers || 0}</span></td>
       <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
       <td>
         <div style="display: flex; gap: 8px; justify-content: flex-end;">
@@ -257,6 +259,7 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
               <th>Title</th>
               <th>Status</th>
               <th>Words</th>
+              <th style="text-align: center;">Views / Readers</th>
               <th>Updated</th>
               <th></th>
             </tr>
@@ -270,6 +273,90 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
     <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
   `;
   return layout('All Posts', content);
+}
+
+export function adminAnalyticsPage(
+  postViews: { title: string; slug: string; total_views: number; unique_readers: number; published_at: string | null }[],
+  recentReaders: { name: string; title: string; slug: string; viewed_at: string }[],
+  totalViews: number,
+  totalUniqueReaders: number,
+): string {
+  const postRows = postViews.map(p => `
+    <tr>
+      <td><a href="/feed/${escapeHtml(p.slug)}" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
+      <td style="text-align: center;">${p.total_views}</td>
+      <td style="text-align: center;">${p.unique_readers}</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${p.published_at ? formatDate(p.published_at) : '—'}</td>
+    </tr>
+  `).join('');
+
+  const readerRows = recentReaders.map(r => `
+    <tr>
+      <td>${escapeHtml(r.name)}</td>
+      <td><a href="/feed/${escapeHtml(r.slug)}">${escapeHtml(r.title)}</a></td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${formatDate(r.viewed_at)}</td>
+    </tr>
+  `).join('');
+
+  const content = `
+    ${adminNav()}
+    <h1 style="font-size: 28px; margin-bottom: 32px;">Analytics</h1>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">${totalViews}</div>
+        <div class="stat-label">Total Views</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${totalUniqueReaders}</div>
+        <div class="stat-label">Unique Readers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${postViews.length}</div>
+        <div class="stat-label">Posts Viewed</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 32px;">
+      <h3 style="font-size: 18px; margin-bottom: 16px;">Views by Post</h3>
+      ${postViews.length === 0
+        ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No views yet.</p>'
+        : `
+        <table>
+          <thead>
+            <tr>
+              <th>Post</th>
+              <th style="text-align: center;">Views</th>
+              <th style="text-align: center;">Readers</th>
+              <th>Published</th>
+            </tr>
+          </thead>
+          <tbody>${postRows}</tbody>
+        </table>
+      `}
+    </div>
+
+    <div class="card">
+      <h3 style="font-size: 18px; margin-bottom: 16px;">Recent Activity</h3>
+      ${recentReaders.length === 0
+        ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No activity yet.</p>'
+        : `
+        <table>
+          <thead>
+            <tr>
+              <th>Reader</th>
+              <th>Post</th>
+              <th>When</th>
+            </tr>
+          </thead>
+          <tbody>${readerRows}</tbody>
+        </table>
+      `}
+    </div>
+
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
+  `;
+  return layout('Analytics', content);
 }
 
 export function adminActionResultPage(
