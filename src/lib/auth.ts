@@ -150,6 +150,27 @@ export async function findOrCreateMember(
     }
 
     if (existing.status === 'pending') {
+      if (isAdmin(email, adminEmail)) {
+        await db
+          .prepare(
+            "UPDATE members SET status = 'active', approved_at = datetime('now'), auth_provider = ?, provider_id = ? WHERE email = ?"
+          )
+          .bind(provider, providerId, email)
+          .run();
+        const updated = await db.prepare('SELECT * FROM members WHERE email = ?').bind(email).first();
+        return {
+          member: {
+            id: updated!.id as number,
+            email: updated!.email as string,
+            name: updated!.name as string,
+            status: 'active',
+            created_at: updated!.created_at as string,
+            approved_at: updated!.approved_at as string | null,
+            removed_at: null,
+          },
+          status: 'active',
+        };
+      }
       return { member: null, status: 'pending' };
     }
 

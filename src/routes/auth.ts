@@ -39,13 +39,26 @@ authRoutes.post('/login', async (c) => {
   }
 
   // Check if member exists and is active
-  const member = await c.env.DB.prepare(
-    "SELECT * FROM members WHERE email = ? AND status = 'active'"
+  let member = await c.env.DB.prepare(
+    "SELECT * FROM members WHERE email = ?"
   )
     .bind(email)
     .first();
 
-  if (!member) {
+  // Auto-create or auto-approve admin email
+  if (email === c.env.ADMIN_EMAIL?.toLowerCase()) {
+    if (!member) {
+      await c.env.DB.prepare(
+        "INSERT INTO members (email, name, status, approved_at) VALUES (?, 'Alexandra Milak', 'active', datetime('now'))"
+      ).bind(email).run();
+      member = await c.env.DB.prepare("SELECT * FROM members WHERE email = ?").bind(email).first();
+    } else if (member.status !== 'active') {
+      await c.env.DB.prepare(
+        "UPDATE members SET status = 'active', approved_at = datetime('now'), removed_at = NULL WHERE email = ?"
+      ).bind(email).run();
+      member = await c.env.DB.prepare("SELECT * FROM members WHERE email = ?").bind(email).first();
+    }
+  } else if (!member || member.status !== 'active') {
     return c.html(
       loginPage('No active membership found for this email. You may need to request membership first.')
     );
