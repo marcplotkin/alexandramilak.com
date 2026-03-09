@@ -358,7 +358,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
       <p style="font-size: 14px; color: rgba(255,248,240,0.45); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
-      <p style="font-size: 13px; color: rgba(255,248,240,0.5); font-style: italic; margin-top: 6px;">Thoughts and curations about things I care about and think are nice.</p>
+      <p style="font-size: 13px; color: rgba(255,248,240,0.5); font-style: italic; margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
       <div class="hero-border"></div>
     </div>
     <div>

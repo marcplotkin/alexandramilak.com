@@ -325,7 +325,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       font-size: 13px;
       color: rgba(255,248,240,0.4);
       font-style: italic;
-      margin: 10px 0 36px;
+      margin: 4px 0 36px;
     }
 
     .cover-image-no-caption {

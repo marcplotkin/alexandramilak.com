@@ -177,7 +177,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       font-size: 13px;
       font-style: italic;
       color: rgba(255,248,240,0.45);
-      margin: 6px 0 0;
+      margin: 2px 0 0;
       padding: 0 4px;
       display: none;
     }
@@ -969,6 +969,14 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       saveDot.className = 'save-dot unsaved';
       saveStatus.textContent = msg || 'Save failed';
     }
+    function showToast(msg, isError) {
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;color:#fff;background:' + (isError ? '#dc2626' : '#16a34a') + ';box-shadow:0 4px 20px rgba(0,0,0,0.3);opacity:0;transition:opacity 0.3s;';
+      document.body.appendChild(toast);
+      requestAnimationFrame(function() { toast.style.opacity = '1'; });
+      setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 300); }, 3000);
+    }
 
     // ---- PREVIEW ----
     document.getElementById('previewBtn').addEventListener('click', function() {
@@ -1100,30 +1108,35 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     const publishBtn = document.getElementById('publishBtn');
     if (publishBtn) publishBtn.addEventListener('click', async function() {
       if (!titleInput.value.trim()) { showError('Title required'); return; }
-      await savePost(false);
-      if (!postId) return;
+      const saved = await savePost(false);
+      if (!saved || !postId) return;
       showSaving();
       const res = await fetch('/admin/posts/' + postId + '/publish', { method: 'POST' });
       const result = await res.json();
       if (result.success) {
         currentStatus = 'published';
-        window.location.href = '/admin/posts/' + postId + '/edit';
+        showSaved();
+        showToast('Post published!');
       } else {
         showError(result.error || 'Publish failed');
+        showToast(result.error || 'Publish failed', true);
       }
     });
 
     const publishNowBtn = document.getElementById('publishNowBtn');
     if (publishNowBtn) publishNowBtn.addEventListener('click', async function() {
       showSaving();
-      await savePost(false);
+      const saved = await savePost(false);
+      if (!saved) return;
       const res = await fetch('/admin/posts/' + postId + '/publish', { method: 'POST' });
       const result = await res.json();
       if (result.success) {
         currentStatus = 'published';
-        window.location.href = '/admin/posts/' + postId + '/edit';
+        showSaved();
+        showToast('Post updated & published!');
       } else {
         showError(result.error || 'Publish failed');
+        showToast(result.error || 'Publish failed', true);
       }
     });
 

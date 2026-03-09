@@ -360,11 +360,19 @@ adminRoutes.post('/posts/:id', async (c) => {
 adminRoutes.post('/posts/:id/publish', async (c) => {
   const id = parseInt(c.req.param('id'));
 
-  await c.env.DB.prepare(
-    "UPDATE posts SET status = 'published', published_at = datetime('now'), scheduled_at = NULL, updated_at = datetime('now') WHERE id = ?"
-  )
-    .bind(id)
-    .run();
+  // Only set published_at if not already published (preserve original publish date on updates)
+  const existing = await c.env.DB.prepare('SELECT status, published_at FROM posts WHERE id = ?').bind(id).first();
+  const isAlreadyPublished = existing && existing.status === 'published' && existing.published_at;
+
+  if (isAlreadyPublished) {
+    await c.env.DB.prepare(
+      "UPDATE posts SET status = 'published', scheduled_at = NULL, updated_at = datetime('now') WHERE id = ?"
+    ).bind(id).run();
+  } else {
+    await c.env.DB.prepare(
+      "UPDATE posts SET status = 'published', published_at = datetime('now'), scheduled_at = NULL, updated_at = datetime('now') WHERE id = ?"
+    ).bind(id).run();
+  }
 
   // Check if email_subscribers is on
   const post = await c.env.DB.prepare('SELECT * FROM posts WHERE id = ?').bind(id).first();

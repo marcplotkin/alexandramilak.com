@@ -190,7 +190,7 @@ export function homePage(): string {
       <img src="/alexandra.jpg" alt="Alexandra Milak" class="profile-photo">
     </div>
     <h1 class="title">Sunday Sauce</h1>
-    <p class="tagline">Thoughts and curations about things I care about and think are nice.</p>
+    <p class="tagline">Thoughts and curations of things I care about and think are nice.</p>
     <div class="buttons">
       <a href="/auth/login" class="btn btn-outline">Log In</a>
       <a href="/auth/request" class="btn btn-solid">Request Membership</a>
