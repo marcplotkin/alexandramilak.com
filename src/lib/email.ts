@@ -19,7 +19,7 @@ export async function sendEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Sunday Sauce <sundaysauce@nyu.marcplotkin.com>',
+        from: 'Sunday Sauce <noreply@alexandramilak.com>',
         reply_to: 'alex.milak@gmail.com',
         to: params.to,
         subject: params.subject,
