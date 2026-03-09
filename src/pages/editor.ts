@@ -164,15 +164,14 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     }
 
     .cover-image-preview {
-      margin-bottom: 32px;
-      border-radius: 12px;
+      margin: 0 -24px 32px;
       overflow: hidden;
       display: none;
     }
     .cover-image-preview img {
       width: 100%;
-      max-height: 400px;
-      object-fit: contain;
+      height: auto;
+      display: block;
     }
     .cover-caption-preview {
       font-size: 13px;
@@ -973,7 +972,6 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
     // ---- PREVIEW ----
     document.getElementById('previewBtn').addEventListener('click', function() {
-      var previewWin = window.open('', '_blank');
       var title = document.getElementById('titleInput').value || 'Untitled';
       var subtitle = document.getElementById('subtitleInput').value || '';
       var coverUrl = coverImageInput.value.trim();
@@ -981,41 +979,50 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       var content = editorContent.innerHTML;
       var dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-      previewWin.document.write('<!DOCTYPE html><html lang="en"><head>');
-      previewWin.document.write('<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">');
-      previewWin.document.write('<title>Preview: ' + title.replace(/</g, '&lt;') + '</title>');
-      previewWin.document.write('<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">');
-      previewWin.document.write('<style>');
-      previewWin.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
-      previewWin.document.write('body { font-family: "DM Sans", sans-serif; background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%); color: #FFF8F0; min-height: 100vh; padding: 40px 20px; }');
-      previewWin.document.write('.container { max-width: 680px; margin: 0 auto; }');
-      previewWin.document.write('.preview-banner { background: rgba(255,248,240,0.1); padding: 10px 16px; border-radius: 8px; margin-bottom: 32px; text-align: center; font-size: 13px; color: rgba(255,248,240,0.6); }');
-      previewWin.document.write('.cover img { width: 100%; max-height: 560px; object-fit: contain; border-radius: 12px; }');
-      previewWin.document.write('.cover-cap { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin: 10px 0 36px; }');
-      previewWin.document.write('.no-cap { margin-bottom: 36px; }');
-      previewWin.document.write('h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 44px; font-weight: 500; line-height: 1.2; margin-bottom: 12px; }');
-      previewWin.document.write('.subtitle { font-size: 18px; color: rgba(255,248,240,0.55); margin-bottom: 8px; }');
-      previewWin.document.write('.date { font-size: 12px; color: rgba(255,248,240,0.35); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 44px; }');
-      previewWin.document.write('.content { font-size: 17px; line-height: 1.8; color: rgba(255,248,240,0.88); }');
-      previewWin.document.write('.content p { margin-bottom: 20px; }');
-      previewWin.document.write('.content img { max-width: 100%; border-radius: 10px; margin: 28px 0; }');
-      previewWin.document.write('.content video { max-width: 100%; border-radius: 10px; margin: 28px 0; }');
-      previewWin.document.write('.content a { color: rgba(255,248,240,0.7); }');
-      previewWin.document.write('.media-figure { margin: 28px 0; }');
-      previewWin.document.write('.media-figure img, .media-figure video { max-width: 100%; border-radius: 10px; margin: 0; }');
-      previewWin.document.write('.media-caption { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin-top: 6px; }');
-      previewWin.document.write('</style></head><body><div class="container">');
-      previewWin.document.write('<div class="preview-banner">This is a preview — not yet published</div>');
+      // Strip editor toolbar artifacts from content
+      var cleanContent = content.replace(/<div class="media-toolbar">.*?<\/div>/g, '');
+
+      var html = '<!DOCTYPE html><html lang="en"><head>'
+        + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">'
+        + '<title>Preview</title>'
+        + '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">'
+        + '<style>'
+        + '* { margin: 0; padding: 0; box-sizing: border-box; }'
+        + 'body { font-family: "DM Sans", sans-serif; background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%); color: #FFF8F0; min-height: 100vh; padding: 40px 20px; }'
+        + '.container { max-width: 680px; margin: 0 auto; }'
+        + '.preview-banner { background: rgba(255,248,240,0.1); padding: 10px 16px; border-radius: 8px; margin-bottom: 32px; text-align: center; font-size: 13px; color: rgba(255,248,240,0.6); cursor: pointer; }'
+        + '.preview-banner:hover { background: rgba(255,248,240,0.15); }'
+        + '.cover img { width: 100%; height: auto; border-radius: 12px; }'
+        + '.cover-cap { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin: 10px 0 36px; }'
+        + '.no-cap { margin-bottom: 36px; }'
+        + 'h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 44px; font-weight: 500; line-height: 1.2; margin-bottom: 12px; }'
+        + '.subtitle { font-size: 18px; color: rgba(255,248,240,0.55); margin-bottom: 8px; }'
+        + '.date { font-size: 12px; color: rgba(255,248,240,0.35); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 44px; }'
+        + '.content { font-size: 17px; line-height: 1.8; color: rgba(255,248,240,0.88); }'
+        + '.content p { margin-bottom: 20px; }'
+        + '.content img { max-width: 100%; border-radius: 10px; margin: 28px 0; }'
+        + '.content video { max-width: 100%; border-radius: 10px; margin: 28px 0; }'
+        + '.content a { color: rgba(255,248,240,0.7); }'
+        + '.media-figure { margin: 28px 0; }'
+        + '.media-figure img, .media-figure video { max-width: 100%; border-radius: 10px; margin: 0; }'
+        + '.media-caption { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin-top: 6px; }'
+        + '.media-toolbar { display: none; }'
+        + '</style></head><body><div class="container">'
+        + '<div class="preview-banner" onclick="window.history.back()">Preview — click here to go back to editor</div>';
       if (coverUrl) {
-        previewWin.document.write('<div class="cover' + (coverCaption ? '' : ' no-cap') + '"><img src="' + coverUrl + '" alt="Cover"></div>');
-        if (coverCaption) previewWin.document.write('<p class="cover-cap">' + coverCaption.replace(/</g, '&lt;') + '</p>');
+        html += '<div class="cover' + (coverCaption ? '' : ' no-cap') + '"><img src="' + coverUrl + '" alt="Cover"></div>';
+        if (coverCaption) html += '<p class="cover-cap">' + coverCaption.replace(/</g, '&lt;') + '</p>';
       }
-      previewWin.document.write('<h1>' + title.replace(/</g, '&lt;') + '</h1>');
-      if (subtitle) previewWin.document.write('<p class="subtitle">' + subtitle.replace(/</g, '&lt;') + '</p>');
-      previewWin.document.write('<p class="date">' + dateStr + '</p>');
-      previewWin.document.write('<div class="content">' + content + '</div>');
-      previewWin.document.write('</div></body></html>');
-      previewWin.document.close();
+      html += '<h1>' + title.replace(/</g, '&lt;') + '</h1>';
+      if (subtitle) html += '<p class="subtitle">' + subtitle.replace(/</g, '&lt;') + '</p>';
+      html += '<p class="date">' + dateStr + '</p>';
+      html += '<div class="content">' + cleanContent + '</div>';
+      html += '</div></body></html>';
+
+      // Use same tab to avoid popup blockers
+      document.open();
+      document.write(html);
+      document.close();
     });
 
     // ---- AUTO-SAVE ----
@@ -1353,6 +1360,17 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     editorContent.addEventListener('keyup', positionPlusButton);
     editorContent.addEventListener('click', positionPlusButton);
     editorContent.addEventListener('focus', positionPlusButton);
+
+    // Cmd+click (Mac) or Ctrl+click (Win) to open links in new tab
+    editorContent.addEventListener('click', function(e) {
+      if (e.metaKey || e.ctrlKey) {
+        var link = e.target.closest('a');
+        if (link && link.href) {
+          e.preventDefault();
+          window.open(link.href, '_blank');
+        }
+      }
+    });
 
     function positionPlusButton() {
       const sel = window.getSelection();
@@ -1716,31 +1734,32 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       }
     });
 
+    // Wrap ALL bare images/videos in figures on load (for posts saved before figure support)
+    function wrapBareMedia() {
+      editorContent.querySelectorAll('img, video').forEach(function(el) {
+        if (!el.closest('.media-figure')) {
+          var figure = document.createElement('figure');
+          figure.className = 'media-figure';
+          figure.contentEditable = 'false';
+          var toolbar = document.createElement('div');
+          toolbar.className = 'media-toolbar';
+          toolbar.innerHTML = '<button type="button" class="replace-btn">Replace</button><button type="button" class="remove-btn">Remove</button>';
+          figure.appendChild(toolbar);
+          el.parentNode.insertBefore(figure, el);
+          figure.appendChild(el);
+          var caption = document.createElement('figcaption');
+          caption.className = 'media-caption';
+          caption.contentEditable = 'true';
+          caption.setAttribute('placeholder', 'Add a caption...');
+          figure.appendChild(caption);
+          bindMediaFigure(figure);
+        }
+      });
+    }
+    wrapBareMedia();
+
     // Bind existing media figures (when editing existing post)
     editorContent.querySelectorAll('.media-figure').forEach(function(fig) { bindMediaFigure(fig); });
-
-    // Also handle bare images/videos (not in figures) — wrap them on click
-    editorContent.addEventListener('click', function(e) {
-      var target = e.target;
-      if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && !target.closest('.media-figure')) {
-        // Wrap in a figure
-        var figure = document.createElement('figure');
-        figure.className = 'media-figure selected';
-        figure.contentEditable = 'false';
-        var toolbar = document.createElement('div');
-        toolbar.className = 'media-toolbar';
-        toolbar.innerHTML = '<button type="button" class="replace-btn">Replace</button><button type="button" class="remove-btn">Remove</button>';
-        figure.appendChild(toolbar);
-        target.parentNode.insertBefore(figure, target);
-        figure.appendChild(target);
-        var caption = document.createElement('figcaption');
-        caption.className = 'media-caption';
-        caption.contentEditable = 'true';
-        caption.setAttribute('placeholder', 'Add a caption...');
-        figure.appendChild(caption);
-        bindMediaFigure(figure);
-        markDirty();
-      }
     });
 
     async function insertMediaFromFile(file) {

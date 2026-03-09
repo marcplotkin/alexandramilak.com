@@ -504,8 +504,7 @@ adminRoutes.post('/upload', async (c) => {
     httpMetadata: { contentType: f.type },
   });
 
-  const baseUrl = new URL(c.req.url).origin;
-  const url = `${baseUrl}/${key}`;
+  const url = `/${key}`;
 
   return c.json({ success: true, url, key });
 });

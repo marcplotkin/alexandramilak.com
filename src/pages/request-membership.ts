@@ -18,7 +18,7 @@ export function requestMembershipPage(error?: string, refCode?: string): string 
       <div style="width: 100%; max-width: 420px; padding: 0 20px;">
         <div style="text-align: center; margin-bottom: 32px;">
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #FFF8F0; text-decoration: none;">Sunday Sauce</a>
-          <p style="font-size: 12px; color: rgba(255,248,240,0.45); font-style: italic; margin-top: 6px;">Thoughts and curations about things I care about and think are nice.</p>
+          <p style="font-size: 12px; color: rgba(255,248,240,0.45); font-style: italic; margin-top: 6px;">A bimonthly curated newsletter</p>
         </div>
         <h2 style="text-align: center; font-size: 22px; margin-bottom: 24px;">Request Membership</h2>
         ${error ? `<div class="message message-error">${error}</div>` : ''}
