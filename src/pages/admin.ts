@@ -19,6 +19,26 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+function getWordCount(content: string): number {
+  const text = content.replace(/<[^>]*>/g, '').trim();
+  if (!text) return 0;
+  return text.split(/\s+/).filter(w => w.length > 0).length;
+}
+
+function statusBadge(status: string): string {
+  const styles: Record<string, string> = {
+    draft: 'background: #f5f0e8; color: var(--text-muted);',
+    scheduled: 'background: #e8f0fa; color: #2563eb;',
+    published: 'background: #f0faf0; color: #2d6a2d;',
+  };
+  const labels: Record<string, string> = {
+    draft: 'Draft',
+    scheduled: 'Scheduled',
+    published: 'Published',
+  };
+  return `<span style="display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; ${styles[status] || styles.draft}">${labels[status] || status}</span>`;
+}
+
 function adminNav(): string {
   return `
     <nav class="nav">
@@ -35,6 +55,8 @@ export function adminDashboard(stats: {
   totalMembers: number;
   pendingRequests: number;
   publishedPosts: number;
+  draftPosts: number;
+  scheduledPosts: number;
 }): string {
   const content = `
     ${adminNav()}
@@ -46,22 +68,26 @@ export function adminDashboard(stats: {
         <div class="stat-label">Active Members</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">${stats.pendingRequests}</div>
-        <div class="stat-label">Pending Requests</div>
+        <div class="stat-number">${stats.publishedPosts}</div>
+        <div class="stat-label">Published</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">${stats.publishedPosts}</div>
-        <div class="stat-label">Published Posts</div>
+        <div class="stat-number">${stats.draftPosts}</div>
+        <div class="stat-label">Drafts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${stats.scheduledPosts}</div>
+        <div class="stat-label">Scheduled</div>
       </div>
     </div>
 
     <div class="card">
-      <h3 style="font-size: 18px; margin-bottom: 20px;">Quick Links</h3>
+      <h3 style="font-size: 18px; margin-bottom: 20px;">Quick Actions</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <a href="/admin/members" class="btn btn-primary" style="text-align: center;">Manage Members</a>
-        <a href="/admin/requests" class="btn btn-primary" style="text-align: center;">Pending Requests${stats.pendingRequests > 0 ? ` (${stats.pendingRequests})` : ''}</a>
-        <a href="/admin/posts/new" class="btn btn-primary" style="text-align: center;">Create Post</a>
+        <a href="/admin/posts/new" class="btn btn-primary" style="text-align: center; font-size: 15px; padding: 16px 28px;">&#9998; Write New Post</a>
         <a href="/admin/posts" class="btn btn-primary" style="text-align: center;">All Posts</a>
+        <a href="/admin/members" class="btn btn-primary" style="text-align: center;">Members</a>
+        <a href="/admin/requests" class="btn btn-primary" style="text-align: center;">Pending Requests${stats.pendingRequests > 0 ? ` (${stats.pendingRequests})` : ''}</a>
       </div>
     </div>
   `;
@@ -166,21 +192,41 @@ export function adminRequestsPage(requests: Member[]): string {
   return layout('Pending Requests', content);
 }
 
-export function adminPostsPage(posts: Post[]): string {
-  const rows = posts
+export function adminPostsPage(posts: Post[], filter?: string): string {
+  const currentFilter = filter || 'all';
+
+  const filterCounts = {
+    all: posts.length,
+    published: posts.filter(p => p.status === 'published').length,
+    draft: posts.filter(p => p.status === 'draft').length,
+    scheduled: posts.filter(p => p.status === 'scheduled').length,
+  };
+
+  const filteredPosts = currentFilter === 'all'
+    ? posts
+    : posts.filter(p => p.status === currentFilter);
+
+  const tabStyle = (tab: string) => {
+    const active = tab === currentFilter;
+    return `display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: ${active ? '600' : '400'}; text-decoration: none; color: ${active ? 'var(--burgundy)' : 'var(--text-muted)'}; background: ${active ? 'white' : 'transparent'}; ${active ? 'box-shadow: 0 1px 3px rgba(0,0,0,0.06);' : ''}`;
+  };
+
+  const rows = filteredPosts
     .map(
       (p) => `
     <tr>
       <td><a href="/admin/posts/${p.id}/edit" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
+      <td>${statusBadge(p.status)}</td>
+      <td style="font-size: 13px; color: var(--text-muted);">${getWordCount(p.content)} words</td>
+      <td style="font-size: 13px; color: var(--text-muted);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
       <td>
-        <span style="display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; ${
-          p.published
-            ? 'background: #f0faf0; color: #2d6a2d;'
-            : 'background: #f5f0e8; color: var(--text-muted);'
-        }">${p.published ? 'Published' : 'Draft'}</span>
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <a href="/admin/posts/${p.id}/edit" style="font-size: 13px;">Edit</a>
+          <form method="POST" action="/admin/posts/${p.id}/delete" style="display: inline;" onsubmit="return confirm('Delete this post?')">
+            <button type="submit" style="background: none; border: none; color: var(--tomato-red); cursor: pointer; font-size: 13px; font-family: Inter, sans-serif;">Delete</button>
+          </form>
+        </div>
       </td>
-      <td style="font-size: 13px; color: var(--text-muted);">${formatDate(p.updated_at)}</td>
-      <td><a href="/admin/posts/${p.id}/edit" style="font-size: 13px;">Edit</a></td>
     </tr>
   `
     )
@@ -188,21 +234,29 @@ export function adminPostsPage(posts: Post[]): string {
 
   const content = `
     ${adminNav()}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <h1 style="font-size: 28px;">All Posts</h1>
-      <a href="/admin/posts/new" class="btn btn-primary">Create New Post</a>
+      <a href="/admin/posts/new" class="btn btn-primary">New Post</a>
+    </div>
+
+    <div style="display: flex; gap: 4px; margin-bottom: 24px; background: var(--cream); padding: 4px; border-radius: 10px;">
+      <a href="/admin/posts" style="${tabStyle('all')}">All (${filterCounts.all})</a>
+      <a href="/admin/posts?filter=published" style="${tabStyle('published')}">Published (${filterCounts.published})</a>
+      <a href="/admin/posts?filter=draft" style="${tabStyle('draft')}">Drafts (${filterCounts.draft})</a>
+      <a href="/admin/posts?filter=scheduled" style="${tabStyle('scheduled')}">Scheduled (${filterCounts.scheduled})</a>
     </div>
 
     <div class="card">
       ${
-        posts.length === 0
-          ? '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No posts yet. Create your first post!</p>'
+        filteredPosts.length === 0
+          ? '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No posts here. Create your first post!</p>'
           : `
         <table>
           <thead>
             <tr>
               <th>Title</th>
               <th>Status</th>
+              <th>Words</th>
               <th>Updated</th>
               <th></th>
             </tr>
@@ -216,60 +270,6 @@ export function adminPostsPage(posts: Post[]): string {
     <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: var(--text-muted);">&larr; Back to dashboard</a></p>
   `;
   return layout('All Posts', content);
-}
-
-export function adminPostFormPage(post?: Post): string {
-  const isEdit = !!post;
-  const title = isEdit ? 'Edit Post' : 'Create Post';
-
-  const content = `
-    ${adminNav()}
-    <h1 style="font-size: 28px; margin-bottom: 32px;">${title}</h1>
-
-    <form method="POST" action="${isEdit ? `/admin/posts/${post!.id}` : '/admin/posts'}" class="card">
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" required value="${isEdit ? escapeHtml(post!.title) : ''}" placeholder="Your post title">
-      </div>
-
-      <div class="form-group">
-        <label for="excerpt">Excerpt <span style="color: var(--text-muted); font-weight: 400;">(optional, shown in feed)</span></label>
-        <input type="text" id="excerpt" name="excerpt" value="${isEdit && post!.excerpt ? escapeHtml(post!.excerpt) : ''}" placeholder="A brief summary of your post">
-      </div>
-
-      <div class="form-group">
-        <label for="content">Content <span style="color: var(--text-muted); font-weight: 400;">(HTML)</span></label>
-        <textarea id="content" name="content" required placeholder="Write your post content here... HTML is supported.">${isEdit ? escapeHtml(post!.content) : ''}</textarea>
-      </div>
-
-      <div class="checkbox-group">
-        <input type="checkbox" id="published" name="published" value="1" ${isEdit && post!.published ? 'checked' : ''}>
-        <label for="published">Published</label>
-      </div>
-
-      <div class="checkbox-group">
-        <input type="checkbox" id="email_members" name="email_members" value="1">
-        <label for="email_members">Email all members about this post</label>
-      </div>
-
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <button type="submit" class="btn btn-primary">Save Post</button>
-        <a href="/admin/posts" style="color: var(--text-muted); font-size: 14px;">Cancel</a>
-        ${
-          isEdit
-            ? `
-          <form method="POST" action="/admin/posts/${post!.id}/delete" style="margin-left: auto;" onsubmit="return confirm('Delete this post permanently?')">
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        `
-            : ''
-        }
-      </div>
-    </form>
-
-    <p style="margin-top: 16px;"><a href="/admin/posts" style="font-size: 14px; color: var(--text-muted);">&larr; Back to all posts</a></p>
-  `;
-  return layout(title, content);
 }
 
 export function adminActionResultPage(

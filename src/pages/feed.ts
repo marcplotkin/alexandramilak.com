@@ -16,6 +16,15 @@ function getExcerpt(post: Post): string {
   return stripped.length > 150 ? stripped.substring(0, 150) + '...' : stripped;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function feedPage(posts: Post[], member: Member, isAdmin: boolean): string {
   const nav = `
     <nav class="nav">
@@ -41,6 +50,11 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
       .map(
         (post) => `
       <article style="padding: 32px 0; border-bottom: 1px solid #e8e0d8;">
+        ${post.cover_image_url ? `
+          <a href="/feed/${post.slug}" style="text-decoration: none; display: block; margin-bottom: 16px;">
+            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 10px;">
+          </a>
+        ` : ''}
         <a href="/feed/${post.slug}" style="text-decoration: none;">
           <h2 style="font-size: 24px; color: var(--text-dark); margin-bottom: 8px;">${escapeHtml(post.title)}</h2>
         </a>
@@ -61,13 +75,4 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
   `;
 
   return layout('Feed', content);
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }

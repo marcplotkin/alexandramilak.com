@@ -22,15 +22,6 @@ export function loginPage(error?: string): string {
           </a>
         </div>
 
-        <div style="margin-bottom: 24px;">
-          <a href="/auth/apple" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 20px; background: #000; color: #fff; border: 1px solid #000; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; font-family: 'Inter', sans-serif; transition: opacity 0.2s; box-sizing: border-box; cursor: pointer;">
-            <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13.784 9.476c-.024-2.318 1.892-3.432 1.978-3.484-1.076-1.574-2.752-1.79-3.35-1.814-1.426-.145-2.784.84-3.51.84-.726 0-1.848-.818-3.036-.796-1.562.022-3.002.908-3.808 2.308-1.624 2.818-.416 6.994 1.166 9.282.774 1.12 1.696 2.378 2.908 2.334 1.166-.046 1.606-.754 3.014-.754 1.408 0 1.802.754 3.032.73 1.256-.022 2.05-1.142 2.818-2.264.888-1.298 1.254-2.556 1.276-2.622-.028-.012-2.448-.94-2.488-3.76zm-2.334-6.908c.642-.778 1.076-1.858.958-2.934-.926.038-2.048.616-2.712 1.394-.596.69-1.118 1.792-.978 2.848 1.034.08 2.088-.524 2.732-1.308z" fill="#fff"/>
-            </svg>
-            Continue with Apple
-          </a>
-        </div>
-
         <!-- Divider -->
         <div style="display: flex; align-items: center; margin-bottom: 24px;">
           <div style="flex: 1; height: 1px; background: #d4cdc5;"></div>

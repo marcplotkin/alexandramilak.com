@@ -21,7 +21,7 @@ blogRoutes.get('/', async (c) => {
   const member = (c as any).get('member') as Member;
 
   const posts = await c.env.DB.prepare(
-    'SELECT * FROM posts WHERE published = 1 ORDER BY published_at DESC, created_at DESC'
+    "SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC"
   ).all();
 
   return c.html(
@@ -39,7 +39,7 @@ blogRoutes.get('/:slug', async (c) => {
   const slug = c.req.param('slug');
 
   const post = await c.env.DB.prepare(
-    'SELECT * FROM posts WHERE slug = ? AND published = 1'
+    "SELECT * FROM posts WHERE slug = ? AND status = 'published'"
   )
     .bind(slug)
     .first();
