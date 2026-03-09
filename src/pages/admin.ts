@@ -27,9 +27,9 @@ function getWordCount(content: string): number {
 
 function statusBadge(status: string): string {
   const styles: Record<string, string> = {
-    draft: 'background: #f5f0e8; color: var(--text-muted);',
-    scheduled: 'background: #e8f0fa; color: #2563eb;',
-    published: 'background: #f0faf0; color: #2d6a2d;',
+    draft: 'background: rgba(255,248,240,0.1); color: rgba(255,248,240,0.5);',
+    scheduled: 'background: rgba(37,99,235,0.2); color: #93b5f5;',
+    published: 'background: rgba(45,106,45,0.2); color: #6aba6a;',
   };
   const labels: Record<string, string> = {
     draft: 'Draft',
@@ -42,7 +42,7 @@ function statusBadge(status: string): string {
 function adminNav(): string {
   return `
     <nav class="nav">
-      <a href="/admin" class="nav-brand">Sunday Sauce <span style="font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; background: var(--burgundy); color: var(--cream); padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle;">ADMIN</span></a>
+      <a href="/admin" class="nav-brand">Sunday Sauce <span style="font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 2px; background: rgba(255,248,240,0.1); color: var(--cream); padding: 3px 10px; border-radius: 20px; margin-left: 10px; vertical-align: middle;">ADMIN</span></a>
       <div class="nav-links">
         <a href="/feed">Feed</a>
         <a href="/auth/logout">Log Out</a>
@@ -134,7 +134,7 @@ export function adminMembersPage(members: Member[]): string {
     <div class="card">
       ${
         members.length === 0
-          ? '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No active members yet.</p>'
+          ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No active members yet.</p>'
           : `
         <table>
           <thead>
@@ -151,7 +151,7 @@ export function adminMembersPage(members: Member[]): string {
       }
     </div>
 
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: var(--text-muted);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
   `;
   return layout('Members', content);
 }
@@ -163,8 +163,8 @@ export function adminRequestsPage(requests: Member[]): string {
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div>
         <strong>${escapeHtml(r.name)}</strong>
-        <br><span style="color: var(--text-muted); font-size: 14px;">${escapeHtml(r.email)}</span>
-        <br><span style="color: var(--text-muted); font-size: 13px;">Requested ${formatDate(r.created_at)}</span>
+        <br><span style="color: rgba(255,248,240,0.5); font-size: 14px;">${escapeHtml(r.email)}</span>
+        <br><span style="color: rgba(255,248,240,0.4); font-size: 13px;">Requested ${formatDate(r.created_at)}</span>
       </div>
       <div style="display: flex; gap: 8px;">
         <form method="POST" action="/admin/requests/${r.id}/approve">
@@ -184,10 +184,10 @@ export function adminRequestsPage(requests: Member[]): string {
     <h1 style="font-size: 28px; margin-bottom: 32px;">Pending Requests</h1>
     ${
       requests.length === 0
-        ? '<div class="card"><p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No pending requests.</p></div>'
+        ? '<div class="card"><p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No pending requests.</p></div>'
         : requestCards
     }
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: var(--text-muted);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
   `;
   return layout('Pending Requests', content);
 }
@@ -208,7 +208,7 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
 
   const tabStyle = (tab: string) => {
     const active = tab === currentFilter;
-    return `display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: ${active ? '600' : '400'}; text-decoration: none; color: ${active ? 'var(--burgundy)' : 'var(--text-muted)'}; background: ${active ? 'white' : 'transparent'}; ${active ? 'box-shadow: 0 1px 3px rgba(0,0,0,0.06);' : ''}`;
+    return `display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: ${active ? '600' : '400'}; text-decoration: none; color: ${active ? 'var(--cream)' : 'rgba(255,248,240,0.5)'}; background: ${active ? 'rgba(255,248,240,0.12)' : 'transparent'}; `;
   };
 
   const rows = filteredPosts
@@ -217,8 +217,8 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
     <tr>
       <td><a href="/admin/posts/${p.id}/edit" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
       <td>${statusBadge(p.status)}</td>
-      <td style="font-size: 13px; color: var(--text-muted);">${getWordCount(p.content)} words</td>
-      <td style="font-size: 13px; color: var(--text-muted);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${getWordCount(p.content)} words</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
       <td>
         <div style="display: flex; gap: 8px; justify-content: flex-end;">
           <a href="/admin/posts/${p.id}/edit" style="font-size: 13px;">Edit</a>
@@ -239,7 +239,7 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
       <a href="/admin/posts/new" class="btn btn-primary">New Post</a>
     </div>
 
-    <div style="display: flex; gap: 4px; margin-bottom: 24px; background: var(--cream); padding: 4px; border-radius: 10px;">
+    <div style="display: flex; gap: 4px; margin-bottom: 24px; background: rgba(255,248,240,0.05); padding: 4px; border-radius: 10px;">
       <a href="/admin/posts" style="${tabStyle('all')}">All (${filterCounts.all})</a>
       <a href="/admin/posts?filter=published" style="${tabStyle('published')}">Published (${filterCounts.published})</a>
       <a href="/admin/posts?filter=draft" style="${tabStyle('draft')}">Drafts (${filterCounts.draft})</a>
@@ -249,7 +249,7 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
     <div class="card">
       ${
         filteredPosts.length === 0
-          ? '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No posts here. Create your first post!</p>'
+          ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No posts here. Create your first post!</p>'
           : `
         <table>
           <thead>
@@ -267,7 +267,7 @@ export function adminPostsPage(posts: Post[], filter?: string): string {
       }
     </div>
 
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: var(--text-muted);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
   `;
   return layout('All Posts', content);
 }
@@ -282,7 +282,7 @@ export function adminActionResultPage(
     ${adminNav()}
     <div class="card" style="text-align: center; padding: 48px 32px;">
       <h2 style="font-size: 22px; margin-bottom: 12px;">${title}</h2>
-      <p style="color: var(--text-muted); margin-bottom: 24px;">${message}</p>
+      <p style="color: rgba(255,248,240,0.6); margin-bottom: 24px;">${message}</p>
       <a href="${backLink}" class="btn btn-primary">${backLabel}</a>
     </div>
   `;

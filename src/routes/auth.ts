@@ -228,7 +228,8 @@ authRoutes.get('/google/callback', async (c) => {
       userInfo.name || userInfo.email.split('@')[0],
       'google',
       userInfo.id,
-      c.env.ADMIN_EMAIL
+      c.env.ADMIN_EMAIL,
+      userInfo.picture || null
     );
 
     if (result.status === 'active' && result.member) {

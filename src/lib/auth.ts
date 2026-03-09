@@ -47,7 +47,7 @@ export async function getSession(
   const hashedId = await hashToken(sessionId, c.env.AUTH_SECRET);
 
   const session = await c.env.DB.prepare(
-    'SELECT s.*, m.id as member_id, m.email, m.name, m.status, m.created_at as member_created_at, m.approved_at, m.removed_at FROM sessions s JOIN members m ON s.member_id = m.id WHERE s.id = ? AND s.expires_at > datetime(\'now\') AND m.status = \'active\''
+    'SELECT s.*, m.id as member_id, m.email, m.name, m.status, m.created_at as member_created_at, m.approved_at, m.removed_at, m.avatar_url FROM sessions s JOIN members m ON s.member_id = m.id WHERE s.id = ? AND s.expires_at > datetime(\'now\') AND m.status = \'active\''
   )
     .bind(hashedId)
     .first();
@@ -62,6 +62,7 @@ export async function getSession(
     created_at: session.member_created_at as string,
     approved_at: session.approved_at as string | null,
     removed_at: session.removed_at as string | null,
+    avatar_url: session.avatar_url as string | null,
   };
 }
 
@@ -118,7 +119,8 @@ export async function findOrCreateMember(
   name: string,
   provider: string,
   providerId: string,
-  adminEmail: string
+  adminEmail: string,
+  avatarUrl?: string | null
 ): Promise<{ member: Member | null; status: 'active' | 'pending' | 'created_pending' }> {
   const existing = await db
     .prepare('SELECT * FROM members WHERE email = ?')
@@ -126,11 +128,11 @@ export async function findOrCreateMember(
     .first();
 
   if (existing) {
-    // Update provider info if not set
-    if (!existing.provider_id) {
+    // Update provider info and avatar if not set
+    if (!existing.provider_id || (avatarUrl && !existing.avatar_url)) {
       await db
-        .prepare('UPDATE members SET auth_provider = ?, provider_id = ? WHERE id = ?')
-        .bind(provider, providerId, existing.id)
+        .prepare('UPDATE members SET auth_provider = ?, provider_id = ?, avatar_url = COALESCE(?, avatar_url) WHERE id = ?')
+        .bind(provider, providerId, avatarUrl || null, existing.id)
         .run();
     }
 
@@ -144,6 +146,7 @@ export async function findOrCreateMember(
           created_at: existing.created_at as string,
           approved_at: existing.approved_at as string | null,
           removed_at: existing.removed_at as string | null,
+          avatar_url: (existing.avatar_url as string | null) || avatarUrl || null,
         },
         status: 'active',
       };
@@ -167,6 +170,7 @@ export async function findOrCreateMember(
             created_at: updated!.created_at as string,
             approved_at: updated!.approved_at as string | null,
             removed_at: null,
+            avatar_url: (updated!.avatar_url as string | null) || avatarUrl || null,
           },
           status: 'active',
         };
@@ -178,9 +182,9 @@ export async function findOrCreateMember(
     if (isAdmin(email, adminEmail)) {
       await db
         .prepare(
-          "UPDATE members SET status = 'active', name = ?, removed_at = NULL, approved_at = datetime('now'), auth_provider = ?, provider_id = ? WHERE email = ?"
+          "UPDATE members SET status = 'active', name = ?, removed_at = NULL, approved_at = datetime('now'), auth_provider = ?, provider_id = ?, avatar_url = COALESCE(?, avatar_url) WHERE email = ?"
         )
-        .bind(name, provider, providerId, email)
+        .bind(name, provider, providerId, avatarUrl || null, email)
         .run();
       const updated = await db.prepare('SELECT * FROM members WHERE email = ?').bind(email).first();
       return {
@@ -192,6 +196,7 @@ export async function findOrCreateMember(
           created_at: updated!.created_at as string,
           approved_at: updated!.approved_at as string | null,
           removed_at: null,
+          avatar_url: updated!.avatar_url as string | null,
         },
         status: 'active',
       };
@@ -199,9 +204,9 @@ export async function findOrCreateMember(
 
     await db
       .prepare(
-        "UPDATE members SET status = 'pending', name = ?, removed_at = NULL, auth_provider = ?, provider_id = ? WHERE email = ?"
+        "UPDATE members SET status = 'pending', name = ?, removed_at = NULL, auth_provider = ?, provider_id = ?, avatar_url = COALESCE(?, avatar_url) WHERE email = ?"
       )
-      .bind(name, provider, providerId, email)
+      .bind(name, provider, providerId, avatarUrl || null, email)
       .run();
     return { member: null, status: 'created_pending' };
   }
@@ -210,9 +215,9 @@ export async function findOrCreateMember(
   if (isAdmin(email, adminEmail)) {
     const result = await db
       .prepare(
-        "INSERT INTO members (email, name, status, auth_provider, provider_id, approved_at) VALUES (?, ?, 'active', ?, ?, datetime('now'))"
+        "INSERT INTO members (email, name, status, auth_provider, provider_id, approved_at, avatar_url) VALUES (?, ?, 'active', ?, ?, datetime('now'), ?)"
       )
-      .bind(email, name, provider, providerId)
+      .bind(email, name, provider, providerId, avatarUrl || null)
       .run();
     return {
       member: {
@@ -223,6 +228,7 @@ export async function findOrCreateMember(
         created_at: new Date().toISOString(),
         approved_at: new Date().toISOString(),
         removed_at: null,
+        avatar_url: avatarUrl || null,
       },
       status: 'active',
     };
@@ -230,9 +236,9 @@ export async function findOrCreateMember(
 
   await db
     .prepare(
-      "INSERT INTO members (email, name, status, auth_provider, provider_id) VALUES (?, ?, 'pending', ?, ?)"
+      "INSERT INTO members (email, name, status, auth_provider, provider_id, avatar_url) VALUES (?, ?, 'pending', ?, ?, ?)"
     )
-    .bind(email, name, provider, providerId)
+    .bind(email, name, provider, providerId, avatarUrl || null)
     .run();
   return { member: null, status: 'created_pending' };
 }

@@ -12,7 +12,7 @@ export function layout(
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --burgundy: #2D0A10;
@@ -33,16 +33,14 @@ export function layout(
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--warm-white);
-      color: var(--text-dark);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body.bg-burgundy {
-      background: var(--burgundy);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-attachment: fixed;
       color: var(--cream);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.1px;
     }
 
     .container {
@@ -52,18 +50,31 @@ export function layout(
     }
 
     h1, h2, h3, h4 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 700;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 500;
       line-height: 1.3;
+      color: var(--cream);
+      letter-spacing: -0.3px;
     }
 
     a {
-      color: var(--burgundy);
+      color: rgba(255,248,240,0.7);
       text-decoration: none;
+      transition: color 0.2s ease;
     }
 
     a:hover {
+      color: var(--cream);
       text-decoration: underline;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container > * {
+      animation: fadeInUp 0.4s ease both;
     }
 
     .nav {
@@ -71,15 +82,15 @@ export function layout(
       align-items: center;
       justify-content: space-between;
       padding: 20px 0;
-      border-bottom: 1px solid #e8e0d8;
+      border-bottom: 1px solid rgba(255,248,240,0.12);
       margin-bottom: 40px;
     }
 
     .nav-brand {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 20px;
       font-weight: 700;
-      color: var(--burgundy);
+      color: var(--cream);
       text-decoration: none;
     }
 
@@ -95,34 +106,41 @@ export function layout(
     }
 
     .nav-links a {
-      color: var(--text-muted);
+      color: rgba(255,248,240,0.6);
+      transition: color 0.2s ease;
     }
 
     .nav-links a:hover {
-      color: var(--burgundy);
+      color: var(--cream);
     }
 
     .btn {
       display: inline-block;
       padding: 12px 28px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.5px;
       text-decoration: none;
       cursor: pointer;
       border: none;
-      font-family: 'Inter', sans-serif;
-      transition: opacity 0.2s;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .btn:hover {
-      opacity: 0.9;
+      transform: translateY(-1px);
       text-decoration: none;
     }
 
     .btn-primary {
-      background: var(--burgundy);
+      background: rgba(255,248,240,0.12);
       color: var(--cream);
+      border: 1px solid rgba(255,248,240,0.15);
+    }
+
+    .btn-primary:hover {
+      background: rgba(255,248,240,0.18);
     }
 
     .btn-secondary {
@@ -133,7 +151,7 @@ export function layout(
     .btn-outline {
       background: transparent;
       color: var(--cream);
-      border: 2px solid var(--cream);
+      border: 2px solid rgba(255,248,240,0.4);
     }
 
     .btn-danger {
@@ -157,6 +175,10 @@ export function layout(
       font-size: 14px;
       font-weight: 500;
       margin-bottom: 6px;
+      color: rgba(255,248,240,0.7);
+    }
+
+    .card-white .form-group label {
       color: var(--text-dark);
     }
 
@@ -165,17 +187,42 @@ export function layout(
     .form-group select {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid #d4cdc5;
+      border: 1px solid rgba(255,248,240,0.15);
       border-radius: 8px;
       font-size: 15px;
-      font-family: 'Inter', sans-serif;
-      background: white;
-      color: var(--text-dark);
+      font-family: 'DM Sans', sans-serif;
+      background: rgba(255,248,240,0.08);
+      color: var(--cream);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(255,248,240,0.3);
     }
 
     .form-group input:focus,
     .form-group textarea:focus {
       outline: none;
+      border-color: rgba(255,248,240,0.35);
+      box-shadow: 0 0 0 3px rgba(255,248,240,0.08);
+    }
+
+    .card-white .form-group input,
+    .card-white .form-group textarea,
+    .card-white .form-group select {
+      border: 1px solid #d4cdc5;
+      background: white;
+      color: var(--text-dark);
+    }
+
+    .card-white .form-group input::placeholder,
+    .card-white .form-group textarea::placeholder {
+      color: #999;
+    }
+
+    .card-white .form-group input:focus,
+    .card-white .form-group textarea:focus {
       border-color: var(--burgundy);
       box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.1);
     }
@@ -186,11 +233,41 @@ export function layout(
     }
 
     .card {
-      background: white;
-      border-radius: 12px;
+      background: rgba(255,248,240,0.05);
+      border: 1px solid rgba(255,248,240,0.08);
+      border-radius: 16px;
       padding: 32px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
       margin-bottom: 24px;
+      transition: border-color 0.3s ease, background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255,248,240,0.15);
+      background: rgba(255,248,240,0.07);
+    }
+
+    /* White card variant for forms (login, request membership) */
+    .card-white {
+      background: white;
+      border: none;
+      color: var(--text-dark);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+
+    .card-white h2 { color: var(--burgundy); }
+    .card-white a { color: var(--burgundy); }
+    .card-white a:hover { color: var(--burgundy-dark); }
+
+    .card-white .btn-primary {
+      background: var(--burgundy);
+      color: var(--cream);
+      border: none;
+    }
+
+    .card-white .message-error {
+      background: #faf0f0;
+      color: #6a2d2d;
+      border: 1px solid #e6c3c3;
     }
 
     .message {
@@ -201,21 +278,21 @@ export function layout(
     }
 
     .message-success {
-      background: #f0faf0;
-      color: #2d6a2d;
-      border: 1px solid #c3e6c3;
+      background: rgba(45,106,45,0.15);
+      color: #6aba6a;
+      border: 1px solid rgba(45,106,45,0.3);
     }
 
     .message-error {
-      background: #faf0f0;
-      color: #6a2d2d;
-      border: 1px solid #e6c3c3;
+      background: rgba(192,57,43,0.15);
+      color: #e6a09a;
+      border: 1px solid rgba(192,57,43,0.3);
     }
 
     .message-info {
-      background: #f0f4fa;
-      color: #2d3d6a;
-      border: 1px solid #c3cfe6;
+      background: rgba(37,99,235,0.15);
+      color: #93b5f5;
+      border: 1px solid rgba(37,99,235,0.3);
     }
 
     .checkbox-group {
@@ -228,7 +305,7 @@ export function layout(
     .checkbox-group input[type="checkbox"] {
       width: 18px;
       height: 18px;
-      accent-color: var(--burgundy);
+      accent-color: var(--cream);
     }
 
     .checkbox-group label {
@@ -244,23 +321,30 @@ export function layout(
     }
 
     .stat-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
+      background: rgba(255,248,240,0.04);
+      border: 1px solid rgba(255,248,240,0.08);
+      border-radius: 16px;
+      padding: 24px;
       text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,248,240,0.15);
+      background: rgba(255,248,240,0.06);
     }
 
     .stat-number {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 32px;
       font-weight: 700;
-      color: var(--burgundy);
+      color: var(--cream);
     }
 
     .stat-label {
       font-size: 13px;
-      color: var(--text-muted);
+      color: rgba(255,248,240,0.5);
       margin-top: 4px;
     }
 
@@ -272,16 +356,22 @@ export function layout(
     th, td {
       padding: 12px 16px;
       text-align: left;
-      border-bottom: 1px solid #e8e0d8;
+      border-bottom: 1px solid rgba(255,248,240,0.08);
       font-size: 14px;
+      color: rgba(255,248,240,0.8);
     }
 
     th {
-      font-weight: 600;
-      color: var(--text-muted);
-      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,248,240,0.4);
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
+    }
+
+    td a {
+      color: var(--cream);
+      font-weight: 500;
     }
 
     @media (max-width: 640px) {

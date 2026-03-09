@@ -7,27 +7,97 @@ interface EmailParams {
   html: string;
 }
 
+async function getGmailAccessToken(
+  clientId: string,
+  clientSecret: string,
+  refreshToken: string
+): Promise<string> {
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }).toString(),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gmail token refresh failed: ${errorText}`);
+  }
+
+  const data: any = await response.json();
+  return data.access_token;
+}
+
+function buildRawEmail(from: string, to: string, subject: string, html: string): string {
+  const boundary = 'boundary_' + Date.now();
+  const lines = [
+    `From: Sunday Sauce <${from}>`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    btoa(unescape(encodeURIComponent(html))),
+    `--${boundary}--`,
+  ];
+  return lines.join('\r\n');
+}
+
+function base64UrlEncode(str: string): string {
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
 export async function sendEmail(
-  apiKey: string,
+  env: Env['Bindings'],
   params: EmailParams
 ): Promise<boolean> {
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Sunday Sauce <noreply@alexandramilak.com>',
-        reply_to: 'alex.milak@gmail.com',
-        to: params.to,
-        subject: params.subject,
-        html: params.html,
-      }),
-    });
+    const accessToken = await getGmailAccessToken(
+      env.GOOGLE_CLIENT_ID,
+      env.GOOGLE_CLIENT_SECRET,
+      env.GMAIL_REFRESH_TOKEN
+    );
+
+    const rawEmail = buildRawEmail(
+      env.ADMIN_EMAIL,
+      params.to,
+      params.subject,
+      params.html
+    );
+
+    const response = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages/send`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          raw: base64UrlEncode(rawEmail),
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gmail send failed:', errorText);
+    }
+
     return response.ok;
-  } catch {
+  } catch (err) {
+    console.error('Gmail send error:', err);
     return false;
   }
 }
@@ -71,7 +141,7 @@ export async function sendApprovalEmail(
     </div>
   `;
 
-  await sendEmail(env.RESEND_API_KEY, {
+  await sendEmail(env, {
     to: env.ADMIN_EMAIL,
     subject: `New membership request from ${member.name}`,
     html,
@@ -99,7 +169,7 @@ export async function sendWelcomeEmail(
     </div>
   `;
 
-  await sendEmail(env.RESEND_API_KEY, {
+  await sendEmail(env, {
     to: member.email,
     subject: 'Welcome to Sunday Sauce!',
     html,
@@ -125,7 +195,7 @@ export async function sendMagicLinkEmail(
     </div>
   `;
 
-  await sendEmail(env.RESEND_API_KEY, {
+  await sendEmail(env, {
     to: email,
     subject: 'Your Sunday Sauce login link',
     html,
@@ -153,12 +223,77 @@ export async function sendNewPostEmail(
   `;
 
   for (const member of members) {
-    await sendEmail(env.RESEND_API_KEY, {
+    await sendEmail(env, {
       to: member.email,
       subject: `New post: ${post.title}`,
       html,
     });
   }
+}
+
+export async function sendCommentNotificationEmail(
+  env: Env['Bindings'],
+  commenter: { name: string },
+  postTitle: string,
+  postSlug: string,
+  commentText: string,
+  baseUrl?: string
+): Promise<void> {
+  const postUrl = `${baseUrl || env.SITE_URL}/feed/${postSlug}#comments`;
+
+  const html = `
+    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+      <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
+      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 24px; margin-bottom: 16px;">New Comment on "${escapeHtml(postTitle)}"</h1>
+      <div style="background: #FFF8F0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px; color: #2C1810;"><strong>${escapeHtml(commenter.name)}</strong> wrote:</p>
+        <p style="margin: 0; color: #2C1810; white-space: pre-wrap;">${escapeHtml(commentText)}</p>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Comment</a>
+      </div>
+    </div>
+  `;
+
+  await sendEmail(env, {
+    to: env.ADMIN_EMAIL,
+    subject: `New comment from ${commenter.name} on "${postTitle}"`,
+    html,
+  });
+}
+
+export async function sendReplyNotificationEmail(
+  env: Env['Bindings'],
+  recipientEmail: string,
+  recipientName: string,
+  replierName: string,
+  postTitle: string,
+  postSlug: string,
+  replyText: string,
+  baseUrl?: string
+): Promise<void> {
+  const postUrl = `${baseUrl || env.SITE_URL}/feed/${postSlug}#comments`;
+
+  const html = `
+    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+      <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
+      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 24px; margin-bottom: 16px;">${escapeHtml(replierName)} replied to your comment</h1>
+      <p style="color: #2C1810; margin-bottom: 16px;">On "${escapeHtml(postTitle)}":</p>
+      <div style="background: #FFF8F0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0; color: #2C1810; white-space: pre-wrap;">${escapeHtml(replyText)}</p>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Reply</a>
+      </div>
+      <p style="color: #7A6B63; font-size: 13px; border-top: 1px solid #e8e0d8; padding-top: 20px;">You're receiving this because someone replied to your comment on Sunday Sauce.</p>
+    </div>
+  `;
+
+  await sendEmail(env, {
+    to: recipientEmail,
+    subject: `${replierName} replied to your comment on Sunday Sauce`,
+    html,
+  });
 }
 
 function escapeHtml(str: string): string {

@@ -8,17 +8,17 @@ export const apiRoutes = new Hono<Env>();
 
 function resultPage(title: string, message: string, success: boolean): string {
   const icon = success ? '&#10003;' : '&#10007;';
-  const iconColor = success ? '#2d6a2d' : '#C0392B';
+  const iconColor = success ? '#6aba6a' : '#e6a09a';
 
   const content = `
     <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
       <div class="card" style="width: 100%; max-width: 420px; text-align: center;">
         <div style="margin-bottom: 24px;">
-          <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--burgundy);">Sunday Sauce</span>
+          <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 500; color: var(--cream);">Sunday Sauce</span>
         </div>
         <div style="font-size: 48px; margin-bottom: 16px; color: ${iconColor};">${icon}</div>
-        <h2 style="font-size: 22px; margin-bottom: 12px; color: var(--text-dark);">${title}</h2>
-        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">${message}</p>
+        <h2 style="font-size: 24px; margin-bottom: 12px;">${title}</h2>
+        <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6;">${message}</p>
       </div>
     </div>
   `;

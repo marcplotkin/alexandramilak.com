@@ -17,6 +17,7 @@ export type Env = {
     SITE_NAME: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
+    GMAIL_REFRESH_TOKEN: string;
   };
 };
 
@@ -28,6 +29,18 @@ export type Member = {
   created_at: string;
   approved_at: string | null;
   removed_at: string | null;
+  avatar_url: string | null;
+};
+
+export type Comment = {
+  id: number;
+  post_id: number;
+  member_id: number;
+  parent_id: number | null;
+  content: string;
+  created_at: string;
+  member_name?: string;
+  member_avatar_url?: string | null;
 };
 
 export type Post = {
@@ -47,6 +60,12 @@ export type Post = {
 };
 
 const app = new Hono<Env>();
+
+// Global error handler
+app.onError((err, c) => {
+  console.error('Unhandled error:', err.message, err.stack);
+  return c.text(`Error: ${err.message}`, 500);
+});
 
 // Block search engine crawling on all responses
 app.use('*', async (c, next) => {

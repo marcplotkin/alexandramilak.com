@@ -8,7 +8,7 @@ export function homePage(): string {
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -17,8 +17,9 @@ export function homePage(): string {
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #2D0A10;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-attachment: fixed;
       color: #FFF8F0;
       min-height: 100vh;
       display: flex;
@@ -27,12 +28,33 @@ export function homePage(): string {
       -webkit-font-smoothing: antialiased;
     }
 
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+      to { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+
     .hero {
       width: 100%;
       max-width: 680px;
       padding: 48px 20px 60px;
       text-align: center;
     }
+
+    .banner { animation: fadeIn 0.6s ease both; }
+    .profile-photo { animation: scaleIn 0.5s ease 0.2s both; }
+    .title { animation: fadeInUp 0.5s ease 0.3s both; }
+    .tagline { animation: fadeInUp 0.5s ease 0.4s both; }
+    .buttons { animation: fadeInUp 0.5s ease 0.5s both; }
 
     .banner-wrapper {
       position: relative;
@@ -43,7 +65,7 @@ export function homePage(): string {
       width: 100%;
       height: 280px;
       object-fit: cover;
-      border-radius: 16px;
+      border-radius: 20px;
       display: block;
     }
 
@@ -52,31 +74,38 @@ export function homePage(): string {
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 4px solid #FFF8F0;
+      border: 3px solid rgba(255,248,240,0.9);
       position: absolute;
       bottom: -60px;
       left: 50%;
       transform: translateX(-50%);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3), 0 0 60px rgba(45,10,16,0.5);
     }
 
     .title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 48px;
-      font-weight: 700;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 56px;
+      font-weight: 400;
       margin-bottom: 8px;
-      letter-spacing: -0.5px;
+      letter-spacing: -1px;
     }
 
     .handle {
-      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
       color: rgba(255, 248, 240, 0.6);
       margin-bottom: 24px;
     }
 
     .tagline {
-      font-size: 17px;
-      line-height: 1.6;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+      line-height: 1.8;
       color: rgba(255, 248, 240, 0.85);
       max-width: 480px;
       margin: 0 auto 40px;
@@ -92,23 +121,25 @@ export function homePage(): string {
     .btn {
       display: inline-block;
       padding: 14px 36px;
-      border-radius: 8px;
+      border-radius: 50px;
       font-weight: 600;
       font-size: 15px;
       text-decoration: none;
-      transition: all 0.2s;
-      font-family: 'Inter', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: 'DM Sans', sans-serif;
     }
 
     .btn:hover {
       opacity: 0.9;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     }
 
     .btn-outline {
       background: transparent;
       color: #FFF8F0;
-      border: 2px solid rgba(255, 248, 240, 0.5);
+      border: 1.5px solid rgba(255, 248, 240, 0.35);
+      letter-spacing: 0.5px;
     }
 
     .btn-outline:hover {
@@ -119,21 +150,24 @@ export function homePage(): string {
       background: #FFF8F0;
       color: #2D0A10;
       border: 2px solid #FFF8F0;
+      letter-spacing: 0.5px;
     }
 
     .footer {
       margin-top: auto;
       padding: 32px 20px;
-      font-size: 13px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       color: rgba(255, 248, 240, 0.4);
     }
 
     @media (max-width: 640px) {
       .title {
-        font-size: 36px;
+        font-size: 40px;
       }
       .banner {
-        height: 200px;
+        height: 180px;
       }
       .buttons {
         flex-direction: column;
@@ -154,7 +188,6 @@ export function homePage(): string {
       <img src="/alexandra.jpg" alt="Alexandra Milak" class="profile-photo">
     </div>
     <h1 class="title">Sunday Sauce</h1>
-    <p class="handle">@alexandramilak</p>
     <p class="tagline">Thoughts and curations about things I care about and think are nice.</p>
     <div class="buttons">
       <a href="/auth/login" class="btn btn-outline">Log In</a>

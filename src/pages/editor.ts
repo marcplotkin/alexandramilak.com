@@ -27,7 +27,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
   const postStatus = post?.status || 'draft';
   const postCoverImage = post?.cover_image_url || '';
   const postScheduledAt = post?.scheduled_at || '';
-  const postEmailSubs = post?.email_subscribers ? true : false;
+  const postEmailSubs = isNew ? true : (post?.email_subscribers ? true : false);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -37,29 +37,32 @@ export function editorPage(post: Post | null, isNew: boolean): string {
   <title>${isNew ? 'New Post' : escapeHtml(postTitle) || 'Edit Post'} — Sunday Sauce</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --burgundy: #722F37;
-      --burgundy-dark: #5A252C;
-      --burgundy-light: #8B3A42;
+      --burgundy: #2D0A10;
+      --burgundy-dark: #1A0609;
+      --burgundy-light: #4A1520;
       --cream: #FFF8F0;
       --warm-white: #FFFAF5;
       --tomato-red: #C0392B;
       --gold: #D4A853;
-      --text-dark: #2C1810;
-      --text-muted: #7A6B63;
-      --border: #e8e0d8;
+      --text-dark: #FFF8F0;
+      --text-muted: rgba(255,248,240,0.5);
+      --border: rgba(255,248,240,0.12);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--warm-white);
-      color: var(--text-dark);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-attachment: fixed;
+      color: var(--cream);
       line-height: 1.6;
+      min-height: 100vh;
       -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.1px;
     }
 
     /* ---- TOP BAR ---- */
@@ -67,7 +70,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255, 250, 245, 0.95);
+      background: rgba(45, 10, 16, 0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 12px 24px;
@@ -86,7 +89,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       gap: 6px;
       transition: color 0.15s;
     }
-    .topbar-left a:hover { color: var(--burgundy); }
+    .topbar-left a:hover { color: var(--cream); }
 
     .topbar-center {
       font-size: 13px;
@@ -122,7 +125,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       text-decoration: none;
       cursor: pointer;
       border: none;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       transition: all 0.15s;
       white-space: nowrap;
     }
@@ -134,8 +137,8 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     }
     .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-dark); }
     .btn-primary {
-      background: var(--burgundy);
-      color: var(--cream);
+      background: var(--cream);
+      color: var(--burgundy);
     }
     .btn-danger {
       background: var(--tomato-red);
@@ -174,7 +177,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       border: none;
       outline: none;
       background: transparent;
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 36px;
       font-weight: 700;
       line-height: 1.2;
@@ -183,14 +186,14 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       overflow: hidden;
       min-height: 48px;
     }
-    .title-input::placeholder { color: #c4b8ae; }
+    .title-input::placeholder { color: rgba(255,248,240,0.3); }
 
     .subtitle-input {
       width: 100%;
       border: none;
       outline: none;
       background: transparent;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-size: 18px;
       font-weight: 400;
       line-height: 1.5;
@@ -200,7 +203,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       margin-top: 12px;
       min-height: 28px;
     }
-    .subtitle-input::placeholder { color: #d4cdc5; }
+    .subtitle-input::placeholder { color: rgba(255,248,240,0.25); }
 
     .editor-divider {
       height: 1px;
@@ -215,30 +218,30 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       font-size: 18px;
       line-height: 1.8;
       color: var(--text-dark);
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'DM Sans', -apple-system, sans-serif;
     }
     .editor-content:empty::before {
       content: 'Start writing...';
-      color: #d4cdc5;
+      color: rgba(255,248,240,0.25);
       pointer-events: none;
     }
     .editor-content p { margin-bottom: 16px; }
     .editor-content h2 {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 28px;
       font-weight: 700;
       margin: 40px 0 16px;
       line-height: 1.3;
     }
     .editor-content h3 {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 22px;
       font-weight: 700;
       margin: 32px 0 12px;
       line-height: 1.3;
     }
     .editor-content blockquote {
-      border-left: 3px solid var(--burgundy);
+      border-left: 3px solid rgba(255,248,240,0.3);
       padding-left: 20px;
       margin: 24px 0;
       color: var(--text-muted);
@@ -247,10 +250,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     .editor-content .pull-quote {
       border-left: none;
       text-align: center;
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 24px;
       font-style: italic;
-      color: var(--burgundy);
+      color: rgba(255,248,240,0.7);
       padding: 24px 40px;
       margin: 32px 0;
     }
@@ -260,15 +263,15 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     }
     .editor-content li { margin-bottom: 8px; }
     .editor-content code {
-      background: #f5f0e8;
+      background: rgba(255,248,240,0.1);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.9em;
       font-family: 'SF Mono', 'Consolas', monospace;
     }
     .editor-content pre {
-      background: #2C1810;
-      color: #f5f0e8;
+      background: rgba(0,0,0,0.3);
+      color: rgba(255,248,240,0.85);
       padding: 20px 24px;
       border-radius: 8px;
       overflow-x: auto;
@@ -293,8 +296,9 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       margin: 40px 0;
     }
     .editor-content a {
-      color: var(--burgundy);
+      color: rgba(255,248,240,0.7);
       text-decoration: underline;
+      text-decoration-color: rgba(255,248,240,0.3);
     }
     .editor-content s {
       text-decoration: line-through;
@@ -340,7 +344,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       transition: all 0.1s;
     }
     .toolbar-btn:hover { background: rgba(255,255,255,0.15); color: white; }
@@ -362,7 +366,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       height: 32px;
       border-radius: 50%;
       border: 1.5px solid var(--border);
-      background: white;
+      background: rgba(255,248,240,0.08);
       color: var(--text-muted);
       cursor: pointer;
       display: none;
@@ -373,16 +377,17 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       z-index: 50;
     }
     .plus-button:hover {
-      border-color: var(--burgundy);
-      color: var(--burgundy);
+      border-color: rgba(255,248,240,0.4);
+      color: var(--cream);
       transform: rotate(90deg);
     }
     .plus-menu {
       position: absolute;
       left: -4px;
-      background: white;
+      background: #3D1A22;
+      border: 1px solid rgba(255,248,240,0.12);
       border-radius: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
       padding: 8px;
       display: none;
       z-index: 201;
@@ -401,21 +406,21 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      color: var(--text-dark);
+      color: var(--cream);
       border: none;
       background: none;
       width: 100%;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       transition: background 0.1s;
     }
-    .plus-menu-item:hover { background: var(--cream); }
+    .plus-menu-item:hover { background: rgba(255,248,240,0.1); }
     .plus-menu-icon { font-size: 16px; width: 22px; text-align: center; }
 
     /* ---- SIDE PANEL ---- */
     .settings-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.4);
       z-index: 300;
       display: none;
       animation: fade-in 0.15s ease;
@@ -429,10 +434,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       width: 380px;
       max-width: 90vw;
       height: 100vh;
-      background: white;
+      background: #3D1A22;
       z-index: 301;
       display: none;
-      box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+      box-shadow: -4px 0 24px rgba(0,0,0,0.3);
       overflow-y: auto;
       animation: slide-in 0.2s ease;
     }
@@ -448,11 +453,12 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      background: white;
+      background: #3D1A22;
     }
     .settings-header h3 {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 18px;
+      color: var(--cream);
     }
     .settings-close {
       width: 32px;
@@ -467,7 +473,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       align-items: center;
       justify-content: center;
     }
-    .settings-close:hover { background: var(--cream); }
+    .settings-close:hover { background: rgba(255,248,240,0.1); }
     .settings-body { padding: 24px; }
     .settings-group { margin-bottom: 24px; }
     .settings-label {
@@ -480,17 +486,17 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     .settings-input {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid #d4cdc5;
+      border: 1px solid rgba(255,248,240,0.15);
       border-radius: 8px;
       font-size: 14px;
-      font-family: 'Inter', sans-serif;
-      background: white;
-      color: var(--text-dark);
+      font-family: 'DM Sans', sans-serif;
+      background: rgba(255,248,240,0.06);
+      color: var(--cream);
     }
     .settings-input:focus {
       outline: none;
-      border-color: var(--burgundy);
-      box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.1);
+      border-color: rgba(255,248,240,0.35);
+      box-shadow: 0 0 0 3px rgba(255,248,240,0.05);
     }
     .settings-hint {
       font-size: 12px;
@@ -519,7 +525,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       position: absolute;
       cursor: pointer;
       inset: 0;
-      background: #d4cdc5;
+      background: rgba(255,248,240,0.15);
       border-radius: 24px;
       transition: 0.2s;
     }
@@ -530,11 +536,11 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       width: 18px;
       left: 3px;
       bottom: 3px;
-      background: white;
+      background: var(--cream);
       border-radius: 50%;
       transition: 0.2s;
     }
-    .toggle input:checked + .toggle-slider { background: var(--burgundy); }
+    .toggle input:checked + .toggle-slider { background: #2d6a2d; }
     .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
     .disabled-field {
@@ -958,6 +964,9 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     settingsBtn.addEventListener('click', openSettings);
     settingsClose.addEventListener('click', closeSettings);
     settingsOverlay.addEventListener('click', closeSettings);
+
+    // Open settings panel by default
+    openSettings();
 
     // ---- FLOATING TOOLBAR ----
     function showToolbar() {

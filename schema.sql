@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS members (
   provider_id TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   approved_at TEXT,
-  removed_at TEXT
+  removed_at TEXT,
+  avatar_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS posts (
@@ -40,6 +41,18 @@ CREATE TABLE IF NOT EXISTS magic_links (
   expires_at TEXT NOT NULL,
   used INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id INTEGER NOT NULL,
+  member_id INTEGER NOT NULL,
+  parent_id INTEGER,
+  content TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (member_id) REFERENCES members(id),
+  FOREIGN KEY (parent_id) REFERENCES comments(id)
 );
 
 CREATE TABLE IF NOT EXISTS approval_tokens (
