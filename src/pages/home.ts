@@ -5,6 +5,7 @@ export function homePage(): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sunday Sauce — Alexandra Milak</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,7 +18,7 @@ export function homePage(): string {
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #722F37;
+      background: #2D0A10;
       color: #FFF8F0;
       min-height: 100vh;
       display: flex;
@@ -116,7 +117,7 @@ export function homePage(): string {
 
     .btn-solid {
       background: #FFF8F0;
-      color: #722F37;
+      color: #2D0A10;
       border: 2px solid #FFF8F0;
     }
 

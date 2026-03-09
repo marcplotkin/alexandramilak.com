@@ -48,6 +48,12 @@ export type Post = {
 
 const app = new Hono<Env>();
 
+// Block search engine crawling on all responses
+app.use('*', async (c, next) => {
+  await next();
+  c.header('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+});
+
 // Public homepage
 app.get('/', async (c) => {
   const session = await getSession(c);

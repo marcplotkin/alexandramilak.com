@@ -9,14 +9,15 @@ export function layout(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title} — Sunday Sauce</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --burgundy: #722F37;
-      --burgundy-dark: #5A252C;
-      --burgundy-light: #8B3A42;
+      --burgundy: #2D0A10;
+      --burgundy-dark: #1A0609;
+      --burgundy-light: #4A1520;
       --cream: #FFF8F0;
       --warm-white: #FFFAF5;
       --tomato-red: #C0392B;
