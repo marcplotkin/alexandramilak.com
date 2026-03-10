@@ -100,7 +100,7 @@ export function homePage(): string {
       font-size: 13px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(255, 248, 240, 0.6);
+      color: rgba(255, 248, 240, 0.75);
       margin-bottom: 24px;
     }
 
@@ -142,7 +142,7 @@ export function homePage(): string {
     .btn-outline {
       background: transparent;
       color: #FFF8F0;
-      border: 1.5px solid rgba(255, 248, 240, 0.35);
+      border: 1.5px solid rgba(255, 248, 240, 0.55);
       letter-spacing: 0.5px;
     }
 
@@ -163,7 +163,7 @@ export function homePage(): string {
       font-size: 11px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: rgba(255, 248, 240, 0.4);
+      color: rgba(255, 248, 240, 0.6);
     }
 
     @media (max-width: 640px) {

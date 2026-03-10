@@ -117,7 +117,7 @@ export function postGatePage(post: Post): string {
     }
     .tagline {
       font-size: 15px;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.7);
       margin-bottom: 40px;
       font-style: italic;
     }
@@ -151,12 +151,12 @@ export function postGatePage(post: Post): string {
     }
     .preview-excerpt {
       font-size: 15px;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.7);
       margin-bottom: 8px;
     }
     .preview-date {
       font-size: 13px;
-      color: rgba(255,248,240,0.3);
+      color: rgba(255,248,240,0.5);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -303,7 +303,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .nav-links a:hover { color: #FFF8F0; }
 
     .nav-links .email {
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       font-size: 13px;
     }
 
@@ -323,7 +323,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .cover-caption {
       text-align: left;
       font-size: 13px;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       font-style: italic;
       margin: 4px 0 36px;
     }
@@ -471,7 +471,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .post-content a {
       color: rgba(255,248,240,0.7);
       text-decoration: underline;
-      text-decoration-color: rgba(255,248,240,0.3);
+      text-decoration-color: rgba(255,248,240,0.5);
       text-underline-offset: 3px;
       transition: color 0.2s;
     }
@@ -548,7 +548,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .reply-btn {
       background: none;
       border: none;
-      color: rgba(255,248,240,0.3);
+      color: rgba(255,248,240,0.5);
       font-size: 12px;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
@@ -616,7 +616,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .reply-cancel {
       padding: 8px 16px;
       background: none;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       border: none;
       border-radius: 50px;
       font-family: 'DM Sans', sans-serif;
@@ -660,7 +660,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       justify-content: center;
       font-size: 14px;
       font-weight: 600;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.7);
       flex-shrink: 0;
     }
 
@@ -793,7 +793,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       font-size: 11px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: rgba(255,248,240,0.3);
+      color: rgba(255,248,240,0.5);
       border-top: 1px solid rgba(255,248,240,0.08);
     }
 

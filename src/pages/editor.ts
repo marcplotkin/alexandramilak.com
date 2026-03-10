@@ -183,7 +183,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       overflow: hidden;
       min-height: 48px;
     }
-    .title-input::placeholder { color: rgba(255,248,240,0.3); }
+    .title-input::placeholder { color: rgba(255,248,240,0.5); }
 
     .subtitle-input {
       width: 100%;
@@ -366,7 +366,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     .editor-content a {
       color: rgba(255,248,240,0.7);
       text-decoration: underline;
-      text-decoration-color: rgba(255,248,240,0.3);
+      text-decoration-color: rgba(255,248,240,0.5);
     }
     .editor-content s {
       text-decoration: line-through;
@@ -445,7 +445,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       z-index: 50;
     }
     .plus-button:hover {
-      border-color: rgba(255,248,240,0.4);
+      border-color: rgba(255,248,240,0.6);
       color: var(--cream);
       transform: rotate(90deg);
     }
@@ -663,7 +663,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     }
     .cover-drop-zone:hover,
     .cover-drop-zone.drag-over {
-      border-color: rgba(255,248,240,0.4);
+      border-color: rgba(255,248,240,0.6);
       background: rgba(255,248,240,0.05);
       color: var(--cream);
     }
@@ -988,7 +988,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         + '.preview-banner { background: rgba(255,248,240,0.1); padding: 10px 16px; border-radius: 8px; margin-bottom: 32px; text-align: center; font-size: 13px; color: rgba(255,248,240,0.6); cursor: pointer; }'
         + '.preview-banner:hover { background: rgba(255,248,240,0.15); }'
         + '.cover img { width: 100%; height: auto; border-radius: 12px; }'
-        + '.cover-cap { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin: 10px 0 36px; }'
+        + '.cover-cap { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.6); margin: 10px 0 36px; }'
         + '.no-cap { margin-bottom: 36px; }'
         + 'h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 44px; font-weight: 500; line-height: 1.2; margin-bottom: 12px; }'
         + '.subtitle { font-size: 18px; color: rgba(255,248,240,0.55); margin-bottom: 8px; }'
@@ -1000,7 +1000,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         + '.content a { color: rgba(255,248,240,0.7); }'
         + '.media-figure { margin: 28px 0; }'
         + '.media-figure img, .media-figure video { max-width: 100%; border-radius: 10px; margin: 0; }'
-        + '.media-caption { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.4); margin-top: 6px; }'
+        + '.media-caption { font-size: 13px; font-style: italic; color: rgba(255,248,240,0.6); margin-top: 6px; }'
         + '.media-toolbar { display: none; }'
         + '</style></head><body><div class="container">'
         + '<div class="preview-banner" onclick="window.history.back()">Preview — click here to go back to editor</div>';

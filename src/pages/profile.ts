@@ -106,7 +106,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       justify-content: center;
       font-size: 48px;
       font-weight: 600;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       margin-bottom: 20px;
       border: 3px solid rgba(255,248,240,0.2);
     }
@@ -149,7 +149,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       font-size: 11px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       margin-bottom: 6px;
     }
 
@@ -184,7 +184,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       margin-left: 12px;
       padding: 10px 20px;
       background: none;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       border: 1px solid rgba(255,248,240,0.1);
       border-radius: 50px;
       font-family: 'DM Sans', sans-serif;
@@ -207,7 +207,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
 
     .back-link a {
       font-size: 14px;
-      color: rgba(255,248,240,0.45);
+      color: rgba(255,248,240,0.65);
       text-decoration: none;
       transition: color 0.2s;
     }
@@ -221,7 +221,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       font-size: 11px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: rgba(255,248,240,0.3);
+      color: rgba(255,248,240,0.5);
       border-top: 1px solid rgba(255,248,240,0.08);
     }
 

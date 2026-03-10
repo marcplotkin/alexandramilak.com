@@ -27,7 +27,7 @@ function getWordCount(content: string): number {
 
 function statusBadge(status: string): string {
   const styles: Record<string, string> = {
-    draft: 'background: rgba(255,248,240,0.1); color: rgba(255,248,240,0.5);',
+    draft: 'background: rgba(255,248,240,0.1); color: rgba(255,248,240,0.7);',
     scheduled: 'background: rgba(37,99,235,0.2); color: #93b5f5;',
     published: 'background: rgba(45,106,45,0.2); color: #6aba6a;',
   };
@@ -140,7 +140,7 @@ export function adminMembersPage(members: Member[]): string {
     <div class="card">
       ${
         members.length === 0
-          ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No active members yet.</p>'
+          ? '<p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No active members yet.</p>'
           : `
         <div class="table-wrapper"><table>
           <thead>
@@ -167,7 +167,7 @@ export function adminMembersPage(members: Member[]): string {
       });
     </script>
 
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.65);">&larr; Back to dashboard</a></p>
   `;
   return layout('Members', content);
 }
@@ -180,9 +180,9 @@ export function adminRequestsPage(requests: Member[], referrerNames?: Record<num
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div>
         <strong>${escapeHtml(r.name)}</strong>
-        <br><span style="color: rgba(255,248,240,0.5); font-size: 14px;">${escapeHtml(r.email)}</span>
+        <br><span style="color: rgba(255,248,240,0.7); font-size: 14px;">${escapeHtml(r.email)}</span>
         ${r.referred_by && refNames[r.referred_by] ? `<br><span style="color: rgba(114,47,55,0.9); font-size: 13px; background: rgba(114,47,55,0.15); padding: 2px 8px; border-radius: 4px;">Referred by ${escapeHtml(refNames[r.referred_by])}</span>` : ''}
-        <br><span style="color: rgba(255,248,240,0.4); font-size: 13px;">Requested ${formatDate(r.created_at)}</span>
+        <br><span style="color: rgba(255,248,240,0.6); font-size: 13px;">Requested ${formatDate(r.created_at)}</span>
       </div>
       <div style="display: flex; gap: 8px;">
         <form method="POST" action="/admin/requests/${r.id}/approve">
@@ -202,10 +202,10 @@ export function adminRequestsPage(requests: Member[], referrerNames?: Record<num
     <h1 style="font-size: 28px; margin-bottom: 32px;">Pending Requests</h1>
     ${
       requests.length === 0
-        ? '<div class="card"><p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No pending requests.</p></div>'
+        ? '<div class="card"><p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No pending requests.</p></div>'
         : requestCards
     }
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.65);">&larr; Back to dashboard</a></p>
   `;
   return layout('Pending Requests', content);
 }
@@ -235,9 +235,9 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
     <tr>
       <td><a href="/admin/posts/${p.id}/edit" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
       <td>${statusBadge(p.status)}${p.emailed ? ' <span title="Emailed to subscribers" style="font-size: 12px; opacity: 0.5;">\u2709</span>' : ''}</td>
-      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${getWordCount(p.content)} words</td>
-      <td style="font-size: 13px; color: rgba(255,248,240,0.4); text-align: center;">${p.view_count || 0} <span style="opacity: 0.5;">/ ${p.unique_readers || 0}</span></td>
-      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.6);">${getWordCount(p.content)} words</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.6); text-align: center;">${p.view_count || 0} <span style="opacity: 0.5;">/ ${p.unique_readers || 0}</span></td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.6);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
       <td>
         <div style="display: flex; gap: 8px; justify-content: flex-end;">
           <a href="/admin/posts/${p.id}/edit" style="font-size: 13px;">Edit</a>
@@ -273,7 +273,7 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
     <div class="card">
       ${
         filteredPosts.length === 0
-          ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No posts here. Create your first post!</p>'
+          ? '<p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No posts here. Create your first post!</p>'
           : `
         <div class="table-wrapper"><table>
           <thead>
@@ -302,7 +302,7 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
       });
     </script>
 
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.65);">&larr; Back to dashboard</a></p>
   `;
   return layout('All Posts', content);
 }
@@ -318,7 +318,7 @@ export function adminAnalyticsPage(
       <td><a href="/feed/${escapeHtml(p.slug)}" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
       <td style="text-align: center;">${p.total_views}</td>
       <td style="text-align: center;">${p.unique_readers}</td>
-      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${p.published_at ? formatDate(p.published_at) : '—'}</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.6);">${p.published_at ? formatDate(p.published_at) : '—'}</td>
     </tr>
   `).join('');
 
@@ -326,7 +326,7 @@ export function adminAnalyticsPage(
     <tr>
       <td>${escapeHtml(r.name)}</td>
       <td><a href="/feed/${escapeHtml(r.slug)}">${escapeHtml(r.title)}</a></td>
-      <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${formatDate(r.viewed_at)}</td>
+      <td style="font-size: 13px; color: rgba(255,248,240,0.6);">${formatDate(r.viewed_at)}</td>
     </tr>
   `).join('');
 
@@ -352,7 +352,7 @@ export function adminAnalyticsPage(
     <div class="card" style="margin-bottom: 32px;">
       <h3 style="font-size: 18px; margin-bottom: 16px;">Views by Post</h3>
       ${postViews.length === 0
-        ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No views yet.</p>'
+        ? '<p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No views yet.</p>'
         : `
         <div class="table-wrapper"><table>
           <thead>
@@ -371,7 +371,7 @@ export function adminAnalyticsPage(
     <div class="card">
       <h3 style="font-size: 18px; margin-bottom: 16px;">Recent Activity</h3>
       ${recentReaders.length === 0
-        ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No activity yet.</p>'
+        ? '<p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No activity yet.</p>'
         : `
         <div class="table-wrapper"><table>
           <thead>
@@ -386,7 +386,7 @@ export function adminAnalyticsPage(
       `}
     </div>
 
-    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
+    <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.65);">&larr; Back to dashboard</a></p>
   `;
   return layout('Analytics', content);
 }

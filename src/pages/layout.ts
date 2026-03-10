@@ -111,7 +111,7 @@ export function layout(
     }
 
     .nav-links a {
-      color: rgba(255,248,240,0.6);
+      color: rgba(255,248,240,0.75);
       transition: color 0.2s ease;
     }
 
@@ -156,7 +156,7 @@ export function layout(
     .btn-outline {
       background: transparent;
       color: var(--cream);
-      border: 2px solid rgba(255,248,240,0.4);
+      border: 2px solid rgba(255,248,240,0.6);
     }
 
     .btn-danger {
@@ -203,7 +203,7 @@ export function layout(
 
     .form-group input::placeholder,
     .form-group textarea::placeholder {
-      color: rgba(255,248,240,0.3);
+      color: rgba(255,248,240,0.5);
     }
 
     .form-group input:focus,
@@ -349,7 +349,7 @@ export function layout(
 
     .stat-label {
       font-size: 13px;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.7);
       margin-top: 4px;
     }
 
@@ -368,7 +368,7 @@ export function layout(
 
     th {
       font-weight: 500;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1px;

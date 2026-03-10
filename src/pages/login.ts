@@ -11,7 +11,7 @@ export function loginPage(error?: string, csrfToken?: string): string {
 
         <!-- Social Login Buttons -->
         <div style="margin-bottom: 24px;">
-          <a href="/auth/google" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 20px; background: rgba(255,248,240,0.06); color: #FFF8F0; border: 1px solid rgba(255,248,240,0.12); border-radius: 50px; font-size: 14px; font-weight: 500; letter-spacing: 0.3px; text-decoration: none; font-family: 'DM Sans', sans-serif; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-sizing: border-box; cursor: pointer;">
+          <a href="/auth/google" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 20px; background: rgba(255,248,240,0.06); color: #FFF8F0; border: 1px solid rgba(255,248,240,0.25); border-radius: 50px; font-size: 14px; font-weight: 500; letter-spacing: 0.3px; text-decoration: none; font-family: 'DM Sans', sans-serif; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-sizing: border-box; cursor: pointer;">
             <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
               <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
@@ -25,7 +25,7 @@ export function loginPage(error?: string, csrfToken?: string): string {
         <!-- Divider -->
         <div style="display: flex; align-items: center; margin-bottom: 24px;">
           <div style="flex: 1; height: 1px; background: rgba(255,248,240,0.15);"></div>
-          <span style="padding: 0 16px; font-size: 13px; color: rgba(255,248,240,0.4); font-weight: 500;">or</span>
+          <span style="padding: 0 16px; font-size: 13px; color: rgba(255,248,240,0.6); font-weight: 500;">or</span>
           <div style="flex: 1; height: 1px; background: rgba(255,248,240,0.15);"></div>
         </div>
 
@@ -38,11 +38,11 @@ export function loginPage(error?: string, csrfToken?: string): string {
           </div>
           <button type="submit" class="btn btn-secondary" style="width: 100%; text-align: center;">Send Magic Link</button>
         </form>
-        <p style="text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,248,240,0.4);">
+        <p style="text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,248,240,0.6);">
           No password needed &mdash; we'll email you a link to log in.
         </p>
         <p style="text-align: center; margin-top: 24px; font-size: 14px;">
-          <a href="/" style="color: rgba(255,248,240,0.45);">&larr; Back to home</a>
+          <a href="/" style="color: rgba(255,248,240,0.65);">&larr; Back to home</a>
         </p>
       </div>
     </div>
@@ -59,11 +59,11 @@ export function checkEmailPage(): string {
         </div>
         <div style="font-size: 48px; margin-bottom: 16px;">&#9993;</div>
         <h2 style="font-size: 22px; margin-bottom: 12px;">Check your email</h2>
-        <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6;">
+        <p style="color: rgba(255,248,240,0.75); font-size: 15px; line-height: 1.6;">
           We sent you a magic link. Click it to log in. The link expires in 15 minutes.
         </p>
         <p style="margin-top: 24px; font-size: 14px;">
-          <a href="/" style="color: rgba(255,248,240,0.45);">&larr; Back to home</a>
+          <a href="/" style="color: rgba(255,248,240,0.65);">&larr; Back to home</a>
         </p>
       </div>
     </div>
@@ -80,11 +80,11 @@ export function pendingApprovalPage(): string {
         </div>
         <div style="font-size: 48px; margin-bottom: 16px;">&#9203;</div>
         <h2 style="font-size: 22px; margin-bottom: 12px;">Membership Pending</h2>
-        <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6;">
+        <p style="color: rgba(255,248,240,0.75); font-size: 15px; line-height: 1.6;">
           Your membership request has been sent to Alexandra for approval. You'll receive an email when you're approved.
         </p>
         <p style="margin-top: 24px; font-size: 14px;">
-          <a href="/" style="color: rgba(255,248,240,0.45);">&larr; Back to home</a>
+          <a href="/" style="color: rgba(255,248,240,0.65);">&larr; Back to home</a>
         </p>
       </div>
     </div>

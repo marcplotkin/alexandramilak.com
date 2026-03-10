@@ -27,7 +27,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
   let postsHtml: string;
   if (posts.length === 0) {
     postsHtml = `
-      <div style="text-align: center; padding: 80px 0; color: rgba(255,248,240,0.5);">
+      <div style="text-align: center; padding: 80px 0; color: rgba(255,248,240,0.7);">
         <p style="font-size: 18px; margin-bottom: 8px;">No posts yet.</p>
         <p>Check back soon!</p>
       </div>
@@ -242,7 +242,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     .nav-links a:hover { color: #FFF8F0; }
 
     .nav-links .email {
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       font-size: 13px;
       letter-spacing: 0.3px;
     }
@@ -289,7 +289,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
 
     .post-card-date {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: rgba(255,248,240,0.4);
+      color: rgba(255,248,240,0.6);
       font-size: 12px;
       margin-bottom: 12px;
       letter-spacing: 1px;
@@ -307,7 +307,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     .post-card-read {
       font-size: 12px;
       font-weight: 500;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.7);
       transition: color 0.2s;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -320,7 +320,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       padding: 32px 0;
       text-align: center;
       font-size: 11px;
-      color: rgba(255,248,240,0.3);
+      color: rgba(255,248,240,0.5);
       position: relative;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -358,8 +358,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
         <img src="/alexandra.jpg" alt="Alexandra Milak" class="profile-photo" onclick="document.getElementById('lightbox').classList.add('active')">
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
-      <p style="font-size: 14px; color: rgba(255,248,240,0.45); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
-      <p style="font-size: 13px; color: rgba(255,248,240,0.5); font-style: italic; margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
+      <p style="font-size: 14px; color: rgba(255,248,240,0.65); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
+      <p style="font-size: 13px; color: rgba(255,248,240,0.7); font-style: italic; margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
       <div class="hero-border"></div>
     </div>
     <div style="margin-bottom: 24px;">
