@@ -39,7 +39,7 @@ export function loginPage(error?: string, csrfToken?: string): string {
           <button type="submit" class="btn btn-secondary" style="width: 100%; text-align: center;">Send Magic Link</button>
         </form>
         <p style="text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,248,240,0.6);">
-          No password needed &mdash; we'll email you a link to log in.
+          No password needed &mdash; it'll email you a link to log in.
         </p>
         <p style="text-align: center; margin-top: 24px; font-size: 14px;">
           <a href="/" style="color: rgba(255,248,240,0.65);">&larr; Back to home</a>
