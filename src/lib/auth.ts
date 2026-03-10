@@ -54,6 +54,16 @@ export async function getSession(
 
   if (!session) return null;
 
+  // Refresh session expiry if more than 1 day old (avoids updating on every request)
+  const expiresAt = new Date(session.expires_at as string);
+  const refreshThreshold = new Date(Date.now() + 25 * 24 * 60 * 60 * 1000); // Refresh when < 25 days left
+  if (expiresAt < refreshThreshold) {
+    const newExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    await c.env.DB.prepare('UPDATE sessions SET expires_at = ? WHERE id = ?')
+      .bind(newExpiry, hashedId)
+      .run();
+  }
+
   return {
     id: session.member_id as number,
     email: session.email as string,

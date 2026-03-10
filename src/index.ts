@@ -70,13 +70,17 @@ const app = new Hono<Env>();
 // Global error handler
 app.onError((err, c) => {
   console.error('Unhandled error:', err.message, err.stack);
-  return c.text(`Error: ${err.message}`, 500);
+  return c.text('An unexpected error occurred. Please try again later.', 500);
 });
 
-// Block search engine crawling on all responses
+// Security headers and block search engine crawling
 app.use('*', async (c, next) => {
   await next();
   c.header('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+  c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'");
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Vary', 'Cookie');
 });
 
 // Public homepage
@@ -90,7 +94,9 @@ app.get('/', async (c) => {
   if (ref) {
     return c.redirect(`/auth/request?ref=${encodeURIComponent(ref)}`);
   }
-  return c.html(homePage());
+  const response = c.html(homePage());
+  response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+  return response;
 });
 
 // Serve media from R2
@@ -102,9 +108,15 @@ app.get('/media/*', async (c) => {
     return c.text('Not found', 404);
   }
 
+  const contentType = object.httpMetadata?.contentType || 'application/octet-stream';
   const headers = new Headers();
-  headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream');
+  headers.set('Content-Type', contentType);
   headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+
+  // Force download for non-image types and SVGs to prevent XSS
+  if (!contentType.startsWith('image/') || contentType === 'image/svg+xml') {
+    headers.set('Content-Disposition', 'attachment');
+  }
 
   return new Response(object.body, { headers });
 });
@@ -151,7 +163,8 @@ export default {
             await sendNewPostEmail(
               env,
               updated as unknown as Post,
-              members.results as unknown as Member[]
+              members.results as unknown as Member[],
+              env.SITE_URL
             );
 
             await env.DB.prepare('UPDATE posts SET emailed = 1 WHERE id = ?')
@@ -161,5 +174,20 @@ export default {
         }
       }
     }
+
+    // Clean up expired sessions
+    await env.DB.prepare(
+      "DELETE FROM sessions WHERE expires_at < datetime('now')"
+    ).run();
+
+    // Clean up used/expired magic links older than 1 day
+    await env.DB.prepare(
+      "DELETE FROM magic_links WHERE (used = 1 OR expires_at < datetime('now')) AND created_at < datetime('now', '-1 day')"
+    ).run();
+
+    // Clean up used approval tokens older than 7 days
+    await env.DB.prepare(
+      "DELETE FROM approval_tokens WHERE used = 1 AND created_at < datetime('now', '-7 days')"
+    ).run();
   },
 };

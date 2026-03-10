@@ -1,4 +1,5 @@
 import type { Post, Member } from '../index';
+import { escapeHtml } from '../lib/utils';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -15,16 +16,14 @@ function getExcerpt(post: Post): string {
   return stripped.length > 150 ? stripped.substring(0, 150) + '...' : stripped;
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+function getReadingTime(content: string): string {
+  const text = content.replace(/<[^>]*>/g, '').trim();
+  const words = text.split(/\s+/).filter(w => w.length > 0).length;
+  const minutes = Math.max(1, Math.round(words / 238));
+  return minutes === 1 ? '1 min read' : minutes + ' min read';
 }
 
-export function feedPage(posts: Post[], member: Member, isAdmin: boolean): string {
+export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: number = 1, hasMore: boolean = false): string {
   let postsHtml: string;
   if (posts.length === 0) {
     postsHtml = `
@@ -40,12 +39,12 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
       <a href="/feed/${post.slug}" class="post-card">
         ${post.cover_image_url ? `
           <div class="post-card-image">
-            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}">
+            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" loading="lazy">
           </div>
         ` : ''}
         <div class="post-card-body">
           <h2 class="post-card-title">${escapeHtml(post.title)}</h2>
-          <p class="post-card-date">${formatDate(post.published_at || post.created_at)}</p>
+          <p class="post-card-date">${formatDate(post.published_at || post.created_at)} &middot; ${getReadingTime(post.content)}</p>
           <p class="post-card-excerpt">${escapeHtml(getExcerpt(post))}</p>
           <span class="post-card-read">Read more &rarr;</span>
         </div>
@@ -66,7 +65,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -361,13 +360,33 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean): strin
       <p style="font-size: 13px; color: rgba(255,248,240,0.5); font-style: italic; margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
       <div class="hero-border"></div>
     </div>
+    <div style="margin-bottom: 24px;">
+      <input type="text" id="feedSearch" placeholder="Search posts..."
+        style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255,248,240,0.1); border-radius: 12px; background: rgba(255,248,240,0.04); color: #FFF8F0; font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s;"
+        onfocus="this.style.borderColor='rgba(255,248,240,0.25)'"
+        onblur="this.style.borderColor='rgba(255,248,240,0.1)'">
+    </div>
     <div>
       ${postsHtml}
     </div>
+    ${page > 1 || hasMore ? `
+      <div style="display: flex; justify-content: center; gap: 16px; padding: 32px 0;">
+        ${page > 1 ? `<a href="/feed?page=${page - 1}" style="display: inline-block; padding: 10px 24px; background: rgba(255,248,240,0.06); border: 1px solid rgba(255,248,240,0.12); border-radius: 8px; color: #FFF8F0; text-decoration: none; font-size: 14px; transition: all 0.2s;">&larr; Newer</a>` : ''}
+        ${hasMore ? `<a href="/feed?page=${page + 1}" style="display: inline-block; padding: 10px 24px; background: rgba(255,248,240,0.06); border: 1px solid rgba(255,248,240,0.12); border-radius: 8px; color: #FFF8F0; text-decoration: none; font-size: 14px; transition: all 0.2s;">Older &rarr;</a>` : ''}
+      </div>
+    ` : ''}
   </div>
   <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
     <img src="/alexandra.jpg" alt="Alexandra Milak">
   </div>
+<script>
+  document.getElementById('feedSearch')?.addEventListener('input', function(e) {
+    var q = e.target.value.toLowerCase();
+    document.querySelectorAll('.post-card').forEach(function(card) {
+      card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+</script>
 </body>
 </html>`;
 }

@@ -1,6 +1,6 @@
 import { layout } from './layout';
 
-export function loginPage(error?: string): string {
+export function loginPage(error?: string, csrfToken?: string): string {
   const content = `
     <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
       <div style="width: 100%; max-width: 420px;">
@@ -31,6 +31,7 @@ export function loginPage(error?: string): string {
 
         <!-- Magic Link Form -->
         <form method="POST" action="/auth/login">
+          <input type="hidden" name="_csrf" value="${csrfToken || ''}">
           <div class="form-group">
             <label for="email">Email address</label>
             <input type="email" id="email" name="email" required placeholder="you@example.com" autocomplete="email">

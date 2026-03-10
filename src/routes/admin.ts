@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { Env, Post, Member } from '../index';
 import { getSession, isAdmin, createMagicLink } from '../lib/auth';
+import { isValidEmail } from '../lib/utils';
 import { sendWelcomeEmail, sendNewPostEmail } from '../lib/email';
 import {
   adminDashboard,
@@ -29,29 +30,27 @@ adminRoutes.use('*', async (c, next) => {
 
 // Dashboard
 adminRoutes.get('/', async (c) => {
-  const totalMembers = await c.env.DB.prepare(
-    "SELECT COUNT(*) as count FROM members WHERE status = 'active'"
-  ).first();
-  const pendingRequests = await c.env.DB.prepare(
-    "SELECT COUNT(*) as count FROM members WHERE status = 'pending'"
-  ).first();
-  const publishedPosts = await c.env.DB.prepare(
-    "SELECT COUNT(*) as count FROM posts WHERE status = 'published'"
-  ).first();
-  const draftPosts = await c.env.DB.prepare(
-    "SELECT COUNT(*) as count FROM posts WHERE status = 'draft'"
-  ).first();
-  const scheduledPosts = await c.env.DB.prepare(
-    "SELECT COUNT(*) as count FROM posts WHERE status = 'scheduled'"
-  ).first();
+  const stats = await c.env.DB.prepare(`
+    SELECT
+      SUM(CASE WHEN type = 'member' AND status = 'active' THEN 1 ELSE 0 END) as totalMembers,
+      SUM(CASE WHEN type = 'member' AND status = 'pending' THEN 1 ELSE 0 END) as pendingRequests,
+      SUM(CASE WHEN type = 'post' AND status = 'published' THEN 1 ELSE 0 END) as publishedPosts,
+      SUM(CASE WHEN type = 'post' AND status = 'draft' THEN 1 ELSE 0 END) as draftPosts,
+      SUM(CASE WHEN type = 'post' AND status = 'scheduled' THEN 1 ELSE 0 END) as scheduledPosts
+    FROM (
+      SELECT 'member' as type, status FROM members
+      UNION ALL
+      SELECT 'post' as type, status FROM posts
+    )
+  `).first();
 
   return c.html(
     adminDashboard({
-      totalMembers: (totalMembers?.count as number) || 0,
-      pendingRequests: (pendingRequests?.count as number) || 0,
-      publishedPosts: (publishedPosts?.count as number) || 0,
-      draftPosts: (draftPosts?.count as number) || 0,
-      scheduledPosts: (scheduledPosts?.count as number) || 0,
+      totalMembers: (stats?.totalMembers as number) || 0,
+      pendingRequests: (stats?.pendingRequests as number) || 0,
+      publishedPosts: (stats?.publishedPosts as number) || 0,
+      draftPosts: (stats?.draftPosts as number) || 0,
+      scheduledPosts: (stats?.scheduledPosts as number) || 0,
     })
   );
 });
@@ -72,6 +71,10 @@ adminRoutes.post('/members/add', async (c) => {
   const email = (body['email'] as string || '').trim().toLowerCase();
 
   if (!name || !email) {
+    return c.redirect('/admin/members');
+  }
+
+  if (!isValidEmail(email)) {
     return c.redirect('/admin/members');
   }
 
@@ -377,19 +380,27 @@ adminRoutes.post('/posts/:id/publish', async (c) => {
   // Check if email_subscribers is on
   const post = await c.env.DB.prepare('SELECT * FROM posts WHERE id = ?').bind(id).first();
   if (post && post.email_subscribers && !post.emailed) {
-    const members = await c.env.DB.prepare(
-      "SELECT * FROM members WHERE status = 'active' AND email_notifications = 1"
-    ).all();
+    const emailPromise = (async () => {
+      const members = await c.env.DB.prepare(
+        "SELECT * FROM members WHERE status = 'active' AND email_notifications = 1"
+      ).all();
 
-    if (members.results && members.results.length > 0) {
-      const baseUrl = new URL(c.req.url).origin;
-      await sendNewPostEmail(
-        c.env,
-        post as unknown as Post,
-        members.results as unknown as Member[],
-        baseUrl
-      );
-      await c.env.DB.prepare('UPDATE posts SET emailed = 1 WHERE id = ?').bind(id).run();
+      if (members.results && members.results.length > 0) {
+        const baseUrl = new URL(c.req.url).origin;
+        await sendNewPostEmail(
+          c.env,
+          post as unknown as Post,
+          members.results as unknown as Member[],
+          baseUrl
+        );
+        await c.env.DB.prepare('UPDATE posts SET emailed = 1 WHERE id = ?').bind(id).run();
+      }
+    })();
+
+    if (c.executionCtx?.waitUntil) {
+      c.executionCtx.waitUntil(emailPromise);
+    } else {
+      await emailPromise;
     }
   }
 
@@ -490,7 +501,7 @@ adminRoutes.post('/upload', async (c) => {
 
   // Validate file type
   const allowedTypes = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
     'video/mp4', 'video/webm', 'video/quicktime',
   ];
   if (!allowedTypes.includes(f.type)) {

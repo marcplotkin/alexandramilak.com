@@ -1,3 +1,4 @@
+import { escapeHtml } from '../lib/utils';
 export function layout(
   title: string,
   content: string,
@@ -8,7 +9,7 @@ export function layout(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} — Sunday Sauce</title>
+  <title>${escapeHtml(title)} — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">

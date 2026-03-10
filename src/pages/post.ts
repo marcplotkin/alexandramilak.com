@@ -1,4 +1,5 @@
 import type { Post, Member, Comment } from '../index';
+import { escapeHtml, escapeAttr } from '../lib/utils';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -9,13 +10,18 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+function getReadingTime(content: string): string {
+  const text = content.replace(/<[^>]*>/g, '').trim();
+  const words = text.split(/\s+/).filter(w => w.length > 0).length;
+  const minutes = Math.max(1, Math.round(words / 238));
+  return minutes === 1 ? '1 min read' : minutes + ' min read';
+}
+
+function linkifyText(escapedText: string): string {
+  return escapedText.replace(
+    /https?:\/\/[^\s<&]+/g,
+    (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: rgba(255,248,240,0.7); text-decoration: underline;">${url}</a>`
+  );
 }
 
 function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAdmin: boolean): string {
@@ -56,7 +62,7 @@ function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAd
         </div>
         <div>${deleteBtn}<button class="reply-btn" onclick="toggleReply(${comment.id})">reply</button></div>
       </div>
-      <div class="comment-body">${escapeHtml(comment.content)}</div>
+      <div class="comment-body">${linkifyText(escapeHtml(comment.content))}</div>
       <form class="reply-form" id="reply-form-${comment.id}" method="POST" action="/feed/${post.slug}/comments">
         <input type="hidden" name="parent_id" value="${comment.id}">
         <textarea name="content" placeholder="Write a reply..." required></textarea>
@@ -72,14 +78,6 @@ function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAd
   return topLevel.map(c => renderComment(c)).join('');
 }
 
-function escapeAttr(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 export function postGatePage(post: Post): string {
   return `<!DOCTYPE html>
@@ -91,7 +89,7 @@ export function postGatePage(post: Post): string {
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${escapeHtml(post.title)} — Sunday Sauce</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -241,7 +239,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -757,6 +755,35 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       font-style: italic;
     }
 
+    .back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,248,240,0.1);
+      border: 1px solid rgba(255,248,240,0.15);
+      color: rgba(255,248,240,0.6);
+      font-size: 18px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s, background 0.2s;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      background: rgba(255,248,240,0.2);
+      color: #FFF8F0;
+    }
+
     .footer {
       margin-top: 60px;
       padding: 32px 0;
@@ -799,7 +826,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       ` : ''}
       <h1 class="post-title">${escapeHtml(post.title)}</h1>
       ${post.excerpt ? `<p class="post-subtitle">${escapeHtml(post.excerpt)}</p>` : ''}
-      <p class="post-date">${formatDate(post.published_at || post.created_at)}${isAdmin ? ` &nbsp;<a href="/admin/posts/${post.id}/edit" style="font-size: 12px; color: rgba(255,248,240,0.35); text-decoration: none; border: 1px solid rgba(255,248,240,0.15); padding: 3px 10px; border-radius: 4px;">&#9998; Edit</a>` : ''}</p>
+      <p class="post-date">${formatDate(post.published_at || post.created_at)} &middot; ${getReadingTime(post.content)}${isAdmin ? ` &nbsp;<a href="/admin/posts/${post.id}/edit" style="font-size: 12px; color: rgba(255,248,240,0.35); text-decoration: none; border: 1px solid rgba(255,248,240,0.15); padding: 3px 10px; border-radius: 4px;">&#9998; Edit</a>` : ''}</p>
       <div class="post-content">
         ${post.content}
       </div>
@@ -861,6 +888,12 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       </div>
     </article>
   </div>
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&uarr;</button>
+<script>
+  window.addEventListener('scroll', function() {
+    document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 400);
+  });
+</script>
 </body>
 </html>`;
 }

@@ -1,22 +1,7 @@
+import { escapeHtml, escapeAttr } from '../lib/utils';
 import type { Post } from '../index';
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
 
-function escapeAttr(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 export function editorPage(post: Post | null, isNew: boolean): string {
   const postId = post?.id || 0;
@@ -1117,6 +1102,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         currentStatus = 'published';
         showSaved();
         showToast('Post published!');
+        showViewPostLink();
       } else {
         showError(result.error || 'Publish failed');
         showToast(result.error || 'Publish failed', true);
@@ -1134,6 +1120,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         currentStatus = 'published';
         showSaved();
         showToast('Post updated & published!');
+        showViewPostLink();
       } else {
         showError(result.error || 'Publish failed');
         showToast(result.error || 'Publish failed', true);
@@ -1955,6 +1942,25 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         editorContent.focus();
       }
     });
+
+    // ---- VIEW POST LINK ----
+    function showViewPostLink() {
+      var statusArea = document.querySelector('.topbar-center');
+      if (statusArea && !statusArea.querySelector('.view-post-link')) {
+        var viewLink = document.createElement('a');
+        viewLink.href = '/feed/' + slugInput.value;
+        viewLink.textContent = 'View Post \u2192';
+        viewLink.target = '_blank';
+        viewLink.className = 'view-post-link';
+        viewLink.style.cssText = 'margin-left: 12px; color: #6aba6a; font-size: 13px; text-decoration: underline;';
+        statusArea.appendChild(viewLink);
+      }
+    }
+
+    // Show view link if already published
+    if (currentStatus === 'published' && slugInput.value) {
+      showViewPostLink();
+    }
 
     // ---- INIT ----
     if (!isNew) {

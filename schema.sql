@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS posts (
   content TEXT NOT NULL DEFAULT '',
   excerpt TEXT,
   cover_image_url TEXT,
+  cover_image_caption TEXT,
   status TEXT NOT NULL DEFAULT 'draft',
   emailed INTEGER NOT NULL DEFAULT 0,
   email_subscribers INTEGER NOT NULL DEFAULT 0,
@@ -72,3 +73,11 @@ CREATE TABLE IF NOT EXISTS approval_tokens (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (member_id) REFERENCES members(id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status);
+CREATE INDEX IF NOT EXISTS idx_posts_scheduled ON posts(status, scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_magic_links_email ON magic_links(email, created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_post_views_post ON post_views(post_id);
+CREATE INDEX IF NOT EXISTS idx_members_status ON members(status);

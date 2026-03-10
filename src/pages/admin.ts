@@ -132,6 +132,11 @@ export function adminMembersPage(members: Member[]): string {
       </form>
     </div>
 
+    <div style="margin-bottom: 16px;">
+      <input type="text" id="memberSearch" placeholder="Search members..."
+        style="width: 100%; padding: 10px 14px; border: 1px solid rgba(255,248,240,0.15); border-radius: 8px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: rgba(255,248,240,0.08); color: #FFF8F0; outline: none;">
+    </div>
+
     <div class="card">
       ${
         members.length === 0
@@ -151,6 +156,16 @@ export function adminMembersPage(members: Member[]): string {
       `
       }
     </div>
+
+    <script>
+      document.getElementById('memberSearch').addEventListener('input', function(e) {
+        var query = e.target.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(function(row) {
+          var text = row.textContent.toLowerCase();
+          row.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    </script>
 
     <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
   `;
@@ -219,7 +234,7 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
       (p) => `
     <tr>
       <td><a href="/admin/posts/${p.id}/edit" style="font-weight: 500;">${escapeHtml(p.title)}</a></td>
-      <td>${statusBadge(p.status)}</td>
+      <td>${statusBadge(p.status)}${p.emailed ? ' <span title="Emailed to subscribers" style="font-size: 12px; opacity: 0.5;">\u2709</span>' : ''}</td>
       <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${getWordCount(p.content)} words</td>
       <td style="font-size: 13px; color: rgba(255,248,240,0.4); text-align: center;">${p.view_count || 0} <span style="opacity: 0.5;">/ ${p.unique_readers || 0}</span></td>
       <td style="font-size: 13px; color: rgba(255,248,240,0.4);">${formatDate(p.status === 'published' ? (p.published_at || p.updated_at) : p.updated_at)}</td>
@@ -250,6 +265,11 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
       <a href="/admin/posts?filter=scheduled" style="${tabStyle('scheduled')}">Scheduled (${filterCounts.scheduled})</a>
     </div>
 
+    <div style="margin-bottom: 16px;">
+      <input type="text" id="postSearch" placeholder="Search posts..."
+        style="width: 100%; padding: 10px 14px; border: 1px solid rgba(255,248,240,0.15); border-radius: 8px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: rgba(255,248,240,0.08); color: #FFF8F0; outline: none;">
+    </div>
+
     <div class="card">
       ${
         filteredPosts.length === 0
@@ -271,6 +291,16 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
       `
       }
     </div>
+
+    <script>
+      document.getElementById('postSearch').addEventListener('input', function(e) {
+        var query = e.target.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(function(row) {
+          var text = row.textContent.toLowerCase();
+          row.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    </script>
 
     <p style="margin-top: 16px;"><a href="/admin" style="font-size: 14px; color: rgba(255,248,240,0.45);">&larr; Back to dashboard</a></p>
   `;

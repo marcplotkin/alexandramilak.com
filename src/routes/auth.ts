@@ -19,6 +19,30 @@ import {
   exchangeGoogleCode,
   getGoogleUserInfo,
 } from '../lib/oauth';
+import { sanitizeLikePattern, isValidEmail } from '../lib/utils';
+
+
+function generateCsrfToken(): string {
+  return crypto.randomUUID();
+}
+
+function setCsrfCookie(c: any): string {
+  const token = generateCsrfToken();
+  setCookie(c, 'csrf_token', token, {
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Strict',
+    maxAge: 3600,
+  });
+  return token;
+}
+
+function validateCsrf(c: any, body: Record<string, string | File>): boolean {
+  const cookieToken = getCookie(c, 'csrf_token');
+  const formToken = body['_csrf'] as string;
+  return !!cookieToken && !!formToken && cookieToken === formToken;
+}
 
 export const authRoutes = new Hono<Env>();
 
@@ -26,13 +50,22 @@ export const authRoutes = new Hono<Env>();
 authRoutes.get('/login', async (c) => {
   const session = await getSession(c);
   if (session) return c.redirect('/feed');
-  return c.html(loginPage());
+  const csrf = setCsrfCookie(c);
+  return c.html(loginPage(undefined, csrf));
 });
 
 // Handle login form
 authRoutes.post('/login', async (c) => {
   const body = await c.req.parseBody();
   const email = (body['email'] as string || '').trim().toLowerCase();
+
+  if (!validateCsrf(c, body)) {
+    return c.html(loginPage('Invalid request. Please try again.'));
+  }
+
+  if (!isValidEmail(email)) {
+    return c.html(loginPage('Please enter a valid email address.'));
+  }
 
   if (!email) {
     return c.html(loginPage('Please enter your email address.'));
@@ -62,6 +95,14 @@ authRoutes.post('/login', async (c) => {
     return c.html(
       loginPage('No active membership found for this email. You may need to request membership first.')
     );
+  }
+
+  // Rate limit: max 3 magic links per email per 15 minutes
+  const recentLinks = await c.env.DB.prepare(
+    "SELECT COUNT(*) as count FROM magic_links WHERE email = ? AND created_at > datetime('now', '-15 minutes')"
+  ).bind(email).first();
+  if (recentLinks && (recentLinks.count as number) >= 3) {
+    return c.html(loginPage('Too many login attempts. Please try again in a few minutes.'));
   }
 
   // Create magic link and send email
@@ -111,7 +152,8 @@ authRoutes.get('/logout', async (c) => {
 // Request membership page
 authRoutes.get('/request', async (c) => {
   const ref = c.req.query('ref') || '';
-  return c.html(requestMembershipPage(undefined, ref));
+  const csrf = setCsrfCookie(c);
+  return c.html(requestMembershipPage(undefined, ref, csrf));
 });
 
 // Handle membership request
@@ -121,6 +163,14 @@ authRoutes.post('/request', async (c) => {
   const email = (body['email'] as string || '').trim().toLowerCase();
   const referredByName = (body['referred_by'] as string || '').trim();
   const refCode = (body['ref_code'] as string || '').trim();
+
+  if (!validateCsrf(c, body)) {
+    return c.html(requestMembershipPage('Invalid request. Please try again.'));
+  }
+
+  if (!isValidEmail(email)) {
+    return c.html(requestMembershipPage('Please enter a valid email address.'));
+  }
 
   if (!name || !email) {
     return c.html(requestMembershipPage('Please fill in all fields.'));
@@ -143,7 +193,7 @@ authRoutes.post('/request', async (c) => {
   if (!referrerId && referredByName) {
     const referrer = await c.env.DB.prepare(
       "SELECT id, name FROM members WHERE LOWER(name) LIKE ? AND status = 'active' LIMIT 1"
-    ).bind('%' + referredByName.toLowerCase() + '%').first();
+    ).bind('%' + sanitizeLikePattern(referredByName.toLowerCase()) + '%').first();
     if (referrer) {
       referrerId = referrer.id as number;
       referrerName = referrer.name as string;
@@ -185,6 +235,14 @@ authRoutes.post('/request', async (c) => {
     }, baseUrl);
 
     return c.html(requestSentPage());
+  }
+
+  // Rate limit: max 5 membership requests per hour (by IP approximation via recent entries)
+  const recentRequests = await c.env.DB.prepare(
+    "SELECT COUNT(*) as count FROM members WHERE created_at > datetime('now', '-1 hour') AND status = 'pending'"
+  ).first();
+  if (recentRequests && (recentRequests.count as number) >= 20) {
+    return c.html(requestMembershipPage('Too many requests right now. Please try again later.'));
   }
 
   // Generate unsubscribe token and referral code for new member

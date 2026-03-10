@@ -28,15 +28,25 @@ blogRoutes.use('*', async (c, next) => {
 blogRoutes.get('/', async (c) => {
   const member = (c as any).get('member') as Member;
 
+  const page = Math.max(1, parseInt(c.req.query('page') || '1'));
+  const perPage = 20;
+  const offset = (page - 1) * perPage;
+
   const posts = await c.env.DB.prepare(
-    "SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC"
-  ).all();
+    "SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC LIMIT ? OFFSET ?"
+  ).bind(perPage + 1, offset).all();
+
+  const results = (posts.results || []) as unknown as Post[];
+  const hasMore = results.length > perPage;
+  const displayPosts = hasMore ? results.slice(0, perPage) : results;
 
   return c.html(
     feedPage(
-      (posts.results || []) as unknown as Post[],
+      displayPosts,
       member,
-      isAdmin(member.email, c.env.ADMIN_EMAIL)
+      isAdmin(member.email, c.env.ADMIN_EMAIL),
+      page,
+      hasMore
     )
   );
 });
@@ -102,10 +112,17 @@ blogRoutes.get('/:slug', async (c) => {
     return c.html(postGatePage(post as unknown as Post));
   }
 
-  // Record view (fire-and-forget, don't block page load)
-  const viewPromise = c.env.DB.prepare(
-    'INSERT INTO post_views (post_id, member_id) VALUES (?, ?)'
-  ).bind(post.id, member.id).run().catch(() => {});
+  // Record view (deduplicated: once per member per post per day)
+  const viewPromise = (async () => {
+    const existing = await c.env.DB.prepare(
+      "SELECT id FROM post_views WHERE post_id = ? AND member_id = ? AND viewed_at > datetime('now', '-1 day')"
+    ).bind(post.id, member.id).first();
+    if (!existing) {
+      await c.env.DB.prepare(
+        'INSERT INTO post_views (post_id, member_id) VALUES (?, ?)'
+      ).bind(post.id, member.id).run();
+    }
+  })().catch(() => {});
   if (c.executionCtx?.waitUntil) {
     c.executionCtx.waitUntil(viewPromise);
   }

@@ -9,7 +9,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export function requestMembershipPage(error?: string, refCode?: string): string {
+export function requestMembershipPage(error?: string, refCode?: string, csrfToken?: string): string {
   const content = `
     <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0;">
       <div style="width: 100%; max-width: 680px; margin-bottom: 32px;">
@@ -23,6 +23,7 @@ export function requestMembershipPage(error?: string, refCode?: string): string 
         <h2 style="text-align: center; font-size: 22px; margin-bottom: 24px;">Request Membership</h2>
         ${error ? `<div class="message message-error">${error}</div>` : ''}
         <form method="POST" action="/auth/request">
+          <input type="hidden" name="_csrf" value="${csrfToken || ''}">
           ${refCode ? `<input type="hidden" name="ref_code" value="${escapeHtml(refCode)}">` : ''}
           <div class="form-group">
             <label for="name">Your name</label>

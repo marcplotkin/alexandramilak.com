@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { escapeHtml } from '../lib/utils';
 import type { Env } from '../index';
 import { createMagicLink } from '../lib/auth';
 import { sendWelcomeEmail } from '../lib/email';
@@ -9,6 +10,8 @@ export const apiRoutes = new Hono<Env>();
 function resultPage(title: string, message: string, success: boolean): string {
   const icon = success ? '&#10003;' : '&#10007;';
   const iconColor = success ? '#6aba6a' : '#e6a09a';
+  const safeTitle = escapeHtml(title);
+  const safeMessage = escapeHtml(message);
 
   const content = `
     <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
@@ -17,8 +20,8 @@ function resultPage(title: string, message: string, success: boolean): string {
           <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 500; color: var(--cream);">Sunday Sauce</span>
         </div>
         <div style="font-size: 48px; margin-bottom: 16px; color: ${iconColor};">${icon}</div>
-        <h2 style="font-size: 24px; margin-bottom: 12px;">${title}</h2>
-        <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6;">${message}</p>
+        <h2 style="font-size: 24px; margin-bottom: 12px;">${safeTitle}</h2>
+        <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6;">${safeMessage}</p>
       </div>
     </div>
   `;
@@ -28,9 +31,10 @@ function resultPage(title: string, message: string, success: boolean): string {
 // Approve member via email link
 apiRoutes.get('/approve/:token', async (c) => {
   const token = c.req.param('token');
+  const confirm = c.req.query('confirm');
 
   const approvalToken = await c.env.DB.prepare(
-    "SELECT * FROM approval_tokens WHERE token = ? AND action = 'approve' AND used = 0"
+    "SELECT at.*, m.name, m.email FROM approval_tokens at JOIN members m ON at.member_id = m.id WHERE at.token = ? AND at.action = 'approve' AND at.used = 0"
   )
     .bind(token)
     .first();
@@ -41,6 +45,26 @@ apiRoutes.get('/approve/:token', async (c) => {
       'This approval link has already been used or is invalid.',
       false
     ));
+  }
+
+  if (confirm !== 'yes') {
+    const confirmContent = `
+      <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
+        <div class="card" style="width: 100%; max-width: 420px; text-align: center;">
+          <div style="margin-bottom: 24px;">
+            <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 500; color: var(--cream);">Sunday Sauce</span>
+          </div>
+          <h2 style="font-size: 24px; margin-bottom: 12px;">Approve Member?</h2>
+          <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+            Approve <strong>${escapeHtml(approvalToken.name as string)}</strong> (${escapeHtml(approvalToken.email as string)})?
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <a href="/api/approve/${encodeURIComponent(token)}?confirm=yes" style="display: inline-block; background: #6aba6a; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">Yes, Approve</a>
+          </div>
+        </div>
+      </div>
+    `;
+    return c.html(layout('Approve Member', confirmContent));
   }
 
   // Mark token as used
@@ -100,9 +124,10 @@ async function ensureReferralCode(db: D1Database, memberId: number): Promise<voi
 // Deny member via email link
 apiRoutes.get('/deny/:token', async (c) => {
   const token = c.req.param('token');
+  const confirm = c.req.query('confirm');
 
   const approvalToken = await c.env.DB.prepare(
-    "SELECT * FROM approval_tokens WHERE token = ? AND action = 'deny' AND used = 0"
+    "SELECT at.*, m.name, m.email FROM approval_tokens at JOIN members m ON at.member_id = m.id WHERE at.token = ? AND at.action = 'deny' AND at.used = 0"
   )
     .bind(token)
     .first();
@@ -113,6 +138,26 @@ apiRoutes.get('/deny/:token', async (c) => {
       'This denial link has already been used or is invalid.',
       false
     ));
+  }
+
+  if (confirm !== 'yes') {
+    const confirmContent = `
+      <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
+        <div class="card" style="width: 100%; max-width: 420px; text-align: center;">
+          <div style="margin-bottom: 24px;">
+            <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 500; color: var(--cream);">Sunday Sauce</span>
+          </div>
+          <h2 style="font-size: 24px; margin-bottom: 12px;">Deny Member?</h2>
+          <p style="color: rgba(255,248,240,0.6); font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+            Deny <strong>${escapeHtml(approvalToken.name as string)}</strong> (${escapeHtml(approvalToken.email as string)})?
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <a href="/api/deny/${encodeURIComponent(token)}?confirm=yes" style="display: inline-block; background: #C0392B; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">Yes, Deny</a>
+          </div>
+        </div>
+      </div>
+    `;
+    return c.html(layout('Deny Member', confirmContent));
   }
 
   // Mark token as used
@@ -189,7 +234,7 @@ apiRoutes.get('/leave', async (c) => {
             This will remove your membership. You won't be able to access posts or comments anymore.
           </p>
           <div style="display: flex; gap: 12px; justify-content: center;">
-            <a href="/api/leave?token=${token}&confirm=yes" style="display: inline-block; background: #C0392B; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">Yes, Leave</a>
+            <a href="/api/leave?token=${encodeURIComponent(token)}&confirm=yes" style="display: inline-block; background: #C0392B; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">Yes, Leave</a>
             <a href="/" style="display: inline-block; background: rgba(255,248,240,0.1); color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">Cancel</a>
           </div>
         </div>

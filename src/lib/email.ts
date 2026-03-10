@@ -1,5 +1,6 @@
 import type { Env, Member, Post } from '../index';
 import { generateToken } from './auth';
+import { escapeHtml } from './utils';
 
 interface EmailParams {
   to: string;
@@ -284,31 +285,36 @@ export async function sendNewPostEmail(
   const siteUrl = baseUrl || env.SITE_URL;
   const postUrl = `${siteUrl}/feed/${post.slug}`;
 
-  for (const member of members) {
-    const shareUrl = member.referral_code
-      ? `${siteUrl}/?ref=${member.referral_code}`
-      : siteUrl;
+  // Send emails in batches of 10 to avoid hitting limits
+  const batchSize = 10;
+  for (let i = 0; i < members.length; i += batchSize) {
+    const batch = members.slice(i, i + batchSize);
+    await Promise.all(batch.map(member => {
+      const shareUrl = member.referral_code
+        ? `${siteUrl}/?ref=${member.referral_code}`
+        : siteUrl;
 
-    const html = `
-      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-        <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
-        <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 16px;">${escapeHtml(post.title)}</h1>
-        ${post.excerpt ? `<p style="color: #2C1810; line-height: 1.6; margin-bottom: 24px;">${escapeHtml(post.excerpt)}</p>` : ''}
-        <div style="text-align: center; margin: 32px 0;">
-          <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>
+      const html = `
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
+          <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 16px;">${escapeHtml(post.title)}</h1>
+          ${post.excerpt ? `<p style="color: #2C1810; line-height: 1.6; margin-bottom: 24px;">${escapeHtml(post.excerpt)}</p>` : ''}
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>
+          </div>
+          <div style="text-align: center; margin: 16px 0;">
+            <p style="color: #7A6B63; font-size: 13px;">Know someone who'd enjoy this? <a href="${shareUrl}" style="color: #722F37;">Invite them to Sunday Sauce</a></p>
+          </div>
+          ${emailFooter(siteUrl, member.unsubscribe_token || undefined)}
         </div>
-        <div style="text-align: center; margin: 16px 0;">
-          <p style="color: #7A6B63; font-size: 13px;">Know someone who'd enjoy this? <a href="${shareUrl}" style="color: #722F37;">Invite them to Sunday Sauce</a></p>
-        </div>
-        ${emailFooter(siteUrl, member.unsubscribe_token || undefined)}
-      </div>
-    `;
+      `;
 
-    await sendEmail(env, {
-      to: member.email,
-      subject: `New post: ${post.title}`,
-      html,
-    });
+      return sendEmail(env, {
+        to: member.email,
+        subject: `New post: ${post.title}`,
+        html,
+      });
+    }));
   }
 }
 
@@ -377,13 +383,4 @@ export async function sendReplyNotificationEmail(
     subject: `${replierName} replied to your comment on Sunday Sauce`,
     html,
   });
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
