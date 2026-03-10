@@ -37,8 +37,10 @@ export function layout(
 
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
-      background-attachment: fixed;
+      background-color: #1A0609;
+      background-image: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-size: 100% 100vh;
+      background-repeat: no-repeat;
       color: var(--cream);
       line-height: 1.6;
       min-height: 100vh;
@@ -377,6 +379,12 @@ export function layout(
       font-weight: 500;
     }
 
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 16px;
+    }
+
     @media (max-width: 640px) {
       .container {
         padding: 0 16px;
@@ -387,6 +395,11 @@ export function layout(
       .nav {
         flex-wrap: wrap;
         gap: 12px;
+      }
+      table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
     }
   </style>

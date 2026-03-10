@@ -142,7 +142,7 @@ export function adminMembersPage(members: Member[]): string {
         members.length === 0
           ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No active members yet.</p>'
           : `
-        <table>
+        <div class="table-wrapper"><table>
           <thead>
             <tr>
               <th>Name</th>
@@ -152,7 +152,7 @@ export function adminMembersPage(members: Member[]): string {
             </tr>
           </thead>
           <tbody>${rows}</tbody>
-        </table>
+        </table></div>
       `
       }
     </div>
@@ -275,7 +275,7 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
         filteredPosts.length === 0
           ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No posts here. Create your first post!</p>'
           : `
-        <table>
+        <div class="table-wrapper"><table>
           <thead>
             <tr>
               <th>Title</th>
@@ -287,7 +287,7 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
             </tr>
           </thead>
           <tbody>${rows}</tbody>
-        </table>
+        </table></div>
       `
       }
     </div>
@@ -354,7 +354,7 @@ export function adminAnalyticsPage(
       ${postViews.length === 0
         ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No views yet.</p>'
         : `
-        <table>
+        <div class="table-wrapper"><table>
           <thead>
             <tr>
               <th>Post</th>
@@ -364,7 +364,7 @@ export function adminAnalyticsPage(
             </tr>
           </thead>
           <tbody>${postRows}</tbody>
-        </table>
+        </table></div>
       `}
     </div>
 
@@ -373,7 +373,7 @@ export function adminAnalyticsPage(
       ${recentReaders.length === 0
         ? '<p style="color: rgba(255,248,240,0.4); text-align: center; padding: 20px 0;">No activity yet.</p>'
         : `
-        <table>
+        <div class="table-wrapper"><table>
           <thead>
             <tr>
               <th>Reader</th>
@@ -382,7 +382,7 @@ export function adminAnalyticsPage(
             </tr>
           </thead>
           <tbody>${readerRows}</tbody>
-        </table>
+        </table></div>
       `}
     </div>
 

@@ -44,8 +44,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
-      background-attachment: fixed;
+      background-color: #1A0609;
+      background-image: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-size: 100% 100vh;
+      background-repeat: no-repeat;
       color: var(--cream);
       line-height: 1.6;
       min-height: 100vh;
