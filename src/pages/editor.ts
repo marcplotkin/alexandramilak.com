@@ -44,8 +44,8 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #1A0609;
-      background-image: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-color: #220D12;
+      background-image: linear-gradient(180deg, #361219 0%, #220D12 100%);
       background-size: 100% 100vh;
       background-repeat: no-repeat;
       color: var(--cream);
@@ -374,7 +374,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
     /* ---- FLOATING TOOLBAR ---- */
     .floating-toolbar {
-      position: absolute;
+      position: fixed;
       display: none;
       background: #2C1810;
       border-radius: 8px;
@@ -1194,7 +1194,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
       floatingToolbar.style.display = 'block';
       floatingToolbar.style.left = (rect.left + rect.width / 2) + 'px';
-      floatingToolbar.style.top = (rect.top + window.scrollY - 48) + 'px';
+      floatingToolbar.style.top = (rect.top - 48) + 'px';
 
       // Update active states
       floatingToolbar.querySelectorAll('.toolbar-btn').forEach(btn => {

@@ -37,8 +37,8 @@ export function layout(
 
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #1A0609;
-      background-image: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-color: #220D12;
+      background-image: linear-gradient(180deg, #361219 0%, #220D12 100%);
       background-size: 100% 100vh;
       background-repeat: no-repeat;
       color: var(--cream);

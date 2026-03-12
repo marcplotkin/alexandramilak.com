@@ -6,6 +6,7 @@ export function loginPage(error?: string, csrfToken?: string): string {
       <div style="width: 100%; max-width: 420px;">
         <div style="text-align: center; margin-bottom: 32px;">
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; color: #FFF8F0; text-decoration: none; letter-spacing: -0.5px;">Sunday Sauce</a>
+          <p style="font-size: 13px; color: rgba(255,248,240,0.6); margin-top: 8px; letter-spacing: 0.3px;">a bimonthly, curated newsletter</p>
         </div>
         ${error ? `<div class="message message-error">${error}</div>` : ''}
 

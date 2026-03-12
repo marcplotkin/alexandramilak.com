@@ -71,8 +71,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
 
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #1A0609;
-      background-image: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%);
+      background-color: #220D12;
+      background-image: linear-gradient(180deg, #361219 0%, #220D12 100%);
       background-size: 100% 100vh;
       background-repeat: no-repeat;
       color: #FFF8F0;
@@ -359,7 +359,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
       <p style="font-size: 14px; color: rgba(255,248,240,0.65); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
-      <p style="font-size: 13px; color: rgba(255,248,240,0.7); font-style: italic; margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
+      <p style="font-size: 13px; color: rgba(255,248,240,0.7); margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
       <div class="hero-border"></div>
     </div>
     <div style="margin-bottom: 24px;">
