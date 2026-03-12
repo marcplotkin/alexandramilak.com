@@ -975,7 +975,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       var dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
       // Strip editor toolbar artifacts from content
-      var cleanContent = content.replace(/<div class="media-toolbar">.*?<\/div>/g, '');
+      var cleanContent = content.replace(/<div class="media-toolbar">.*?<\\/div>/g, '');
 
       var html = '<!DOCTYPE html><html lang="en"><head>'
         + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">'
@@ -1762,7 +1762,6 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
     // Bind existing media figures (when editing existing post)
     editorContent.querySelectorAll('.media-figure').forEach(function(fig) { bindMediaFigure(fig); });
-    });
 
     async function insertMediaFromFile(file) {
       // Create placeholder
