@@ -1,4 +1,7 @@
-export function homePage(): string {
+import type { SiteSettings } from '../lib/settings';
+import { escapeHtml } from '../lib/utils';
+
+export function homePage(settings: SiteSettings): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -188,11 +191,11 @@ export function homePage(): string {
 <body>
   <div class="hero">
     <div class="banner-wrapper">
-      <img src="/tomatoes.jpg" alt="Tomatoes" class="banner">
-      <img src="/alexandra.jpg" alt="Alexandra Milak" class="profile-photo">
+      <img src="${escapeHtml(settings.banner_url)}" alt="Banner" class="banner">
+      <img src="${escapeHtml(settings.profile_photo_url)}" alt="Alexandra Milak" class="profile-photo">
     </div>
     <h1 class="title">Sunday Sauce</h1>
-    <p class="tagline">Thoughts and curations of things I care about and think are nice.</p>
+    <p class="tagline">${escapeHtml(settings.tagline)}</p>
     <div class="buttons">
       <a href="/auth/login" class="btn btn-outline">Log In</a>
       <a href="/auth/request" class="btn btn-solid">Request Membership</a>

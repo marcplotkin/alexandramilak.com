@@ -1,6 +1,7 @@
 import type { Env, Member, Post } from '../index';
 import { generateToken } from './auth';
 import { escapeHtml } from './utils';
+import { getAllSiteSettings, DEFAULTS } from './settings';
 
 interface EmailParams {
   to: string;
@@ -151,6 +152,13 @@ export async function sendEmail(
   return false;
 }
 
+// ─── Theme helper ───
+
+async function getAccentColor(db: D1Database): Promise<string> {
+  const settings = await getAllSiteSettings(db);
+  return settings.accent_color || DEFAULTS.accent_color;
+}
+
 // ─── Email Footer ───
 
 function emailFooter(baseUrl: string, unsubscribeToken?: string): string {
@@ -182,6 +190,7 @@ export async function sendApprovalEmail(
 ): Promise<void> {
   const approveToken = generateToken();
   const denyToken = generateToken();
+  const accent = await getAccentColor(env.DB);
 
   await env.DB.prepare(
     'INSERT INTO approval_tokens (token, member_id, action) VALUES (?, ?, ?)'
@@ -201,7 +210,7 @@ export async function sendApprovalEmail(
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 8px;">New Membership Request</h1>
+      <h1 style="font-family: Georgia, serif; color: ${accent}; font-size: 28px; margin-bottom: 8px;">New Membership Request</h1>
       <p style="color: #7A6B63; font-size: 14px; margin-bottom: 32px;">Sunday Sauce</p>
       <div style="background: #FFF8F0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
         <p style="margin: 0 0 8px; color: #2C1810;"><strong>Name:</strong> ${escapeHtml(member.name)}</p>
@@ -209,7 +218,7 @@ export async function sendApprovalEmail(
         ${referralInfo}
       </div>
       <div style="text-align: center;">
-        <a href="${approveUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; margin-right: 12px;">Approve</a>
+        <a href="${approveUrl}" style="display: inline-block; background: ${accent}; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; margin-right: 12px;">Approve</a>
         <a href="${denyUrl}" style="display: inline-block; background: #e8e0d8; color: #2C1810; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">Deny</a>
       </div>
     </div>
@@ -229,15 +238,16 @@ export async function sendWelcomeEmail(
   baseUrl?: string
 ): Promise<void> {
   const loginUrl = `${baseUrl || env.SITE_URL}/auth/verify?token=${magicLinkToken}`;
+  const accent = await getAccentColor(env.DB);
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 8px;">Welcome to Sunday Sauce!</h1>
+      <h1 style="font-family: Georgia, serif; color: ${accent}; font-size: 28px; margin-bottom: 8px;">Welcome to Sunday Sauce!</h1>
       <p style="color: #7A6B63; font-size: 14px; margin-bottom: 32px;">You're in.</p>
       <p style="color: #2C1810; line-height: 1.6;">Hi ${escapeHtml(member.name)},</p>
       <p style="color: #2C1810; line-height: 1.6;">Your membership has been approved! Click the button below to access Sunday Sauce.</p>
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${loginUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Enter Sunday Sauce</a>
+        <a href="${loginUrl}" style="display: inline-block; background: ${accent}; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Enter Sunday Sauce</a>
       </div>
       <p style="color: #7A6B63; font-size: 13px;">This link expires in 15 minutes. You can always request a new one from the login page.</p>
     </div>
@@ -257,13 +267,14 @@ export async function sendMagicLinkEmail(
   baseUrl?: string
 ): Promise<void> {
   const loginUrl = `${baseUrl || env.SITE_URL}/auth/verify?token=${token}`;
+  const accent = await getAccentColor(env.DB);
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 8px;">Log in to Sunday Sauce</h1>
+      <h1 style="font-family: Georgia, serif; color: ${accent}; font-size: 28px; margin-bottom: 8px;">Log in to Sunday Sauce</h1>
       <p style="color: #2C1810; line-height: 1.6;">Click the button below to log in. No password needed.</p>
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${loginUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Log In</a>
+        <a href="${loginUrl}" style="display: inline-block; background: ${accent}; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Log In</a>
       </div>
       <p style="color: #7A6B63; font-size: 13px;">This link expires in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
     </div>
@@ -284,6 +295,7 @@ export async function sendNewPostEmail(
 ): Promise<void> {
   const siteUrl = baseUrl || env.SITE_URL;
   const postUrl = `${siteUrl}/feed/${post.slug}`;
+  const accent = await getAccentColor(env.DB);
 
   // Send emails in batches of 10 to avoid hitting limits
   const batchSize = 10;
@@ -297,13 +309,13 @@ export async function sendNewPostEmail(
       const html = `
         <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
           <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
-          <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 16px;">${escapeHtml(post.title)}</h1>
+          <h1 style="font-family: Georgia, serif; color: ${accent}; font-size: 28px; margin-bottom: 16px;">${escapeHtml(post.title)}</h1>
           ${post.excerpt ? `<p style="color: #2C1810; line-height: 1.6; margin-bottom: 24px;">${escapeHtml(post.excerpt)}</p>` : ''}
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>
+            <a href="${postUrl}" style="display: inline-block; background: ${accent}; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>
           </div>
           <div style="text-align: center; margin: 16px 0;">
-            <p style="color: #7A6B63; font-size: 13px;">Know someone who'd enjoy this? <a href="${shareUrl}" style="color: #722F37;">Invite them to Sunday Sauce</a></p>
+            <p style="color: #7A6B63; font-size: 13px;">Know someone who'd enjoy this? <a href="${shareUrl}" style="color: ${accent};">Invite them to Sunday Sauce</a></p>
           </div>
           ${emailFooter(siteUrl, member.unsubscribe_token || undefined)}
         </div>
@@ -327,17 +339,18 @@ export async function sendCommentNotificationEmail(
   baseUrl?: string
 ): Promise<void> {
   const postUrl = `${baseUrl || env.SITE_URL}/feed/${postSlug}#comments`;
+  const accent = await getAccentColor(env.DB);
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
       <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
-      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 24px; margin-bottom: 16px;">New Comment on "${escapeHtml(postTitle)}"</h1>
+      <h1 style="font-family: Georgia, serif; color: ${accent}; font-size: 24px; margin-bottom: 16px;">New Comment on "${escapeHtml(postTitle)}"</h1>
       <div style="background: #FFF8F0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
         <p style="margin: 0 0 8px; color: #2C1810;"><strong>${escapeHtml(commenter.name)}</strong> wrote:</p>
         <p style="margin: 0; color: #2C1810; white-space: pre-wrap;">${escapeHtml(commentText)}</p>
       </div>
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Comment</a>
+        <a href="${postUrl}" style="display: inline-block; background: ${accent}; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Comment</a>
       </div>
     </div>
   `;
@@ -362,17 +375,18 @@ export async function sendReplyNotificationEmail(
 ): Promise<void> {
   const siteUrl = baseUrl || env.SITE_URL;
   const postUrl = `${siteUrl}/feed/${postSlug}#comments`;
+  const accent = await getAccentColor(env.DB);
 
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
       <p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>
-      <h1 style="font-family: Georgia, serif; color: #722F37; font-size: 24px; margin-bottom: 16px;">${escapeHtml(replierName)} replied to your comment</h1>
+      <h1 style="font-family: Georgia, serif; color: ${accent}; font-size: 24px; margin-bottom: 16px;">${escapeHtml(replierName)} replied to your comment</h1>
       <p style="color: #2C1810; margin-bottom: 16px;">On "${escapeHtml(postTitle)}":</p>
       <div style="background: #FFF8F0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
         <p style="margin: 0; color: #2C1810; white-space: pre-wrap;">${escapeHtml(replyText)}</p>
       </div>
       <div style="text-align: center; margin: 24px 0;">
-        <a href="${postUrl}" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Reply</a>
+        <a href="${postUrl}" style="display: inline-block; background: ${accent}; color: #FFF8F0; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600;">View Reply</a>
       </div>
       ${emailFooter(siteUrl, recipientUnsubscribeToken)}
     </div>

@@ -1,4 +1,5 @@
 import type { Post, Member } from '../index';
+import type { SiteSettings } from '../lib/settings';
 import { escapeHtml } from '../lib/utils';
 
 function formatDate(dateStr: string): string {
@@ -23,7 +24,7 @@ function getReadingTime(content: string): string {
   return minutes === 1 ? '1 min read' : minutes + ' min read';
 }
 
-export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: number = 1, hasMore: boolean = false): string {
+export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: number = 1, hasMore: boolean = false, settings?: SiteSettings): string {
   let postsHtml: string;
   if (posts.length === 0) {
     postsHtml = `
@@ -354,12 +355,12 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     </nav>
     <div class="hero">
       <div class="banner-wrapper">
-        <img src="/tomatoes.jpg" alt="Tomatoes" class="banner">
-        <img src="/alexandra.jpg" alt="Alexandra Milak" class="profile-photo" onclick="document.getElementById('lightbox').classList.add('active')">
+        <img src="${escapeHtml(settings?.banner_url || '/tomatoes.jpg')}" alt="Banner" class="banner">
+        <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak" class="profile-photo" onclick="document.getElementById('lightbox').classList.add('active')">
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
       <p style="font-size: 14px; color: rgba(255,248,240,0.65); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
-      <p style="font-size: 13px; color: rgba(255,248,240,0.7); margin-top: 6px;">Thoughts and curations of things I care about and think are nice.</p>
+      <p style="font-size: 13px; color: rgba(255,248,240,0.7); margin-top: 6px;">${escapeHtml(settings?.tagline || 'Thoughts and curations of things I care about and think are nice.')}</p>
       <div class="hero-border"></div>
     </div>
     <div style="margin-bottom: 24px;">
@@ -379,7 +380,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     ` : ''}
   </div>
   <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
-    <img src="/alexandra.jpg" alt="Alexandra Milak">
+    <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak">
   </div>
 <script>
   document.getElementById('feedSearch')?.addEventListener('input', function(e) {

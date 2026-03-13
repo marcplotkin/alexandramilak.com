@@ -13,7 +13,7 @@ import {
 } from '../pages/admin';
 import { editorPage } from '../pages/editor';
 import { appearancePage } from '../pages/appearance';
-import { getSiteSetting, setSiteSetting, DEFAULT_BG_COLOR } from '../lib/settings';
+import { getSiteSetting, setSiteSetting, getAllSiteSettings, DEFAULT_BG_COLOR } from '../lib/settings';
 
 export const adminRoutes = new Hono<Env>();
 
@@ -536,19 +536,27 @@ adminRoutes.get('/unfurl', async (c) => {
 
 // Appearance settings
 adminRoutes.get('/appearance', async (c) => {
-  const bgColor = (await getSiteSetting(c.env.DB, 'bg_color')) || DEFAULT_BG_COLOR;
-  return c.html(appearancePage(bgColor));
+  const settings = await getAllSiteSettings(c.env.DB);
+  return c.html(appearancePage(settings));
 });
 
 adminRoutes.post('/appearance', async (c) => {
   const body = await c.req.json();
-  const bgColor = (body.bg_color || '').trim();
+  const allowedKeys = ['bg_color', 'accent_color', 'text_color', 'font_pairing', 'tagline', 'banner_url', 'profile_photo_url'];
 
-  if (!/^#[0-9a-fA-F]{6}$/.test(bgColor)) {
-    return c.json({ success: false, error: 'Invalid hex color' });
+  for (const key of allowedKeys) {
+    if (body[key] !== undefined) {
+      const value = String(body[key]).trim();
+      if ((key === 'bg_color' || key === 'accent_color' || key === 'text_color') && !/^#[0-9a-fA-F]{6}$/.test(value)) {
+        return c.json({ success: false, error: `Invalid hex color for ${key}` });
+      }
+      if (key === 'font_pairing' && !['classic', 'modern', 'elegant', 'editorial', 'clean'].includes(value)) {
+        return c.json({ success: false, error: 'Invalid font pairing' });
+      }
+      await setSiteSetting(c.env.DB, key, value);
+    }
   }
 
-  await setSiteSetting(c.env.DB, 'bg_color', bgColor);
   return c.json({ success: true });
 });
 

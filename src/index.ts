@@ -6,7 +6,8 @@ import { apiRoutes } from './routes/api';
 import { homePage } from './pages/home';
 import { getSession } from './lib/auth';
 import { sendNewPostEmail } from './lib/email';
-import { getSiteSetting, lightenColor, DEFAULT_BG_COLOR } from './lib/settings';
+import { getSiteSetting, getAllSiteSettings, lightenColor, DEFAULT_BG_COLOR, DEFAULTS, FONT_PAIRINGS } from './lib/settings';
+export type { SiteSettings } from './lib/settings';
 
 export type Env = {
   Bindings: {
@@ -84,18 +85,44 @@ app.use('*', async (c, next) => {
   c.header('Vary', 'Cookie');
 });
 
-// Inject dynamic background color from site_settings into all HTML responses
+// Inject dynamic theme from site_settings into all HTML responses
 app.use('*', async (c, next) => {
   await next();
   const ct = c.res.headers.get('content-type') || '';
   if (!ct.includes('text/html')) return;
 
-  const bgColor = (await getSiteSetting(c.env.DB, 'bg_color')) || DEFAULT_BG_COLOR;
-  if (bgColor === DEFAULT_BG_COLOR) return; // No override needed for default
+  const settings = await getAllSiteSettings(c.env.DB);
+  const bgChanged = settings.bg_color !== DEFAULTS.bg_color;
+  const accentChanged = settings.accent_color !== DEFAULTS.accent_color;
+  const textChanged = settings.text_color !== DEFAULTS.text_color;
+  const fontChanged = settings.font_pairing !== DEFAULTS.font_pairing;
 
-  const gradientTop = lightenColor(bgColor, 1.6);
-  const overrideStyle = `<style id="site-bg">body{background-color:${bgColor}!important;background-image:linear-gradient(180deg,${gradientTop} 0%,${bgColor} 100%)!important;}</style>`;
+  if (!bgChanged && !accentChanged && !textChanged && !fontChanged) return;
 
+  let css = '';
+  let extraHead = '';
+
+  if (bgChanged) {
+    const gradientTop = lightenColor(settings.bg_color, 1.6);
+    css += `body{background-color:${settings.bg_color}!important;background-image:linear-gradient(180deg,${gradientTop} 0%,${settings.bg_color} 100%)!important;}`;
+  }
+  if (accentChanged) {
+    css += `:root{--accent-color:${settings.accent_color}!important;--tomato-red:${settings.accent_color}!important;}`;
+  }
+  if (textChanged) {
+    css += `:root{--cream:${settings.text_color}!important;--warm-white:${settings.text_color}!important;}`;
+    css += `body{color:${settings.text_color}!important;}`;
+  }
+  if (fontChanged) {
+    const pairing = FONT_PAIRINGS[settings.font_pairing];
+    if (pairing) {
+      extraHead += `<link href="${pairing.googleFontsUrl}" rel="stylesheet">`;
+      css += `body{font-family:${pairing.body}!important;}`;
+      css += `h1,h2,h3,h4,.nav-brand,.hero-title,.post-title,.post-card-title,.title,.brand,.comments-title,.stat-number,.preview-title{font-family:${pairing.heading}!important;}`;
+    }
+  }
+
+  const overrideStyle = `${extraHead}<style id="site-theme">${css}</style>`;
   const html = await c.res.text();
   const newHtml = html.replace('</head>', overrideStyle + '</head>');
   c.res = new Response(newHtml, {
@@ -115,7 +142,8 @@ app.get('/', async (c) => {
   if (ref) {
     return c.redirect(`/auth/request?ref=${encodeURIComponent(ref)}`);
   }
-  const response = c.html(homePage());
+  const settings = await getAllSiteSettings(c.env.DB);
+  const response = c.html(homePage(settings));
   response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600');
   return response;
 });

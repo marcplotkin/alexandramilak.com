@@ -186,10 +186,10 @@ export function postGatePage(post: Post): string {
       border: none;
     }
     .btn-primary {
-      background: #C0392B;
+      background: var(--accent-color, #C0392B);
       color: #FFF8F0;
     }
-    .btn-primary:hover { background: #A93226; }
+    .btn-primary:hover { opacity: 0.9; }
     .btn-secondary {
       background: rgba(255,248,240,0.08);
       color: #FFF8F0;

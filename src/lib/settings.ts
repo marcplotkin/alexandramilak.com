@@ -1,3 +1,65 @@
+export type SiteSettings = {
+  bg_color: string;
+  accent_color: string;
+  text_color: string;
+  font_pairing: string;
+  tagline: string;
+  banner_url: string;
+  profile_photo_url: string;
+};
+
+export const DEFAULTS: SiteSettings = {
+  bg_color: '#220D12',
+  accent_color: '#C0392B',
+  text_color: '#FFF8F0',
+  font_pairing: 'classic',
+  tagline: 'Thoughts and curations of things I care about and think are nice.',
+  banner_url: '/tomatoes.jpg',
+  profile_photo_url: '/alexandra.jpg',
+};
+
+export type FontPairing = {
+  label: string;
+  heading: string;
+  body: string;
+  googleFontsUrl: string;
+};
+
+export const FONT_PAIRINGS: Record<string, FontPairing> = {
+  classic: {
+    label: 'Classic',
+    heading: "'Cormorant Garamond', Georgia, serif",
+    body: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap',
+  },
+  modern: {
+    label: 'Modern',
+    heading: "'Playfair Display', Georgia, serif",
+    body: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap',
+  },
+  elegant: {
+    label: 'Elegant',
+    heading: "'Libre Baskerville', Georgia, serif",
+    body: "'Lato', -apple-system, BlinkMacSystemFont, sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap',
+  },
+  editorial: {
+    label: 'Editorial',
+    heading: "'Abril Fatface', Georgia, serif",
+    body: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Poppins:wght@400;500;600&display=swap',
+  },
+  clean: {
+    label: 'Clean',
+    heading: "'Source Serif 4', Georgia, serif",
+    body: "'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&display=swap',
+  },
+};
+
+export const DEFAULT_BG_COLOR = DEFAULTS.bg_color;
+
 export async function getSiteSetting(db: D1Database, key: string): Promise<string | null> {
   const row = await db.prepare('SELECT value FROM site_settings WHERE key = ?').bind(key).first();
   return row ? (row.value as string) : null;
@@ -12,6 +74,23 @@ export async function setSiteSetting(db: D1Database, key: string, value: string)
     .run();
 }
 
+export async function getAllSiteSettings(db: D1Database): Promise<SiteSettings> {
+  const rows = await db.prepare('SELECT key, value FROM site_settings').all();
+  const map: Record<string, string> = {};
+  for (const row of (rows.results || [])) {
+    map[row.key as string] = row.value as string;
+  }
+  return {
+    bg_color: map.bg_color || DEFAULTS.bg_color,
+    accent_color: map.accent_color || DEFAULTS.accent_color,
+    text_color: map.text_color || DEFAULTS.text_color,
+    font_pairing: map.font_pairing || DEFAULTS.font_pairing,
+    tagline: map.tagline || DEFAULTS.tagline,
+    banner_url: map.banner_url || DEFAULTS.banner_url,
+    profile_photo_url: map.profile_photo_url || DEFAULTS.profile_photo_url,
+  };
+}
+
 export function lightenColor(hex: string, factor: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -21,5 +100,3 @@ export function lightenColor(hex: string, factor: number): string {
   const lb = Math.min(255, Math.round(b * factor));
   return '#' + [lr, lg, lb].map((c) => c.toString(16).padStart(2, '0')).join('');
 }
-
-export const DEFAULT_BG_COLOR = '#220D12';

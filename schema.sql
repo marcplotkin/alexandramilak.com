@@ -81,3 +81,9 @@ CREATE INDEX IF NOT EXISTS idx_magic_links_email ON magic_links(email, created_a
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
 CREATE INDEX IF NOT EXISTS idx_post_views_post ON post_views(post_id);
 CREATE INDEX IF NOT EXISTS idx_members_status ON members(status);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

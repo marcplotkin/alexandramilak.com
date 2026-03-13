@@ -23,7 +23,8 @@ export function layout(
       --burgundy-light: #4A1520;
       --cream: #FFF8F0;
       --warm-white: #FFFAF5;
-      --tomato-red: #C0392B;
+      --accent-color: #C0392B;
+      --tomato-red: var(--accent-color);
       --gold: #D4A853;
       --text-dark: #2C1810;
       --text-muted: #7A6B63;

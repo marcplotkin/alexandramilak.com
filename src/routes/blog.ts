@@ -5,6 +5,7 @@ import { sendCommentNotificationEmail, sendReplyNotificationEmail } from '../lib
 import { feedPage } from '../pages/feed';
 import { postPage, postGatePage } from '../pages/post';
 import { profilePage } from '../pages/profile';
+import { getAllSiteSettings } from '../lib/settings';
 
 export const blogRoutes = new Hono<Env>();
 
@@ -40,13 +41,15 @@ blogRoutes.get('/', async (c) => {
   const hasMore = results.length > perPage;
   const displayPosts = hasMore ? results.slice(0, perPage) : results;
 
+  const siteSettings = await getAllSiteSettings(c.env.DB);
   return c.html(
     feedPage(
       displayPosts,
       member,
       isAdmin(member.email, c.env.ADMIN_EMAIL),
       page,
-      hasMore
+      hasMore,
+      siteSettings
     )
   );
 });
