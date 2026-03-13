@@ -490,6 +490,50 @@ adminRoutes.get('/analytics', async (c) => {
   ));
 });
 
+// Unfurl URL (fetch Open Graph metadata for link cards)
+adminRoutes.get('/unfurl', async (c) => {
+  const url = c.req.query('url');
+  if (!url) return c.json({ success: false, error: 'No URL' });
+
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SundaySauceBot/1.0)' },
+      redirect: 'follow',
+    });
+    if (!res.ok) return c.json({ success: false });
+
+    const html = await res.text();
+    const getOg = (prop: string): string => {
+      const m = html.match(new RegExp(`<meta[^>]*property=["']og:${prop}["'][^>]*content=["']([^"']*)["']`, 'i'))
+        || html.match(new RegExp(`<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:${prop}["']`, 'i'));
+      return m ? m[1] : '';
+    };
+    const getMeta = (name: string): string => {
+      const m = html.match(new RegExp(`<meta[^>]*name=["']${name}["'][^>]*content=["']([^"']*)["']`, 'i'))
+        || html.match(new RegExp(`<meta[^>]*content=["']([^"']*)["'][^>]*name=["']${name}["']`, 'i'));
+      return m ? m[1] : '';
+    };
+
+    const title = getOg('title') || (html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] || '').trim();
+    const description = getOg('description') || getMeta('description');
+    const rawImage = getOg('image');
+    const image = rawImage ? rawImage.replace(/^http:\/\//, 'https://') : null;
+    const siteName = getOg('site_name') || new URL(url).hostname;
+
+    if (!title && !description) return c.json({ success: false });
+
+    return c.json({
+      success: true,
+      title: title.substring(0, 200),
+      description: description.substring(0, 300),
+      image: image,
+      site: siteName,
+    });
+  } catch {
+    return c.json({ success: false });
+  }
+});
+
 // Appearance settings
 adminRoutes.get('/appearance', async (c) => {
   const bgColor = (await getSiteSetting(c.env.DB, 'bg_color')) || DEFAULT_BG_COLOR;

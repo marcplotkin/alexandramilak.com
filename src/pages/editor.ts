@@ -372,6 +372,114 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       text-decoration: line-through;
     }
 
+    /* ---- LINK CARD ---- */
+    .link-card {
+      display: flex;
+      border: 1px solid rgba(255,248,240,0.12);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      max-height: 140px;
+    }
+    .link-card:hover {
+      border-color: rgba(255,248,240,0.3);
+    }
+    .link-card-body {
+      flex: 1;
+      padding: 14px 16px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .link-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--cream);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .link-card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .link-card-url {
+      font-size: 11px;
+      color: rgba(255,248,240,0.35);
+      margin-top: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .link-card-image {
+      width: 140px;
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* ---- EMAIL PREVIEW MODAL ---- */
+    .email-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .email-modal-overlay.visible { display: flex; }
+    .email-modal {
+      background: #fff;
+      border-radius: 12px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .email-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e8e0d8;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      border-radius: 12px 12px 0 0;
+      z-index: 2;
+    }
+    .email-modal-header h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: #2C1810;
+      font-weight: 600;
+    }
+    .email-modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #7A6B63;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .email-modal-close:hover { background: #f0ebe6; }
+    .email-modal-body { padding: 0; }
+
     /* ---- FLOATING TOOLBAR ---- */
     .floating-toolbar {
       position: fixed;
@@ -737,6 +845,9 @@ export function editorPage(post: Post | null, isNew: boolean): string {
           <button class="plus-menu-item" data-action="pullquote" type="button">
             <span class="plus-menu-icon">&#10077;</span> Pull Quote
           </button>
+          <button class="plus-menu-item" data-action="linkcard" type="button">
+            <span class="plus-menu-icon">&#127760;</span> Link Card
+          </button>
         </div>
 
         <!-- Floating toolbar -->
@@ -817,6 +928,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <button class="btn btn-ghost" id="emailPreviewBtn" type="button" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 12px;">Preview Email Notification</button>
         </div>
 
         <div class="settings-group disabled-field">
@@ -1978,6 +2090,121 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
     // Start autosave loop
     resetAutoSave();
+
+  // ---- EMAIL PREVIEW ----
+  document.getElementById('emailPreviewBtn').addEventListener('click', function() {
+    var title = titleInput.value || 'Untitled Post';
+    var excerpt = subtitleInput.value || '';
+    var slug = slugInput.value || 'post';
+    var postUrl = window.location.origin + '/feed/' + slug;
+    var shareUrl = window.location.origin;
+
+    var emailHtml = '<div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">'
+      + '<p style="color: #7A6B63; font-size: 14px; margin-bottom: 8px;">Sunday Sauce</p>'
+      + '<h1 style="font-family: Georgia, serif; color: #722F37; font-size: 28px; margin-bottom: 16px;">' + title.replace(/</g, '&lt;') + '</h1>'
+      + (excerpt ? '<p style="color: #2C1810; line-height: 1.6; margin-bottom: 24px;">' + excerpt.replace(/</g, '&lt;') + '</p>' : '')
+      + '<div style="text-align: center; margin: 32px 0;">'
+      + '<a href="' + postUrl + '" style="display: inline-block; background: #722F37; color: #FFF8F0; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Read Post</a>'
+      + '</div>'
+      + '<div style="text-align: center; margin: 16px 0;">'
+      + '<p style="color: #7A6B63; font-size: 13px;">Know someone who would enjoy this? <a href="' + shareUrl + '" style="color: #722F37;">Invite them to Sunday Sauce</a></p>'
+      + '</div>'
+      + '<div style="border-top: 1px solid #e8e0d8; padding-top: 20px; margin-top: 32px; text-align: center; font-size: 12px; color: #7A6B63;">'
+      + '<p style="margin: 0 0 8px;">You are receiving this because you are a member of Sunday Sauce by Alexandra Milak.</p>'
+      + '<p style="margin: 0;"><a href="#" style="color: #7A6B63; text-decoration: underline;">Unsubscribe from emails</a> &middot; <a href="#" style="color: #7A6B63; text-decoration: underline;">Leave Sunday Sauce</a></p>'
+      + '</div></div>';
+
+    var overlay = document.getElementById('emailPreviewModal');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'emailPreviewModal';
+      overlay.className = 'email-modal-overlay';
+      overlay.innerHTML = '<div class="email-modal">'
+        + '<div class="email-modal-header"><h3>Email Notification Preview</h3><button class="email-modal-close" id="emailModalClose">&times;</button></div>'
+        + '<div class="email-modal-body"><div id="emailPreviewContent" style="padding: 0;"></div></div>'
+        + '</div>';
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', function(ev) { if (ev.target === overlay) overlay.classList.remove('visible'); });
+      document.getElementById('emailModalClose').addEventListener('click', function() { overlay.classList.remove('visible'); });
+    }
+    document.getElementById('emailPreviewContent').innerHTML = emailHtml;
+    overlay.classList.add('visible');
+  });
+
+  // ---- LINK CARD (from plus menu or paste) ----
+  function insertLinkCard(url) {
+    var placeholder = document.createElement('div');
+    placeholder.className = 'link-card';
+    placeholder.setAttribute('contenteditable', 'false');
+    placeholder.innerHTML = '<div class="link-card-body"><div class="link-card-title" style="color: rgba(255,248,240,0.4);">Loading preview...</div><div class="link-card-url">' + url.replace(/</g, '&lt;') + '</div></div>';
+
+    var sel = window.getSelection();
+    if (sel.rangeCount) {
+      var range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(placeholder);
+      range.collapse(false);
+    } else {
+      editorContent.appendChild(placeholder);
+    }
+
+    // Add paragraph after for continued editing
+    var p = document.createElement('p');
+    p.innerHTML = '<br>';
+    placeholder.parentNode.insertBefore(p, placeholder.nextSibling);
+
+    fetch('/admin/unfurl?url=' + encodeURIComponent(url))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          var cardHtml = '<div class="link-card-body">'
+            + '<div class="link-card-title">' + (data.title || '').replace(/</g, '&lt;') + '</div>'
+            + (data.description ? '<div class="link-card-desc">' + data.description.replace(/</g, '&lt;') + '</div>' : '')
+            + '<div class="link-card-url">' + (data.site || url).replace(/</g, '&lt;') + '</div>'
+            + '</div>'
+            + (data.image ? '<div class="link-card-image" style="background-image: url(' + data.image + ')"></div>' : '');
+          placeholder.innerHTML = cardHtml;
+          placeholder.setAttribute('data-url', url);
+          placeholder.onclick = function() { window.open(url, '_blank'); };
+        } else {
+          // Fallback: simple linked URL
+          placeholder.outerHTML = '<p><a href="' + url + '" target="_blank">' + url.replace(/</g, '&lt;') + '</a></p>';
+        }
+        markDirty();
+      })
+      .catch(function() {
+        placeholder.outerHTML = '<p><a href="' + url + '" target="_blank">' + url.replace(/</g, '&lt;') + '</a></p>';
+        markDirty();
+      });
+  }
+
+  // Handle "Link Card" from plus menu
+  document.querySelector('[data-action="linkcard"]').addEventListener('click', function() {
+    plusMenu.style.display = 'none';
+    var url = prompt('Enter a URL:');
+    if (url && url.trim()) {
+      insertLinkCard(url.trim());
+    }
+  });
+
+  // Auto-detect pasted URLs on blank lines
+  editorContent.addEventListener('paste', function(e) {
+    // Check if pasting plain text that looks like a URL
+    var text = e.clipboardData.getData('text/plain').trim();
+    if (/^https?:\\/\\/[^\\s]+$/.test(text)) {
+      // Check if we're on an empty line/paragraph
+      var sel = window.getSelection();
+      if (sel.anchorNode) {
+        var block = sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+        var blockText = (block.textContent || '').trim();
+        if (!blockText || block === editorContent) {
+          e.preventDefault();
+          insertLinkCard(text);
+          return;
+        }
+      }
+    }
+  }, true); // Use capture phase to run before the other paste handler
 
   })();
   </script>
