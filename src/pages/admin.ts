@@ -1,4 +1,5 @@
 import { layout } from './layout';
+import { isAdmin } from '../lib/auth';
 import type { Post, Member } from '../index';
 
 function formatDate(dateStr: string): string {
@@ -95,12 +96,12 @@ export function adminDashboard(stats: {
   return layout('Admin Dashboard', content);
 }
 
-export function adminMembersPage(members: Member[]): string {
+export function adminMembersPage(members: Member[], adminEmail: string): string {
   const rows = members
     .map(
       (m) => `
     <tr>
-      <td>${escapeHtml(m.name)}</td>
+      <td>${escapeHtml(m.name)}${isAdmin(m.email, adminEmail) ? ' <span style="display: inline-block; font-size: 11px; padding: 2px 8px; background: rgba(192,57,43,0.25); color: #E8A87C; border-radius: 4px; margin-left: 8px; vertical-align: middle; letter-spacing: 0.3px;">Admin</span>' : ''}</td>
       <td>${escapeHtml(m.email)}</td>
       <td>${formatDate(m.approved_at || m.created_at)}</td>
       <td>

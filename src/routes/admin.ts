@@ -61,7 +61,7 @@ adminRoutes.get('/members', async (c) => {
     "SELECT * FROM members WHERE status = 'active' ORDER BY name ASC"
   ).all();
 
-  return c.html(adminMembersPage((members.results || []) as unknown as Member[]));
+  return c.html(adminMembersPage((members.results || []) as unknown as Member[], c.env.ADMIN_EMAIL));
 });
 
 // Add member directly
