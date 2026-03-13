@@ -12,6 +12,8 @@ import {
   adminAnalyticsPage,
 } from '../pages/admin';
 import { editorPage } from '../pages/editor';
+import { appearancePage } from '../pages/appearance';
+import { getSiteSetting, setSiteSetting, DEFAULT_BG_COLOR } from '../lib/settings';
 
 export const adminRoutes = new Hono<Env>();
 
@@ -486,6 +488,24 @@ adminRoutes.get('/analytics', async (c) => {
     (totals?.total_views as number) || 0,
     (totals?.unique_readers as number) || 0,
   ));
+});
+
+// Appearance settings
+adminRoutes.get('/appearance', async (c) => {
+  const bgColor = (await getSiteSetting(c.env.DB, 'bg_color')) || DEFAULT_BG_COLOR;
+  return c.html(appearancePage(bgColor));
+});
+
+adminRoutes.post('/appearance', async (c) => {
+  const body = await c.req.json();
+  const bgColor = (body.bg_color || '').trim();
+
+  if (!/^#[0-9a-fA-F]{6}$/.test(bgColor)) {
+    return c.json({ success: false, error: 'Invalid hex color' });
+  }
+
+  await setSiteSetting(c.env.DB, 'bg_color', bgColor);
+  return c.json({ success: true });
 });
 
 // Upload media to R2

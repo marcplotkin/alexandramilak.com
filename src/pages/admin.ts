@@ -90,6 +90,7 @@ export function adminDashboard(stats: {
         <a href="/admin/members" class="btn btn-primary" style="text-align: center;">Members</a>
         <a href="/admin/requests" class="btn btn-primary" style="text-align: center;">Pending Requests${stats.pendingRequests > 0 ? ` (${stats.pendingRequests})` : ''}</a>
         <a href="/admin/analytics" class="btn btn-primary" style="text-align: center;">Analytics</a>
+        <a href="/admin/appearance" class="btn btn-primary" style="text-align: center;">&#127912; Appearance</a>
       </div>
     </div>
   `;

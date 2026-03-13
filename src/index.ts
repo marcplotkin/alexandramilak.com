@@ -6,6 +6,7 @@ import { apiRoutes } from './routes/api';
 import { homePage } from './pages/home';
 import { getSession } from './lib/auth';
 import { sendNewPostEmail } from './lib/email';
+import { getSiteSetting, lightenColor, DEFAULT_BG_COLOR } from './lib/settings';
 
 export type Env = {
   Bindings: {
@@ -81,6 +82,26 @@ app.use('*', async (c, next) => {
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   c.header('Vary', 'Cookie');
+});
+
+// Inject dynamic background color from site_settings into all HTML responses
+app.use('*', async (c, next) => {
+  await next();
+  const ct = c.res.headers.get('content-type') || '';
+  if (!ct.includes('text/html')) return;
+
+  const bgColor = (await getSiteSetting(c.env.DB, 'bg_color')) || DEFAULT_BG_COLOR;
+  if (bgColor === DEFAULT_BG_COLOR) return; // No override needed for default
+
+  const gradientTop = lightenColor(bgColor, 1.6);
+  const overrideStyle = `<style id="site-bg">body{background-color:${bgColor}!important;background-image:linear-gradient(180deg,${gradientTop} 0%,${bgColor} 100%)!important;}</style>`;
+
+  const html = await c.res.text();
+  const newHtml = html.replace('</head>', overrideStyle + '</head>');
+  c.res = new Response(newHtml, {
+    status: c.res.status,
+    headers: c.res.headers,
+  });
 });
 
 // Public homepage
