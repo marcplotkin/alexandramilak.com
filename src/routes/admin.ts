@@ -542,7 +542,7 @@ adminRoutes.get('/appearance', async (c) => {
 
 adminRoutes.post('/appearance', async (c) => {
   const body = await c.req.json();
-  const allowedKeys = ['bg_color', 'accent_color', 'text_color', 'font_pairing', 'tagline', 'banner_url', 'profile_photo_url'];
+  const allowedKeys = ['bg_color', 'accent_color', 'text_color', 'font_pairing', 'heading_font', 'body_font', 'tagline', 'banner_url', 'profile_photo_url'];
 
   for (const key of allowedKeys) {
     if (body[key] !== undefined) {
@@ -552,6 +552,9 @@ adminRoutes.post('/appearance', async (c) => {
       }
       if (key === 'font_pairing' && !['classic', 'modern', 'elegant', 'editorial', 'clean'].includes(value)) {
         return c.json({ success: false, error: 'Invalid font pairing' });
+      }
+      if ((key === 'heading_font' || key === 'body_font') && (value.length < 1 || value.length > 100)) {
+        return c.json({ success: false, error: `Invalid font name for ${key}` });
       }
       await setSiteSetting(c.env.DB, key, value);
     }

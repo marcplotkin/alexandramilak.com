@@ -1,5 +1,5 @@
 import { layout } from './layout';
-import { DEFAULTS, lightenColor, FONT_PAIRINGS } from '../lib/settings';
+import { DEFAULTS, lightenColor, FONT_PAIRINGS, POPULAR_GOOGLE_FONTS } from '../lib/settings';
 import type { SiteSettings } from '../lib/settings';
 import { escapeHtml, escapeAttr } from '../lib/utils';
 
@@ -19,14 +19,13 @@ export function appearancePage(settings: SiteSettings): string {
   const gradientTop = lightenColor(settings.bg_color, 1.6);
   const accentGradientTop = lightenColor(settings.accent_color, 1.3);
 
-  // Load all font pairings for preview cards
-  const fontLinks = Object.values(FONT_PAIRINGS)
-    .filter(p => p.googleFontsUrl !== FONT_PAIRINGS.classic.googleFontsUrl)
-    .map(p => `<link href="${p.googleFontsUrl}" rel="stylesheet">`)
-    .join('\n');
+  // Load current fonts for preview
+  const currentHeadingFont = settings.heading_font || DEFAULTS.heading_font;
+  const currentBodyFont = settings.body_font || DEFAULTS.body_font;
+  const currentFontsUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(currentHeadingFont)}:ital,wght@0,400;0,500;0,600;0,700;1,400&family=${encodeURIComponent(currentBodyFont)}:wght@400;500;600&display=swap`;
 
   const content = `
-    ${fontLinks}
+    <link href="${currentFontsUrl}" rel="stylesheet" id="fontPreviewLink">
     ${adminNav()}
     <h1 style="font-size: 28px; margin-bottom: 8px;">Appearance</h1>
     <p style="color: rgba(255,248,240,0.5); font-size: 14px; margin-bottom: 36px;">Customize how Sunday Sauce looks and feels.</p>
@@ -217,25 +216,46 @@ export function appearancePage(settings: SiteSettings): string {
         <h3 style="font-size: 18px; margin: 0;">Typography</h3>
       </div>
       <p style="color: rgba(255,248,240,0.5); font-size: 13px; margin-bottom: 28px;">
-        Choose a font pairing for your site. Headlines use the serif font, body text uses the sans-serif.
+        Browse and pick fonts for your headings and body text. Click any font to see how it looks.
       </p>
 
-      <div style="display: grid; gap: 12px;" id="fontPairingGrid">
-        ${Object.entries(FONT_PAIRINGS).map(([key, pairing]) => `
-          <label style="display: block; cursor: pointer;">
-            <div id="fontCard-${key}" onclick="selectFont('${key}')" style="padding: 20px 24px; border-radius: 12px; border: 2px solid ${settings.font_pairing === key ? 'rgba(255,248,240,0.4)' : 'rgba(255,248,240,0.08)'}; background: ${settings.font_pairing === key ? 'rgba(255,248,240,0.08)' : 'rgba(255,248,240,0.02)'}; transition: all 0.2s; position: relative;">
-              ${settings.font_pairing === key ? '<span style="position: absolute; top: 12px; right: 16px; font-size: 14px; color: rgba(255,248,240,0.6);">&#10003;</span>' : ''}
-              <div style="font-size: 11px; font-weight: 600; color: rgba(255,248,240,0.5); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">${pairing.label}</div>
-              <div style="font-family: ${pairing.heading}; font-size: 26px; font-weight: 500; color: #FFF8F0; margin-bottom: 6px; line-height: 1.2;">Sunday Sauce</div>
-              <div style="font-family: ${pairing.body}; font-size: 14px; color: rgba(255,248,240,0.65); line-height: 1.6;">Thoughts and curations of things I care about and think are nice.</div>
-            </div>
-          </label>
-        `).join('')}
+      <!-- Live Preview (sticky at top so she always sees the result) -->
+      <div id="fontPreviewBox" style="padding: 20px 24px; border-radius: 12px; border: 1px solid rgba(255,248,240,0.1); background: rgba(255,248,240,0.03); margin-bottom: 28px;">
+        <div style="font-size: 11px; font-weight: 600; color: rgba(255,248,240,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">Preview</div>
+        <div id="fontPreviewHeading" style="font-family: '${escapeAttr(currentHeadingFont)}', Georgia, serif; font-size: 28px; font-weight: 500; color: #FFF8F0; margin-bottom: 6px; line-height: 1.2;">Sunday Sauce</div>
+        <div id="fontPreviewBody" style="font-family: '${escapeAttr(currentBodyFont)}', sans-serif; font-size: 15px; color: rgba(255,248,240,0.65); line-height: 1.6;">Thoughts and curations of things I care about and think are nice.</div>
       </div>
 
-      <div style="display: flex; gap: 12px; align-items: center; margin-top: 20px;">
-        <button id="fontSaveBtn" onclick="saveFont()" class="btn btn-primary" style="padding: 10px 28px;">
-          Save Font
+      <!-- Heading Font Picker -->
+      <div style="margin-bottom: 28px;">
+        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Heading Font</label>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 0;">
+          <span style="font-size: 12px; color: rgba(255,248,240,0.4);">Selected:</span>
+          <span id="headingFontLabel" style="font-size: 14px; font-weight: 600; color: #FFF8F0;">${escapeHtml(currentHeadingFont)}</span>
+        </div>
+        <input type="text" id="headingFontFilter" placeholder="Filter fonts..."
+          style="width: 100%; padding: 10px 14px; border: 1px solid rgba(255,248,240,0.12); border-radius: 10px 10px 0 0; font-size: 13px; font-family: 'DM Sans', sans-serif; background: rgba(255,248,240,0.04); color: #FFF8F0; outline: none; box-sizing: border-box; border-bottom: none;">
+        <div id="headingFontList" style="max-height: 280px; overflow-y: auto; border: 1px solid rgba(255,248,240,0.12); border-radius: 0 0 10px 10px; background: rgba(0,0,0,0.15);"></div>
+      </div>
+
+      <!-- Body Font Picker -->
+      <div style="margin-bottom: 28px;">
+        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Body Font</label>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 0;">
+          <span style="font-size: 12px; color: rgba(255,248,240,0.4);">Selected:</span>
+          <span id="bodyFontLabel" style="font-size: 14px; font-weight: 600; color: #FFF8F0;">${escapeHtml(currentBodyFont)}</span>
+        </div>
+        <input type="text" id="bodyFontFilter" placeholder="Filter fonts..."
+          style="width: 100%; padding: 10px 14px; border: 1px solid rgba(255,248,240,0.12); border-radius: 10px 10px 0 0; font-size: 13px; font-family: 'DM Sans', sans-serif; background: rgba(255,248,240,0.04); color: #FFF8F0; outline: none; box-sizing: border-box; border-bottom: none;">
+        <div id="bodyFontList" style="max-height: 280px; overflow-y: auto; border: 1px solid rgba(255,248,240,0.12); border-radius: 0 0 10px 10px; background: rgba(0,0,0,0.15);"></div>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button id="fontSaveBtn" onclick="saveFonts()" class="btn btn-primary" style="padding: 10px 28px;">
+          Save Fonts
+        </button>
+        <button onclick="resetFonts()" style="padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,248,240,0.12); background: transparent; color: rgba(255,248,240,0.5); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif;">
+          Reset to Default
         </button>
         <span id="fontStatus" style="font-size: 13px; color: #6aba6a; opacity: 0; transition: opacity 0.3s;"></span>
       </div>
@@ -404,30 +424,126 @@ export function appearancePage(settings: SiteSettings): string {
         window.setTextPreset('${DEFAULTS.text_color}');
       };
 
-      // ── Font Pairing ──
-      var selectedFont = '${settings.font_pairing}';
+      // ── Typography (Scrollable Font Picker) ──
+      var popularFonts = ${JSON.stringify(POPULAR_GOOGLE_FONTS)};
+      var loadedFonts = {};
+      var selectedHeadingFont = ${JSON.stringify(currentHeadingFont)};
+      var selectedBodyFont = ${JSON.stringify(currentBodyFont)};
 
-      window.selectFont = function(key) {
-        // Deselect all
-        document.querySelectorAll('[id^="fontCard-"]').forEach(function(el) {
-          el.style.border = '2px solid rgba(255,248,240,0.08)';
-          el.style.background = 'rgba(255,248,240,0.02)';
-          var check = el.querySelector('span[style*="position: absolute"]');
-          if (check) check.remove();
+      function loadGoogleFont(fontName) {
+        if (loadedFonts[fontName]) return;
+        loadedFonts[fontName] = true;
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fontName) + ':wght@400;500;600;700&display=swap';
+        document.head.appendChild(link);
+      }
+
+      // Batch-load fonts visible in the list (lazy via IntersectionObserver)
+      function setupLazyFontLoading(listEl) {
+        if (!('IntersectionObserver' in window)) {
+          // Fallback: load all
+          listEl.querySelectorAll('[data-font]').forEach(function(el) {
+            loadGoogleFont(el.getAttribute('data-font'));
+            el.style.fontFamily = "'" + el.getAttribute('data-font') + "', sans-serif";
+          });
+          return;
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              var fontName = entry.target.getAttribute('data-font');
+              loadGoogleFont(fontName);
+              entry.target.style.fontFamily = "'" + fontName + "', sans-serif";
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { root: listEl, rootMargin: '100px' });
+        listEl.querySelectorAll('[data-font]').forEach(function(el) {
+          observer.observe(el);
         });
-        // Select chosen
-        var card = document.getElementById('fontCard-' + key);
-        card.style.border = '2px solid rgba(255,248,240,0.4)';
-        card.style.background = 'rgba(255,248,240,0.08)';
-        var checkmark = document.createElement('span');
-        checkmark.style.cssText = 'position: absolute; top: 12px; right: 16px; font-size: 14px; color: rgba(255,248,240,0.6);';
-        checkmark.innerHTML = '&#10003;';
-        card.appendChild(checkmark);
-        selectedFont = key;
+      }
+
+      function buildFontList(listId, filterId, labelId, type) {
+        var listEl = document.getElementById(listId);
+        var filterEl = document.getElementById(filterId);
+        var labelEl = document.getElementById(labelId);
+        var currentFont = type === 'heading' ? selectedHeadingFont : selectedBodyFont;
+
+        function render(filter) {
+          var q = (filter || '').trim().toLowerCase();
+          var fonts = popularFonts.filter(function(f) {
+            return !q || f.toLowerCase().indexOf(q) !== -1;
+          });
+
+          listEl.innerHTML = '';
+          if (fonts.length === 0) {
+            listEl.innerHTML = '<div style="padding: 16px; color: rgba(255,248,240,0.3); font-size: 13px; text-align: center;">No fonts match your filter</div>';
+            return;
+          }
+
+          fonts.forEach(function(fontName) {
+            var isSelected = fontName === (type === 'heading' ? selectedHeadingFont : selectedBodyFont);
+            var item = document.createElement('div');
+            item.setAttribute('data-font', fontName);
+            item.setAttribute('data-font-item', type);
+            item.style.cssText = 'padding: 14px 18px; cursor: pointer; border-bottom: 1px solid rgba(255,248,240,0.04); transition: background 0.15s; display: flex; align-items: baseline; gap: 12px;'
+              + (isSelected ? 'background: rgba(255,248,240,0.08); border-left: 3px solid rgba(255,248,240,0.5);' : 'border-left: 3px solid transparent;');
+            item.innerHTML = '<span style="font-size: 22px; color: #FFF8F0; flex: 1; line-height: 1.3;">Sunday Sauce</span>'
+              + '<span style="font-size: 11px; color: rgba(255,248,240,0.35); white-space: nowrap;">' + fontName + '</span>';
+
+            item.addEventListener('mouseenter', function() {
+              if (!isSelected) item.style.background = 'rgba(255,248,240,0.05)';
+            });
+            item.addEventListener('mouseleave', function() {
+              if (!isSelected) item.style.background = 'transparent';
+            });
+            item.addEventListener('click', function() {
+              if (type === 'heading') {
+                selectedHeadingFont = fontName;
+              } else {
+                selectedBodyFont = fontName;
+              }
+              labelEl.textContent = fontName;
+              loadGoogleFont(fontName);
+              updateFontPreview();
+              render(filterEl.value); // re-render to update selection highlight
+            });
+
+            listEl.appendChild(item);
+          });
+
+          setupLazyFontLoading(listEl);
+        }
+
+        render('');
+        filterEl.addEventListener('input', function() { render(filterEl.value); });
+      }
+
+      function updateFontPreview() {
+        loadGoogleFont(selectedHeadingFont);
+        loadGoogleFont(selectedBodyFont);
+        document.getElementById('fontPreviewHeading').style.fontFamily = "'" + selectedHeadingFont + "', Georgia, serif";
+        document.getElementById('fontPreviewBody').style.fontFamily = "'" + selectedBodyFont + "', sans-serif";
+      }
+
+      buildFontList('headingFontList', 'headingFontFilter', 'headingFontLabel', 'heading');
+      buildFontList('bodyFontList', 'bodyFontFilter', 'bodyFontLabel', 'body');
+
+      window.saveFonts = function() {
+        saveSetting({ heading_font: selectedHeadingFont, body_font: selectedBodyFont }, 'fontSaveBtn', 'fontStatus', 'Fonts saved! Refresh to see the change across the site.');
       };
 
-      window.saveFont = function() {
-        saveSetting({ font_pairing: selectedFont }, 'fontSaveBtn', 'fontStatus', 'Font saved! Refresh to see the change across the site.');
+      window.resetFonts = function() {
+        selectedHeadingFont = ${JSON.stringify(DEFAULTS.heading_font)};
+        selectedBodyFont = ${JSON.stringify(DEFAULTS.body_font)};
+        document.getElementById('headingFontLabel').textContent = selectedHeadingFont;
+        document.getElementById('bodyFontLabel').textContent = selectedBodyFont;
+        document.getElementById('headingFontFilter').value = '';
+        document.getElementById('bodyFontFilter').value = '';
+        updateFontPreview();
+        buildFontList('headingFontList', 'headingFontFilter', 'headingFontLabel', 'heading');
+        buildFontList('bodyFontList', 'bodyFontFilter', 'bodyFontLabel', 'body');
       };
 
       // ── Photo Upload ──

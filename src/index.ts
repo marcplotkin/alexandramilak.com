@@ -6,7 +6,7 @@ import { apiRoutes } from './routes/api';
 import { homePage } from './pages/home';
 import { getSession } from './lib/auth';
 import { sendNewPostEmail } from './lib/email';
-import { getSiteSetting, getAllSiteSettings, lightenColor, DEFAULT_BG_COLOR, DEFAULTS, FONT_PAIRINGS } from './lib/settings';
+import { getSiteSetting, getAllSiteSettings, lightenColor, DEFAULT_BG_COLOR, DEFAULTS, FONT_PAIRINGS, buildGoogleFontsUrl } from './lib/settings';
 export type { SiteSettings } from './lib/settings';
 
 export type Env = {
@@ -95,7 +95,8 @@ app.use('*', async (c, next) => {
   const bgChanged = settings.bg_color !== DEFAULTS.bg_color;
   const accentChanged = settings.accent_color !== DEFAULTS.accent_color;
   const textChanged = settings.text_color !== DEFAULTS.text_color;
-  const fontChanged = settings.font_pairing !== DEFAULTS.font_pairing;
+  const hasCustomFonts = settings.heading_font !== DEFAULTS.heading_font || settings.body_font !== DEFAULTS.body_font;
+  const fontChanged = hasCustomFonts || settings.font_pairing !== DEFAULTS.font_pairing;
 
   if (!bgChanged && !accentChanged && !textChanged && !fontChanged) return;
 
@@ -114,11 +115,21 @@ app.use('*', async (c, next) => {
     css += `body{color:${settings.text_color}!important;}`;
   }
   if (fontChanged) {
-    const pairing = FONT_PAIRINGS[settings.font_pairing];
-    if (pairing) {
-      extraHead += `<link href="${pairing.googleFontsUrl}" rel="stylesheet">`;
-      css += `body{font-family:${pairing.body}!important;}`;
-      css += `h1,h2,h3,h4,.nav-brand,.hero-title,.post-title,.post-card-title,.title,.brand,.comments-title,.stat-number,.preview-title{font-family:${pairing.heading}!important;}`;
+    if (hasCustomFonts) {
+      // Use individual font selections
+      const hFont = settings.heading_font;
+      const bFont = settings.body_font;
+      extraHead += `<link href="${buildGoogleFontsUrl(hFont, bFont)}" rel="stylesheet">`;
+      css += `body{font-family:'${bFont}', -apple-system, BlinkMacSystemFont, sans-serif!important;}`;
+      css += `h1,h2,h3,h4,.nav-brand,.hero-title,.post-title,.post-card-title,.title,.brand,.comments-title,.stat-number,.preview-title{font-family:'${hFont}', Georgia, serif!important;}`;
+    } else {
+      // Legacy font pairing fallback
+      const pairing = FONT_PAIRINGS[settings.font_pairing];
+      if (pairing) {
+        extraHead += `<link href="${pairing.googleFontsUrl}" rel="stylesheet">`;
+        css += `body{font-family:${pairing.body}!important;}`;
+        css += `h1,h2,h3,h4,.nav-brand,.hero-title,.post-title,.post-card-title,.title,.brand,.comments-title,.stat-number,.preview-title{font-family:${pairing.heading}!important;}`;
+      }
     }
   }
 
