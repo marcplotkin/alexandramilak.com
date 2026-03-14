@@ -79,7 +79,7 @@ app.onError((err, c) => {
 app.use('*', async (c, next) => {
   await next();
   c.header('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
-  c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'");
+  c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.instagram.com https://www.tiktok.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com https://fonts.googleapis.com; frame-src https://open.spotify.com https://www.youtube.com https://player.vimeo.com https://w.soundcloud.com https://www.instagram.com https://www.tiktok.com; frame-ancestors 'none'");
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   c.header('Vary', 'Cookie');
@@ -105,7 +105,7 @@ app.use('*', async (c, next) => {
 
   if (bgChanged) {
     const gradientTop = lightenColor(settings.bg_color, 1.6);
-    css += `body{background-color:${settings.bg_color}!important;background-image:linear-gradient(180deg,${gradientTop} 0%,${settings.bg_color} 100%)!important;}`;
+    css += `body{background-color:${settings.bg_color}!important;background-image:none!important;}`;
   }
   if (accentChanged) {
     css += `:root{--accent-color:${settings.accent_color}!important;--tomato-red:${settings.accent_color}!important;}`;
@@ -155,7 +155,7 @@ app.get('/', async (c) => {
   }
   const settings = await getAllSiteSettings(c.env.DB);
   const response = c.html(homePage(settings));
-  response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+  response.headers.set('Cache-Control', 'no-cache');
   return response;
 });
 

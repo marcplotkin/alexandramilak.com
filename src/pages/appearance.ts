@@ -16,7 +16,7 @@ function adminNav(): string {
 }
 
 export function appearancePage(settings: SiteSettings): string {
-  const gradientTop = lightenColor(settings.bg_color, 1.6);
+  // accentGradientTop kept for potential future use
   const accentGradientTop = lightenColor(settings.accent_color, 1.3);
 
   // Load current fonts for preview
@@ -128,7 +128,7 @@ export function appearancePage(settings: SiteSettings): string {
             <input type="text" id="bgColorHex" value="${settings.bg_color}"
               style="width: 100px; padding: 8px 12px; border: 1px solid rgba(255,248,240,0.15); border-radius: 8px; font-size: 14px; font-family: 'DM Sans', monospace; background: rgba(255,248,240,0.06); color: #FFF8F0; outline: none;">
           </div>
-          <div id="bgPreviewSwatch" style="width: 100px; height: 42px; border-radius: 10px; border: 1px solid rgba(255,248,240,0.12); background: linear-gradient(180deg, ${gradientTop} 0%, ${settings.bg_color} 100%);"></div>
+          <div id="bgPreviewSwatch" style="width: 100px; height: 42px; border-radius: 10px; border: 1px solid rgba(255,248,240,0.12); background: ${settings.bg_color};"></div>
         </div>
 
         <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
@@ -332,10 +332,9 @@ export function appearancePage(settings: SiteSettings): string {
       var bgSwatch = document.getElementById('bgPreviewSwatch');
 
       function updateBgPreview(color) {
-        var top = lighten(color, 1.6);
-        bgSwatch.style.background = 'linear-gradient(180deg, ' + top + ' 0%, ' + color + ' 100%)';
+        bgSwatch.style.background = color;
         document.body.style.backgroundColor = color;
-        document.body.style.backgroundImage = 'linear-gradient(180deg, ' + top + ' 0%, ' + color + ' 100%)';
+        document.body.style.backgroundImage = 'none';
       }
 
       bgPicker.addEventListener('input', function() {
