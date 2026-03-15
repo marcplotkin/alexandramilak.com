@@ -913,7 +913,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
 
         <div class="settings-group">
           <label class="settings-label">Schedule</label>
-          <input type="datetime-local" class="settings-input" id="scheduledAtInput" value="${postScheduledAt ? escapeAttr(postScheduledAt.replace(' ', 'T').substring(0, 16)) : ''}">
+          <input type="datetime-local" class="settings-input" id="scheduledAtInput" data-utc="${postScheduledAt ? escapeAttr(postScheduledAt.replace(' ', 'T').substring(0, 16)) : ''}" value="">
           <div class="settings-hint">Set a date/time to auto-publish</div>
           ${postStatus !== 'published' ? `<button class="btn btn-blue" id="scheduleBtn" type="button" style="margin-top: 8px; width: 100%; justify-content: center;">Schedule Post</button>` : ''}
         </div>
@@ -969,6 +969,19 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     const coverPreviewImg = document.getElementById('coverPreviewImg');
     const excerptSettingsInput = document.getElementById('excerptSettingsInput');
     const scheduledAtInput = document.getElementById('scheduledAtInput');
+    // Convert stored UTC scheduled_at to local time for display
+    (function() {
+      var utcVal = scheduledAtInput.getAttribute('data-utc');
+      if (utcVal) {
+        var d = new Date(utcVal + 'Z'); // append Z to parse as UTC
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        var h = String(d.getHours()).padStart(2, '0');
+        var min = String(d.getMinutes()).padStart(2, '0');
+        scheduledAtInput.value = y + '-' + m + '-' + day + 'T' + h + ':' + min;
+      }
+    })();
     const emailSubsToggle = document.getElementById('emailSubsToggle');
     const wordCountEl = document.getElementById('wordCount');
 
@@ -1093,7 +1106,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         + '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">'
         + '<style>'
         + '* { margin: 0; padding: 0; box-sizing: border-box; }'
-        + 'body { font-family: "DM Sans", sans-serif; background: linear-gradient(180deg, #2D0A10 0%, #1A0609 100%); color: #FFF8F0; min-height: 100vh; padding: 40px 20px; }'
+        + 'body { font-family: "DM Sans", sans-serif; background-color: #220D12; background-image: none; color: #FFF8F0; min-height: 100vh; padding: 40px 20px; }'
         + '.container { max-width: 680px; margin: 0 auto; }'
         + '.preview-banner { background: rgba(255,248,240,0.1); padding: 10px 16px; border-radius: 8px; margin-bottom: 32px; text-align: center; font-size: 13px; color: rgba(255,248,240,0.6); cursor: pointer; }'
         + '.preview-banner:hover { background: rgba(255,248,240,0.15); }'
