@@ -1097,8 +1097,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       var content = editorContent.innerHTML;
       var dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-      // Strip editor toolbar artifacts from content
-      var cleanContent = content.replace(/<div class="media-toolbar">.*?<\\/div>/g, '');
+      // Strip editor toolbar artifacts and fix video attributes for preview
+      var cleanContent = content.replace(/<div class="media-toolbar">.*?<\\/div>/g, '')
+        .replace(/<video(?![^>]*preload)/g, '<video preload="metadata" playsinline')
+        .replace(/<video([^>]*?)\\ssrc="([^"]+?)(?:#[^"]*)?"/g, '<video$1 src="$2#t=0.001"');
 
       var html = '<!DOCTYPE html><html lang="en"><head>'
         + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">'
@@ -1921,8 +1923,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
           figure.appendChild(img);
         } else if (isVideoFile(file)) {
           const video = document.createElement('video');
-          video.src = url;
+          video.src = url + '#t=0.001';
           video.controls = true;
+          video.preload = 'metadata';
+          video.playsInline = true;
           figure.appendChild(video);
         }
 
