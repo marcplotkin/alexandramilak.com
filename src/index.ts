@@ -21,6 +21,8 @@ export type Env = {
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
     GMAIL_REFRESH_TOKEN: string;
+    TURNSTILE_SITE_KEY: string;
+    TURNSTILE_SECRET_KEY: string;
   };
 };
 
@@ -79,7 +81,7 @@ app.onError((err, c) => {
 app.use('*', async (c, next) => {
   await next();
   c.header('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
-  c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.instagram.com https://www.tiktok.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com https://fonts.googleapis.com; frame-src https://open.spotify.com https://www.youtube.com https://player.vimeo.com https://w.soundcloud.com https://www.instagram.com https://www.tiktok.com; frame-ancestors 'none'");
+  c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.instagram.com https://www.tiktok.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com https://fonts.googleapis.com https://challenges.cloudflare.com; frame-src https://open.spotify.com https://www.youtube.com https://player.vimeo.com https://w.soundcloud.com https://www.instagram.com https://www.tiktok.com https://challenges.cloudflare.com; frame-ancestors 'none'");
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   c.header('Vary', 'Cookie');

@@ -20,6 +20,7 @@ import {
   getGoogleUserInfo,
 } from '../lib/oauth';
 import { sanitizeLikePattern, isValidEmail } from '../lib/utils';
+import { checkForSpam, verifyTurnstile } from '../lib/spam';
 
 
 function generateCsrfToken(): string {
@@ -153,7 +154,7 @@ authRoutes.get('/logout', async (c) => {
 authRoutes.get('/request', async (c) => {
   const ref = c.req.query('ref') || '';
   const csrf = setCsrfCookie(c);
-  return c.html(requestMembershipPage(undefined, ref, csrf));
+  return c.html(requestMembershipPage(undefined, ref, csrf, c.env.TURNSTILE_SITE_KEY));
 });
 
 // Handle membership request
@@ -174,6 +175,20 @@ authRoutes.post('/request', async (c) => {
 
   if (!name || !email) {
     return c.html(requestMembershipPage('Please fill in all fields.'));
+  }
+
+  // Spam protection
+  const spamCheck = checkForSpam(body, name, email);
+  if (spamCheck.isSpam) {
+    return c.html(requestMembershipPage('Unable to process your request. Please try again later.'));
+  }
+
+  // Turnstile CAPTCHA verification
+  const turnstileToken = body['cf-turnstile-response'] as string || '';
+  const ip = c.req.header('CF-Connecting-IP');
+  const turnstileOk = await verifyTurnstile(turnstileToken, c.env.TURNSTILE_SECRET_KEY, ip);
+  if (!turnstileOk) {
+    return c.html(requestMembershipPage('Please complete the verification challenge.', undefined, undefined, c.env.TURNSTILE_SITE_KEY));
   }
 
   // Look up referrer by code or by name
