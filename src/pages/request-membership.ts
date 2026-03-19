@@ -43,7 +43,7 @@ export function requestMembershipPage(error?: string, refCode?: string, csrfToke
             <label for="referred_by">Who referred you? <span style="color: rgba(255,248,240,0.55); font-weight: 400;">(optional)</span></label>
             <input type="text" id="referred_by" name="referred_by" placeholder="Name of the member who sent you">
           </div>
-          ${turnstileSiteKey ? `<div class="cf-turnstile" data-sitekey="${escapeHtml(turnstileSiteKey)}" data-theme="dark" style="margin-bottom: 16px;"></div>` : ''}
+          ${turnstileSiteKey ? `<div style="display: flex; justify-content: center; margin-bottom: 16px;"><div class="cf-turnstile" data-sitekey="${escapeHtml(turnstileSiteKey)}" data-theme="dark"></div></div>` : ''}
           <button type="submit" class="btn btn-secondary" style="width: 100%; text-align: center;">Request Access</button>
         </form>
         ${turnstileSiteKey ? '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>' : ''}
