@@ -6,7 +6,7 @@ import { apiRoutes } from './routes/api';
 import { homePage } from './pages/home';
 import { getSession } from './lib/auth';
 import { sendNewPostEmail } from './lib/email';
-import { getSiteSetting, getAllSiteSettings, lightenColor, DEFAULT_BG_COLOR, DEFAULTS, FONT_PAIRINGS, buildGoogleFontsUrl } from './lib/settings';
+import { getAllSiteSettings, DEFAULTS, FONT_PAIRINGS, buildGoogleFontsUrl } from './lib/settings';
 export type { SiteSettings } from './lib/settings';
 
 export type Env = {
@@ -106,7 +106,6 @@ app.use('*', async (c, next) => {
   let extraHead = '';
 
   if (bgChanged) {
-    const gradientTop = lightenColor(settings.bg_color, 1.6);
     css += `body{background-color:${settings.bg_color}!important;background-image:none!important;}`;
   }
   if (accentChanged) {
