@@ -83,7 +83,7 @@ export function adminDashboard(stats: {
     </div>
 
     <div class="card">
-      <h3 style="font-size: 18px; margin-bottom: 20px;">Quick Actions</h3>
+      <h2 style="font-size: 18px; margin-bottom: 20px;">Quick Actions</h2>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <a href="/admin/posts/new" class="btn btn-primary" style="text-align: center; font-size: 15px; padding: 16px 28px;">&#9998; Write New Post</a>
         <a href="/admin/posts" class="btn btn-primary" style="text-align: center;">All Posts</a>
@@ -120,7 +120,7 @@ export function adminMembersPage(members: Member[], adminEmail: string): string 
     <h1 style="font-size: 28px; margin-bottom: 32px;">Members</h1>
 
     <div class="card" style="margin-bottom: 32px;">
-      <h3 style="font-size: 16px; margin-bottom: 16px;">Add Member Directly</h3>
+      <h2 style="font-size: 16px; margin-bottom: 16px;">Add Member Directly</h2>
       <form method="POST" action="/admin/members/add" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
         <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
           <label for="name">Name</label>
@@ -135,7 +135,7 @@ export function adminMembersPage(members: Member[], adminEmail: string): string 
     </div>
 
     <div style="margin-bottom: 16px;">
-      <input type="text" id="memberSearch" placeholder="Search members..."
+      <input type="text" id="memberSearch" placeholder="Search members..." aria-label="Search members"
         style="width: 100%; padding: 10px 14px; border: 1px solid rgba(255,248,240,0.15); border-radius: 8px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: rgba(255,248,240,0.08); color: #FFF8F0; outline: none;">
     </div>
 
@@ -268,7 +268,7 @@ export function adminPostsPage(posts: (Post & { view_count?: number; unique_read
     </div>
 
     <div style="margin-bottom: 16px;">
-      <input type="text" id="postSearch" placeholder="Search posts..."
+      <input type="text" id="postSearch" placeholder="Search posts..." aria-label="Search posts"
         style="width: 100%; padding: 10px 14px; border: 1px solid rgba(255,248,240,0.15); border-radius: 8px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: rgba(255,248,240,0.08); color: #FFF8F0; outline: none;">
     </div>
 
@@ -352,7 +352,7 @@ export function adminAnalyticsPage(
     </div>
 
     <div class="card" style="margin-bottom: 32px;">
-      <h3 style="font-size: 18px; margin-bottom: 16px;">Views by Post</h3>
+      <h2 style="font-size: 18px; margin-bottom: 16px;">Views by Post</h2>
       ${postViews.length === 0
         ? '<p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No views yet.</p>'
         : `
@@ -371,7 +371,7 @@ export function adminAnalyticsPage(
     </div>
 
     <div class="card">
-      <h3 style="font-size: 18px; margin-bottom: 16px;">Recent Activity</h3>
+      <h2 style="font-size: 18px; margin-bottom: 16px;">Recent Activity</h2>
       ${recentReaders.length === 0
         ? '<p style="color: rgba(255,248,240,0.6); text-align: center; padding: 20px 0;">No activity yet.</p>'
         : `

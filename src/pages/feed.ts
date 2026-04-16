@@ -240,6 +240,12 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
 
     .nav-links a:hover { color: #FFF8F0; }
 
+    .nav-links a:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     .nav-links .email {
       color: rgba(255,248,240,0.6);
       font-size: 13px;
@@ -263,6 +269,11 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       transform: translateY(-3px);
       box-shadow: 0 12px 40px rgba(0,0,0,0.2);
       text-decoration: none;
+    }
+
+    .post-card:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
     }
 
     .post-card-image img {
@@ -319,7 +330,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       padding: 32px 0;
       text-align: center;
       font-size: 11px;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.65);
       position: relative;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -334,6 +345,32 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       background: linear-gradient(90deg, transparent, rgba(255,248,240,0.12), transparent);
     }
 
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      padding: 12px 24px;
+      background: #FFF8F0;
+      color: #2D0A10;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     @media (max-width: 640px) {
       .container { padding: 0 16px; }
       .nav { flex-wrap: wrap; gap: 12px; }
@@ -343,8 +380,9 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
   </style>
 </head>
 <body>
-  <div class="container">
-    <nav class="nav">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <main id="main-content" class="container">
+    <nav class="nav" aria-label="Main navigation">
       <div class="nav-links" style="margin-left: auto;">
         ${isAdmin ? '<a href="/admin">Admin</a>' : ''}
         <a href="/feed/profile">Profile</a>
@@ -353,8 +391,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     </nav>
     <div class="hero">
       <div class="banner-wrapper">
-        <img src="${escapeHtml(settings?.banner_url || '/tomatoes.jpg')}" alt="Banner" class="banner">
-        <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak" class="profile-photo" onclick="document.getElementById('lightbox').classList.add('active')">
+        <img src="${escapeHtml(settings?.banner_url || '/tomatoes.jpg')}" alt="Sunday Sauce newsletter banner" class="banner">
+        <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak — click to enlarge" class="profile-photo" role="button" tabindex="0" onclick="document.getElementById('lightbox').classList.add('active')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('lightbox').classList.add('active')}">
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
       <p style="font-size: 14px; color: rgba(255,248,240,0.65); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
@@ -362,7 +400,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       <div class="hero-border"></div>
     </div>
     <div style="margin-bottom: 24px;">
-      <input type="text" id="feedSearch" placeholder="Search posts..."
+      <label for="feedSearch" class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Search posts</label>
+      <input type="text" id="feedSearch" placeholder="Search posts..." aria-label="Search posts"
         style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255,248,240,0.1); border-radius: 12px; background: rgba(255,248,240,0.04); color: #FFF8F0; font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s;"
         onfocus="this.style.borderColor='rgba(255,248,240,0.25)'"
         onblur="this.style.borderColor='rgba(255,248,240,0.1)'">
@@ -376,9 +415,9 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
         ${hasMore ? `<a href="/feed?page=${page + 1}" style="display: inline-block; padding: 10px 24px; background: rgba(255,248,240,0.06); border: 1px solid rgba(255,248,240,0.12); border-radius: 8px; color: #FFF8F0; text-decoration: none; font-size: 14px; transition: all 0.2s;">Older &rarr;</a>` : ''}
       </div>
     ` : ''}
-  </div>
-  <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
-    <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak">
+  </main>
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged profile photo" onclick="this.classList.remove('active')">
+    <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak profile photo">
   </div>
 <script>
   document.getElementById('feedSearch')?.addEventListener('input', function(e) {
@@ -386,6 +425,15 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     document.querySelectorAll('.post-card').forEach(function(card) {
       card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
+  });
+  // Close lightbox with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var lb = document.getElementById('lightbox');
+      if (lb && lb.classList.contains('active')) {
+        lb.classList.remove('active');
+      }
+    }
   });
 </script>
 </body>
