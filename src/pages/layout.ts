@@ -72,6 +72,12 @@ export function layout(
       text-decoration: underline;
     }
 
+    a:focus-visible {
+      outline: 2px solid var(--cream);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
@@ -135,6 +141,11 @@ export function layout(
     .btn:hover {
       transform: translateY(-1px);
       text-decoration: none;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--cream);
+      outline-offset: 2px;
     }
 
     .btn-primary {
@@ -210,6 +221,13 @@ export function layout(
       outline: none;
       border-color: rgba(255,248,240,0.35);
       box-shadow: 0 0 0 3px rgba(255,248,240,0.08);
+    }
+
+    .form-group input:focus-visible,
+    .form-group textarea:focus-visible,
+    .form-group select:focus-visible {
+      outline: 2px solid var(--cream);
+      outline-offset: 1px;
     }
 
     .card-white .form-group input,
@@ -384,6 +402,32 @@ export function layout(
       border-radius: 16px;
     }
 
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      padding: 12px 24px;
+      background: var(--cream);
+      color: var(--burgundy);
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     @media (max-width: 640px) {
       .container {
         padding: 0 16px;
@@ -404,9 +448,10 @@ export function layout(
   </style>
 </head>
 <body${options?.bodyClass ? ` class="${options.bodyClass}"` : ''}>
-  <div class="container">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <main id="main-content" class="container">
     ${content}
-  </div>
+  </main>
 </body>
 </html>`;
 }

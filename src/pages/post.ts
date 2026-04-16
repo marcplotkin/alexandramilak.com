@@ -197,10 +197,21 @@ export function postGatePage(post: Post): string {
       border: 1px solid rgba(255,248,240,0.12);
     }
     .btn-secondary:hover { background: rgba(255,248,240,0.12); }
+    .btn:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="gate">
+  <main class="gate">
     <div class="brand">Sunday Sauce</div>
     <div class="tagline">Monthly emails from Alexandra Milak</div>
 
@@ -223,7 +234,7 @@ export function postGatePage(post: Post): string {
       <a href="/auth/login" class="btn btn-primary">Log In</a>
       <a href="/auth/request" class="btn btn-secondary">Request Membership</a>
     </div>
-  </div>
+  </main>
 </body>
 </html>`;
 }
@@ -301,6 +312,12 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
 
     .nav-links a:hover { color: #FFF8F0; }
 
+    .nav-links a:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     .nav-links .email {
       color: rgba(255,248,240,0.6);
       font-size: 13px;
@@ -351,7 +368,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
 
     .post-date {
       font-family: 'DM Sans', sans-serif;
-      color: rgba(255,248,240,0.35);
+      color: rgba(255,248,240,0.6);
       font-size: 13px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
@@ -551,15 +568,27 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       font-size: 12px;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
+      min-width: 44px;
+      min-height: 44px;
       padding: 2px 6px;
       border-radius: 4px;
       transition: all 0.15s;
       margin-left: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .reply-btn:hover {
       color: rgba(255,248,240,0.6);
       background: rgba(255,248,240,0.06);
+    }
+
+    .reply-btn:focus-visible,
+    .comment-delete:focus-visible,
+    .back-to-top:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
     }
 
     .reply-form {
@@ -674,7 +703,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .comment-date {
       font-size: 13px;
       letter-spacing: 0.5px;
-      color: rgba(255,248,240,0.35);
+      color: rgba(255,248,240,0.6);
     }
 
     .comment-body {
@@ -687,13 +716,18 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     .comment-delete {
       background: none;
       border: none;
-      color: rgba(255,248,240,0.25);
+      color: rgba(255,248,240,0.6);
       font-size: 12px;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
+      min-width: 44px;
+      min-height: 44px;
       padding: 2px 6px;
       border-radius: 4px;
       transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .comment-delete:hover {
@@ -760,8 +794,8 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       position: fixed;
       bottom: 24px;
       right: 24px;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: rgba(255,248,240,0.1);
       border: 1px solid rgba(255,248,240,0.15);
@@ -792,8 +826,46 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
       font-size: 11px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.65);
       border-top: 1px solid rgba(255,248,240,0.08);
+    }
+
+    .comment-form button:focus-visible,
+    .reply-form button:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
+    }
+
+    .comment-form textarea:focus-visible,
+    .reply-form textarea:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 1px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      padding: 12px 24px;
+      background: #FFF8F0;
+      color: #2D0A10;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     @media (max-width: 640px) {
@@ -809,8 +881,9 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="container">
-    <nav class="nav">
+    <nav class="nav" aria-label="Main navigation">
       <a href="/feed" class="nav-brand">Sunday Sauce</a>
       <div class="nav-links">
         ${isAdmin ? '<a href="/admin">Admin</a>' : ''}
@@ -818,7 +891,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
         <a href="/auth/logout">Log Out</a>
       </div>
     </nav>
-    <article>
+    <article id="main-content" role="main">
       ${post.cover_image_url ? `
         <div class="cover-image${post.cover_image_caption ? '' : ' cover-image-no-caption'}">
           <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}">

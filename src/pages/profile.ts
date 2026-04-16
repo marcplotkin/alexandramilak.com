@@ -74,6 +74,12 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
 
     .nav-links a:hover { color: #FFF8F0; }
 
+    .nav-links a:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     .page-title {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 36px;
@@ -135,6 +141,12 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
     .upload-btn:hover {
       background: rgba(255,248,240,0.15);
       border-color: rgba(255,248,240,0.25);
+    }
+
+    .upload-btn:focus-visible,
+    .remove-avatar:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
     }
 
     .file-input {
@@ -221,7 +233,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       font-size: 11px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: rgba(255,248,240,0.5);
+      color: rgba(255,248,240,0.65);
       border-top: 1px solid rgba(255,248,240,0.08);
     }
 
@@ -241,6 +253,32 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       display: flex;
     }
 
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      padding: 12px 24px;
+      background: #FFF8F0;
+      color: #2D0A10;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     @media (max-width: 640px) {
       .container { padding: 0 16px; }
       .page-title { font-size: 28px; }
@@ -249,8 +287,9 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="container">
-    <nav class="nav">
+    <nav class="nav" aria-label="Main navigation">
       <a href="/feed" class="nav-brand">Sunday Sauce</a>
       <div class="nav-links">
         ${isAdmin ? '<a href="/admin">Admin</a>' : ''}
@@ -259,7 +298,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
       </div>
     </nav>
 
-    <h1 class="page-title">Profile</h1>
+    <h1 id="main-content" class="page-title">Profile</h1>
 
     ${message ? `<div class="message ${message.startsWith('Error') ? 'message-error' : 'message-success'}">${escapeHtml(message)}</div>` : ''}
 

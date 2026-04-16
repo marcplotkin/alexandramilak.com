@@ -140,6 +140,11 @@ export function homePage(settings: SiteSettings): string {
       box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     }
 
+    .btn:focus-visible {
+      outline: 2px solid #FFF8F0;
+      outline-offset: 2px;
+    }
+
     .btn-outline {
       background: transparent;
       color: #FFF8F0;
@@ -164,7 +169,33 @@ export function homePage(settings: SiteSettings): string {
       font-size: 11px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: rgba(255, 248, 240, 0.6);
+      color: rgba(255, 248, 240, 0.65);
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      padding: 12px 24px;
+      background: #FFF8F0;
+      color: #2D0A10;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     @media (max-width: 640px) {
@@ -187,9 +218,10 @@ export function homePage(settings: SiteSettings): string {
   </style>
 </head>
 <body>
-  <div class="hero">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <main id="main-content" class="hero">
     <div class="banner-wrapper">
-      <img src="${escapeHtml(settings.banner_url)}" alt="Banner" class="banner">
+      <img src="${escapeHtml(settings.banner_url)}" alt="Sunday Sauce newsletter banner" class="banner">
       <img src="${escapeHtml(settings.profile_photo_url)}" alt="Alexandra Milak" class="profile-photo">
     </div>
     <h1 class="title">Sunday Sauce</h1>
@@ -198,7 +230,7 @@ export function homePage(settings: SiteSettings): string {
       <a href="/auth/login" class="btn btn-outline">Log In</a>
       <a href="/auth/request" class="btn btn-solid">Request Membership</a>
     </div>
-  </div>
+  </main>
 </body>
 </html>`;
 }
