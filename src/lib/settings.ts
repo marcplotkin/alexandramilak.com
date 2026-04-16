@@ -62,8 +62,6 @@ export const FONT_PAIRINGS: Record<string, FontPairing> = {
   },
 };
 
-export const DEFAULT_BG_COLOR = DEFAULTS.bg_color;
-
 export async function getSiteSetting(db: D1Database, key: string): Promise<string | null> {
   const row = await db.prepare('SELECT value FROM site_settings WHERE key = ?').bind(key).first();
   return row ? (row.value as string) : null;
