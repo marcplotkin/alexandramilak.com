@@ -40,7 +40,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       <a href="/feed/${post.slug}" class="post-card">
         ${post.cover_image_url ? `
           <div class="post-card-image">
-            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" loading="lazy">
+            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" loading="lazy" style="aspect-ratio: 16/9;">
           </div>
         ` : ''}
         <div class="post-card-body">
@@ -391,8 +391,8 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     </nav>
     <div class="hero">
       <div class="banner-wrapper">
-        <img src="${escapeHtml(settings?.banner_url || '/tomatoes.jpg')}" alt="Sunday Sauce newsletter banner" class="banner">
-        <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak — click to enlarge" class="profile-photo" role="button" tabindex="0" onclick="document.getElementById('lightbox').classList.add('active')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('lightbox').classList.add('active')}">
+        <img src="${escapeHtml(settings?.banner_url || '/tomatoes.webp')}" alt="Sunday Sauce newsletter banner" class="banner" width="1800" height="1350">
+        <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.webp')}" alt="Alexandra Milak — click to enlarge" class="profile-photo" width="800" height="691" role="button" tabindex="0" onclick="document.getElementById('lightbox').classList.add('active')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('lightbox').classList.add('active')}">
       </div>
       <h1 class="hero-title">Sunday Sauce</h1>
       <p style="font-size: 14px; color: rgba(255,248,240,0.65); margin-top: 8px; letter-spacing: 0.5px;">by Alexandra Milak</p>
@@ -417,7 +417,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
     ` : ''}
   </main>
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged profile photo" onclick="this.classList.remove('active')">
-    <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.jpg')}" alt="Alexandra Milak profile photo">
+    <img src="${escapeHtml(settings?.profile_photo_url || '/alexandra.webp')}" alt="Alexandra Milak profile photo" width="800" height="691">
   </div>
 <script>
   document.getElementById('feedSearch')?.addEventListener('input', function(e) {

@@ -18,8 +18,8 @@ export const DEFAULTS: SiteSettings = {
   heading_font: 'Cormorant Garamond',
   body_font: 'DM Sans',
   tagline: 'Thoughts and curations of things I care about and think are nice.',
-  banner_url: '/tomatoes.jpg',
-  profile_photo_url: '/alexandra.jpg',
+  banner_url: '/tomatoes.webp',
+  profile_photo_url: '/alexandra.webp',
 };
 
 export type FontPairing = {

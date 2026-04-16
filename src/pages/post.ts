@@ -40,7 +40,7 @@ function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAd
   function renderComment(comment: Comment): string {
     const childReplies = replyMap.get(comment.id) || [];
     const avatar = comment.member_avatar_url
-      ? `<img class="comment-avatar" src="${escapeHtml(comment.member_avatar_url)}" alt="">`
+      ? `<img class="comment-avatar" src="${escapeHtml(comment.member_avatar_url)}" alt="" width="32" height="32">`
       : `<div class="comment-avatar-placeholder">${escapeHtml((comment.member_name || 'M')[0].toUpperCase())}</div>`;
 
     const deleteBtn = (comment.member_id === member.id || isAdmin)
@@ -218,7 +218,7 @@ export function postGatePage(post: Post): string {
     <div class="post-preview">
       ${post.cover_image_url ? `
         <div class="preview-image">
-          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}">
+          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" fetchpriority="high" style="aspect-ratio: 16/9;">
         </div>
       ` : ''}
       <div class="preview-title">${escapeHtml(post.title)}</div>
@@ -894,7 +894,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     <article id="main-content" role="main">
       ${post.cover_image_url ? `
         <div class="cover-image${post.cover_image_caption ? '' : ' cover-image-no-caption'}">
-          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}">
+          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" fetchpriority="high" style="aspect-ratio: 16/9;">
         </div>
         ${post.cover_image_caption ? `<p class="cover-caption">${escapeHtml(post.cover_image_caption)}</p>` : ''}
       ` : ''}

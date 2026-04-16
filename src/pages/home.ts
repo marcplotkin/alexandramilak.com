@@ -221,8 +221,8 @@ export function homePage(settings: SiteSettings): string {
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <main id="main-content" class="hero">
     <div class="banner-wrapper">
-      <img src="${escapeHtml(settings.banner_url)}" alt="Sunday Sauce newsletter banner" class="banner">
-      <img src="${escapeHtml(settings.profile_photo_url)}" alt="Alexandra Milak" class="profile-photo">
+      <img src="${escapeHtml(settings.banner_url)}" alt="Sunday Sauce newsletter banner" class="banner" width="1800" height="1350">
+      <img src="${escapeHtml(settings.profile_photo_url)}" alt="Alexandra Milak" class="profile-photo" width="800" height="691">
     </div>
     <h1 class="title">Sunday Sauce</h1>
     <p class="tagline">${escapeHtml(settings.tagline)}</p>
