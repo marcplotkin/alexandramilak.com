@@ -89,6 +89,7 @@ export function postGatePage(post: Post): string {
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${escapeHtml(post.title)} — Sunday Sauce</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
