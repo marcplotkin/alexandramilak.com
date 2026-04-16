@@ -13,7 +13,7 @@ import {
 } from '../pages/admin';
 import { editorPage } from '../pages/editor';
 import { appearancePage } from '../pages/appearance';
-import { getSiteSetting, setSiteSetting, getAllSiteSettings, DEFAULT_BG_COLOR } from '../lib/settings';
+import { setSiteSetting, getAllSiteSettings } from '../lib/settings';
 
 export const adminRoutes = new Hono<Env>();
 

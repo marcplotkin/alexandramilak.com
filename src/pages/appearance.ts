@@ -1,5 +1,5 @@
 import { layout } from './layout';
-import { DEFAULTS, lightenColor, FONT_PAIRINGS, POPULAR_GOOGLE_FONTS } from '../lib/settings';
+import { DEFAULTS, lightenColor, POPULAR_GOOGLE_FONTS } from '../lib/settings';
 import type { SiteSettings } from '../lib/settings';
 import { escapeHtml, escapeAttr } from '../lib/utils';
 
