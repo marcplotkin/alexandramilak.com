@@ -1624,7 +1624,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
                 }
               } else {
                 // Unknown URL — insert as a styled link
-                var linkHtml = '<a href="' + embedUrl + '" target="_blank" rel="noopener">' + embedUrl + '</a>';
+                var linkHtml = '<a href="' + embedUrl + '" target="_blank" rel="noopener noreferrer">' + embedUrl + '</a>';
                 document.execCommand('insertHTML', false, linkHtml);
               }
             }
@@ -1757,11 +1757,11 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       if (url.includes('instagram.com/p/') || url.includes('instagram.com/reel/')) {
         var cleanUrl = url.split('?')[0];
         if (!cleanUrl.endsWith('/')) cleanUrl += '/';
-        return '<blockquote class="instagram-media" data-instgrm-permalink="' + cleanUrl + '" style="max-width:540px; width:100%;"><a href="' + cleanUrl + '" target="_blank">View on Instagram</a></blockquote><script async src="https://www.instagram.com/embed.js"><\\/script>';
+        return '<blockquote class="instagram-media" data-instgrm-permalink="' + cleanUrl + '" style="max-width:540px; width:100%;"><a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer">View on Instagram</a></blockquote><script async src="https://www.instagram.com/embed.js"><\\/script>';
       }
       // TikTok
       if (url.includes('tiktok.com/')) {
-        return '<blockquote class="tiktok-embed" cite="' + url + '" style="max-width:605px; min-width:325px;"><a href="' + url + '" target="_blank">View on TikTok</a></blockquote><script async src="https://www.tiktok.com/embed.js"><\\/script>';
+        return '<blockquote class="tiktok-embed" cite="' + url + '" style="max-width:605px; min-width:325px;"><a href="' + url + '" target="_blank" rel="noopener noreferrer">View on TikTok</a></blockquote><script async src="https://www.tiktok.com/embed.js"><\\/script>';
       }
       return null;
     }
@@ -2183,12 +2183,12 @@ export function editorPage(post: Post | null, isNew: boolean): string {
           placeholder.onclick = function() { window.open(url, '_blank'); };
         } else {
           // Fallback: simple linked URL
-          placeholder.outerHTML = '<p><a href="' + url + '" target="_blank">' + url.replace(/</g, '&lt;') + '</a></p>';
+          placeholder.outerHTML = '<p><a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url.replace(/</g, '&lt;') + '</a></p>';
         }
         markDirty();
       })
       .catch(function() {
-        placeholder.outerHTML = '<p><a href="' + url + '" target="_blank">' + url.replace(/</g, '&lt;') + '</a></p>';
+        placeholder.outerHTML = '<p><a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url.replace(/</g, '&lt;') + '</a></p>';
         markDirty();
       });
   }
