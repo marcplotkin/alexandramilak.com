@@ -88,6 +88,16 @@ export function postGatePage(post: Post): string {
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${escapeHtml(post.title)} — Sunday Sauce</title>
+  <meta name="description" content="${post.excerpt ? escapeHtml(post.excerpt) : 'A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.'}">
+  <meta property="og:title" content="${escapeHtml(post.title)}">
+  <meta property="og:description" content="${post.excerpt ? escapeHtml(post.excerpt) : 'A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.'}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://alexandramilak.com/feed/${escapeHtml(post.slug)}">
+  ${post.cover_image_url ? `<meta property="og:image" content="${escapeHtml(post.cover_image_url)}">` : ''}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(post.title)}">
+  <meta name="twitter:description" content="${post.excerpt ? escapeHtml(post.excerpt) : 'A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.'}">
+  ${post.cover_image_url ? `<meta name="twitter:image" content="${escapeHtml(post.cover_image_url)}">` : ''}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
@@ -221,7 +231,7 @@ export function postGatePage(post: Post): string {
           <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" fetchpriority="high" style="aspect-ratio: 16/9;">
         </div>
       ` : ''}
-      <div class="preview-title">${escapeHtml(post.title)}</div>
+      <h1 class="preview-title">${escapeHtml(post.title)}</h1>
       ${post.excerpt ? `<div class="preview-excerpt">${escapeHtml(post.excerpt)}</div>` : ''}
       <div class="preview-date">${formatDate(post.published_at || post.created_at)}</div>
     </div>
@@ -941,7 +951,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
         // Open all post content links in new tab
         document.querySelectorAll('.post-content a').forEach(function(a) {
           a.setAttribute('target', '_blank');
-          a.setAttribute('rel', 'noopener');
+          a.setAttribute('rel', 'noopener noreferrer');
         });
 
         function toggleReply(commentId) {

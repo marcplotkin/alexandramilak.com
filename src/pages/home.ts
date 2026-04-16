@@ -11,6 +11,16 @@ export function homePage(settings: SiteSettings): string {
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Sunday Sauce — Alexandra Milak</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="description" content="Sunday Sauce — a food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
+  <meta property="og:title" content="Sunday Sauce — Alexandra Milak">
+  <meta property="og:description" content="A food and cooking newsletter. Recipes, stories, and kitchen inspiration.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alexandramilak.com">
+  <meta property="og:image" content="${escapeHtml(settings.banner_url)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sunday Sauce — Alexandra Milak">
+  <meta name="twitter:description" content="A food and cooking newsletter. Recipes, stories, and kitchen inspiration.">
+  <meta name="twitter:image" content="${escapeHtml(settings.banner_url)}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
