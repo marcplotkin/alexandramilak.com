@@ -304,7 +304,7 @@ export function profilePage(member: Member, isAdmin: boolean, message?: string):
 
     <div class="avatar-section">
       ${member.avatar_url
-        ? `<img src="${escapeHtml(member.avatar_url)}" alt="Your avatar" class="current-avatar" id="avatarPreview">`
+        ? `<img src="${escapeHtml(member.avatar_url)}" alt="Your avatar" class="current-avatar" id="avatarPreview" width="120" height="120">`
         : `<div class="avatar-placeholder" id="avatarPreview">${escapeHtml(member.name[0].toUpperCase())}</div>`
       }
       <div>

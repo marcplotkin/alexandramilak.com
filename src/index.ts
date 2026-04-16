@@ -69,6 +69,19 @@ export type Post = {
   scheduled_at: string | null;
 };
 
+// In-memory cache for site settings (short TTL to reduce D1 queries)
+let settingsCache: { data: any; expiry: number } | null = null;
+const SETTINGS_TTL = 60_000; // 60 seconds
+
+async function getCachedSettings(db: D1Database): Promise<import('./lib/settings').SiteSettings> {
+  if (settingsCache && Date.now() < settingsCache.expiry) {
+    return settingsCache.data;
+  }
+  const settings = await getAllSiteSettings(db);
+  settingsCache = { data: settings, expiry: Date.now() + SETTINGS_TTL };
+  return settings;
+}
+
 const app = new Hono<Env>();
 
 // Global error handler
@@ -93,7 +106,7 @@ app.use('*', async (c, next) => {
   const ct = c.res.headers.get('content-type') || '';
   if (!ct.includes('text/html')) return;
 
-  const settings = await getAllSiteSettings(c.env.DB);
+  const settings = await getCachedSettings(c.env.DB);
   const bgChanged = settings.bg_color !== DEFAULTS.bg_color;
   const accentChanged = settings.accent_color !== DEFAULTS.accent_color;
   const textChanged = settings.text_color !== DEFAULTS.text_color;
@@ -116,18 +129,19 @@ app.use('*', async (c, next) => {
     css += `body{color:${settings.text_color}!important;}`;
   }
   if (fontChanged) {
+    const preconnect = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`;
     if (hasCustomFonts) {
       // Use individual font selections
       const hFont = settings.heading_font;
       const bFont = settings.body_font;
-      extraHead += `<link href="${buildGoogleFontsUrl(hFont, bFont)}" rel="stylesheet">`;
+      extraHead += `${preconnect}<link href="${buildGoogleFontsUrl(hFont, bFont)}" rel="stylesheet">`;
       css += `body{font-family:'${bFont}', -apple-system, BlinkMacSystemFont, sans-serif!important;}`;
       css += `h1,h2,h3,h4,.nav-brand,.hero-title,.post-title,.post-card-title,.title,.brand,.comments-title,.stat-number,.preview-title{font-family:'${hFont}', Georgia, serif!important;}`;
     } else {
       // Legacy font pairing fallback
       const pairing = FONT_PAIRINGS[settings.font_pairing];
       if (pairing) {
-        extraHead += `<link href="${pairing.googleFontsUrl}" rel="stylesheet">`;
+        extraHead += `${preconnect}<link href="${pairing.googleFontsUrl}" rel="stylesheet">`;
         css += `body{font-family:${pairing.body}!important;}`;
         css += `h1,h2,h3,h4,.nav-brand,.hero-title,.post-title,.post-card-title,.title,.brand,.comments-title,.stat-number,.preview-title{font-family:${pairing.heading}!important;}`;
       }
@@ -154,9 +168,9 @@ app.get('/', async (c) => {
   if (ref) {
     return c.redirect(`/auth/request?ref=${encodeURIComponent(ref)}`);
   }
-  const settings = await getAllSiteSettings(c.env.DB);
+  const settings = await getCachedSettings(c.env.DB);
   const response = c.html(homePage(settings));
-  response.headers.set('Cache-Control', 'no-cache');
+  response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   return response;
 });
 

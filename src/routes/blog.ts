@@ -42,7 +42,7 @@ blogRoutes.get('/', async (c) => {
   const displayPosts = hasMore ? results.slice(0, perPage) : results;
 
   const siteSettings = await getAllSiteSettings(c.env.DB);
-  return c.html(
+  const response = c.html(
     feedPage(
       displayPosts,
       member,
@@ -52,6 +52,8 @@ blogRoutes.get('/', async (c) => {
       siteSettings
     )
   );
+  response.headers.set('Cache-Control', 'private, no-cache');
+  return response;
 });
 
 // Profile page
@@ -59,7 +61,9 @@ blogRoutes.get('/profile', async (c) => {
   const member = (c as any).get('member') as Member;
   const admin = isAdmin(member.email, c.env.ADMIN_EMAIL);
   const msg = c.req.query('msg');
-  return c.html(profilePage(member, admin, msg || undefined));
+  const response = c.html(profilePage(member, admin, msg || undefined));
+  response.headers.set('Cache-Control', 'private, no-store');
+  return response;
 });
 
 // Upload avatar
@@ -112,7 +116,9 @@ blogRoutes.get('/:slug', async (c) => {
 
   // Not logged in — show welcoming gate page
   if (!member) {
-    return c.html(postGatePage(post as unknown as Post));
+    const response = c.html(postGatePage(post as unknown as Post));
+    response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    return response;
   }
 
   // Record view (deduplicated: once per member per post per day)
@@ -136,7 +142,7 @@ blogRoutes.get('/:slug', async (c) => {
     .bind(post.id)
     .all();
 
-  return c.html(
+  const response = c.html(
     postPage(
       post as unknown as Post,
       member,
@@ -144,6 +150,8 @@ blogRoutes.get('/:slug', async (c) => {
       (comments.results || []) as unknown as Comment[]
     )
   );
+  response.headers.set('Cache-Control', 'private, no-cache');
+  return response;
 });
 
 // Post a comment

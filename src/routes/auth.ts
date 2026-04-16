@@ -52,7 +52,9 @@ authRoutes.get('/login', async (c) => {
   const session = await getSession(c);
   if (session) return c.redirect('/feed');
   const csrf = setCsrfCookie(c);
-  return c.html(loginPage(undefined, csrf));
+  const response = c.html(loginPage(undefined, csrf));
+  response.headers.set('Cache-Control', 'private, no-store');
+  return response;
 });
 
 // Handle login form
@@ -154,7 +156,9 @@ authRoutes.get('/logout', async (c) => {
 authRoutes.get('/request', async (c) => {
   const ref = c.req.query('ref') || '';
   const csrf = setCsrfCookie(c);
-  return c.html(requestMembershipPage(undefined, ref, csrf, c.env.TURNSTILE_SITE_KEY));
+  const response = c.html(requestMembershipPage(undefined, ref, csrf, c.env.TURNSTILE_SITE_KEY));
+  response.headers.set('Cache-Control', 'private, no-store');
+  return response;
 });
 
 // Handle membership request

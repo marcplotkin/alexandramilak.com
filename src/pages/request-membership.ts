@@ -13,7 +13,7 @@ export function requestMembershipPage(error?: string, refCode?: string, csrfToke
   const content = `
     <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0;">
       <div style="width: 100%; max-width: 680px; margin-bottom: 32px;">
-        <img src="/tomatoes.jpg" alt="Tomatoes" style="width: 100%; height: 180px; object-fit: cover; border-radius: 0 0 20px 20px; display: block;">
+        <img src="/tomatoes.webp" alt="Tomatoes" width="1800" height="1350" style="width: 100%; height: 180px; object-fit: cover; border-radius: 0 0 20px 20px; display: block;">
       </div>
       <div style="width: 100%; max-width: 420px; padding: 0 20px;">
         <div style="text-align: center; margin-bottom: 32px;">
