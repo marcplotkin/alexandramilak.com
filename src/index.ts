@@ -97,7 +97,11 @@ app.use('*', async (c, next) => {
   c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.instagram.com https://www.tiktok.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://cloudflareinsights.com https://fonts.googleapis.com https://challenges.cloudflare.com; frame-src https://open.spotify.com https://www.youtube.com https://player.vimeo.com https://w.soundcloud.com https://www.instagram.com https://www.tiktok.com https://challenges.cloudflare.com; frame-ancestors 'none'");
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
-  c.header('Vary', 'Cookie');
+  // Skip Vary:Cookie on /media/* — these are immutable R2 assets that
+  // should be cached uniformly by CDN edges regardless of session cookie.
+  if (!c.req.path.startsWith('/media/')) {
+    c.header('Vary', 'Cookie');
+  }
 });
 
 // Inject dynamic theme from site_settings into all HTML responses
