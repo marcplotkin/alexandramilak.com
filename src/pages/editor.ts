@@ -23,9 +23,10 @@ export function editorPage(post: Post | null, isNew: boolean): string {
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${isNew ? 'New Post' : escapeHtml(postTitle) || 'Edit Post'} — Sunday Sauce</title>
+  <link rel="dns-prefetch" href="https://static.cloudflareinsights.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     :root {
       --burgundy: #2D0A10;
@@ -1105,7 +1106,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       var html = '<!DOCTYPE html><html lang="en"><head>'
         + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">'
         + '<title>Preview</title>'
-        + '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">'
+        + '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">'
         + '<style>'
         + '* { margin: 0; padding: 0; box-sizing: border-box; }'
         + 'body { font-family: "DM Sans", sans-serif; background-color: #220D12; background-image: none; color: #FFF8F0; min-height: 100vh; padding: 40px 20px; }'
@@ -1130,7 +1131,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         + '</style></head><body><div class="container">'
         + '<div class="preview-banner" onclick="window.history.back()">Preview — click here to go back to editor</div>';
       if (coverUrl) {
-        html += '<div class="cover' + (coverCaption ? '' : ' no-cap') + '"><img src="' + coverUrl + '" alt="Cover"></div>';
+        html += '<div class="cover' + (coverCaption ? '' : ' no-cap') + '"><img src="' + coverUrl + '" alt="Cover" width="680" height="383"></div>';
         if (coverCaption) html += '<p class="cover-cap">' + coverCaption.replace(/</g, '&lt;') + '</p>';
       }
       html += '<h1>' + title.replace(/</g, '&lt;') + '</h1>';

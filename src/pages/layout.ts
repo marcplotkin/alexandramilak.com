@@ -2,7 +2,7 @@ import { escapeHtml } from '../lib/utils';
 export function layout(
   title: string,
   content: string,
-  options?: { bodyClass?: string }
+  options?: { bodyClass?: string; headExtra?: string }
 ): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -14,9 +14,11 @@ export function layout(
   <meta name="description" content="Sunday Sauce — a food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="dns-prefetch" href="https://static.cloudflareinsights.com">
+  ${options?.headExtra || ''}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     :root {
       --burgundy: #2D0A10;

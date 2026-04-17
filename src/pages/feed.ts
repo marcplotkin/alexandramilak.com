@@ -40,7 +40,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       <a href="/feed/${post.slug}" class="post-card">
         ${post.cover_image_url ? `
           <div class="post-card-image">
-            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" loading="lazy" style="aspect-ratio: 16/9;">
+            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" width="680" height="383" loading="lazy" style="aspect-ratio: 16/9;">
           </div>
         ` : ''}
         <div class="post-card-body">
@@ -64,9 +64,10 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Feed — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <link rel="dns-prefetch" href="https://static.cloudflareinsights.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
