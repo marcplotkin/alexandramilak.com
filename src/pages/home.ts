@@ -21,6 +21,20 @@ export function homePage(settings: SiteSettings): string {
   <meta name="twitter:title" content="Sunday Sauce — Alexandra Milak">
   <meta name="twitter:description" content="A food and cooking newsletter. Recipes, stories, and kitchen inspiration.">
   <meta name="twitter:image" content="${escapeHtml(settings.banner_url)}">
+  <link rel="canonical" href="https://alexandramilak.com">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Sunday Sauce",
+    "url": "https://alexandramilak.com",
+    "description": "A food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.",
+    "author": {
+      "@type": "Person",
+      "name": "Alexandra Milak"
+    }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">

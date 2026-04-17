@@ -12,6 +12,13 @@ export function layout(
   <title>${escapeHtml(title)} — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta name="description" content="Sunday Sauce — a food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
+  <meta property="og:title" content="${escapeHtml(title)} — Sunday Sauce">
+  <meta property="og:description" content="Sunday Sauce — a food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alexandramilak.com">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="${escapeHtml(title)} — Sunday Sauce">
+  <meta name="twitter:description" content="Sunday Sauce — a food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
