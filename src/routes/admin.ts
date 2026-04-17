@@ -8,7 +8,6 @@ import {
   adminMembersPage,
   adminRequestsPage,
   adminPostsPage,
-  adminActionResultPage,
   adminAnalyticsPage,
 } from '../pages/admin';
 import { editorPage } from '../pages/editor';
