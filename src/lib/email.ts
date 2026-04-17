@@ -14,7 +14,7 @@ interface EmailParams {
 
 async function sendViaResend(apiKey: string, fromEmail: string, params: EmailParams): Promise<boolean> {
   try {
-    const body: any = {
+    const body: { from: string; to: string[]; subject: string; html: string; reply_to?: string } = {
       from: `Sunday Sauce <${fromEmail}>`,
       to: [params.to],
       subject: params.subject,
@@ -65,7 +65,7 @@ async function getGmailAccessToken(
     throw new Error(`Gmail token refresh failed: ${errorText}`);
   }
 
-  const data: any = await response.json();
+  const data = await response.json<{ access_token: string }>();
   return data.access_token;
 }
 

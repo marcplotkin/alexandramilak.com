@@ -70,7 +70,7 @@ export type Post = {
 };
 
 // In-memory cache for site settings (short TTL to reduce D1 queries)
-let settingsCache: { data: any; expiry: number } | null = null;
+let settingsCache: { data: import('./lib/settings').SiteSettings; expiry: number } | null = null;
 const SETTINGS_TTL = 60_000; // 60 seconds
 
 async function getCachedSettings(db: D1Database): Promise<import('./lib/settings').SiteSettings> {
