@@ -1,13 +1,5 @@
 import { layout } from './layout';
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+import { escapeHtml } from '../lib/utils';
 
 export function requestMembershipPage(error?: string, refCode?: string, csrfToken?: string, turnstileSiteKey?: string): string {
   const content = `

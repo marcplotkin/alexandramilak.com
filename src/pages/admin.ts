@@ -1,5 +1,6 @@
 import { layout } from './layout';
 import { isAdmin } from '../lib/auth';
+import { escapeHtml } from '../lib/utils';
 import type { Post, Member } from '../index';
 
 function formatDate(dateStr: string): string {
@@ -9,15 +10,6 @@ function formatDate(dateStr: string): string {
     month: 'short',
     day: 'numeric',
   });
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
 
 function getWordCount(content: string): number {
