@@ -5,7 +5,7 @@ import { escapeHtml, escapeAttr } from '../lib/utils';
 
 function adminNav(): string {
   return `
-    <nav class="nav">
+    <nav class="nav" aria-label="Admin navigation">
       <a href="/admin" class="nav-brand">Sunday Sauce <span style="font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 2px; background: rgba(255,248,240,0.1); color: var(--cream); padding: 3px 10px; border-radius: 20px; margin-left: 10px; vertical-align: middle;">ADMIN</span></a>
       <div class="nav-links">
         <a href="/feed">Feed</a>
@@ -34,7 +34,7 @@ export function appearancePage(settings: SiteSettings): string {
     <div class="card" style="margin-bottom: 28px;">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <span style="font-size: 20px;">&#9997;</span>
-        <h3 style="font-size: 18px; margin: 0;">Site Tagline</h3>
+        <h2 style="font-size: 18px; margin: 0;">Site Tagline</h2>
       </div>
       <p style="color: rgba(255,248,240,0.5); font-size: 13px; margin-bottom: 20px;">
         The tagline appears on your homepage and feed — it's the first thing visitors see.
@@ -62,7 +62,7 @@ export function appearancePage(settings: SiteSettings): string {
     <div class="card" style="margin-bottom: 28px;">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <span style="font-size: 20px;">&#128247;</span>
-        <h3 style="font-size: 18px; margin: 0;">Photos</h3>
+        <h2 style="font-size: 18px; margin: 0;">Photos</h2>
       </div>
       <p style="color: rgba(255,248,240,0.5); font-size: 13px; margin-bottom: 28px;">
         Update your banner and profile photo. Changes appear across the entire site instantly.
@@ -70,8 +70,8 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Banner -->
       <div style="margin-bottom: 32px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Banner Image</label>
-        <div id="bannerPreview" style="position: relative; width: 100%; height: 160px; border-radius: 14px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,248,240,0.1); cursor: pointer; transition: border-color 0.2s;" onclick="document.getElementById('bannerFileInput').click()">
+        <label for="bannerFileInput" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Banner Image</label>
+        <div id="bannerPreview" role="button" tabindex="0" style="position: relative; width: 100%; height: 160px; border-radius: 14px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,248,240,0.1); cursor: pointer; transition: border-color 0.2s;" onclick="document.getElementById('bannerFileInput').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('bannerFileInput').click();}" aria-label="Change banner image">
           <img id="bannerImg" src="${escapeAttr(settings.banner_url)}" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;">
           <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
             <span style="color: white; font-size: 14px; font-weight: 500; background: rgba(0,0,0,0.5); padding: 8px 20px; border-radius: 50px;">Click to change</span>
@@ -85,9 +85,9 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Profile Photo -->
       <div>
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Profile Photo</label>
+        <label for="profileFileInput" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Profile Photo</label>
         <div style="display: flex; align-items: center; gap: 20px;">
-          <div id="profilePreview" style="position: relative; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,248,240,0.3); cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;" onclick="document.getElementById('profileFileInput').click()">
+          <div id="profilePreview" role="button" tabindex="0" style="position: relative; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,248,240,0.3); cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;" onclick="document.getElementById('profileFileInput').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('profileFileInput').click();}" aria-label="Change profile photo">
             <img id="profileImg" src="${escapeAttr(settings.profile_photo_url)}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
             <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
               <span style="color: white; font-size: 11px; font-weight: 500;">Change</span>
@@ -109,7 +109,7 @@ export function appearancePage(settings: SiteSettings): string {
     <div class="card" style="margin-bottom: 28px;">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <span style="font-size: 20px;">&#127912;</span>
-        <h3 style="font-size: 18px; margin: 0;">Colors</h3>
+        <h2 style="font-size: 18px; margin: 0;">Colors</h2>
       </div>
       <p style="color: rgba(255,248,240,0.5); font-size: 13px; margin-bottom: 28px;">
         Set the background and accent colors for the entire site.
@@ -117,7 +117,7 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Background Color -->
       <div style="margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,248,240,0.08);">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px;">Background</label>
+        <label for="bgColorPicker" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px;">Background</label>
 
         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
           <div>
@@ -143,7 +143,7 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Text Color -->
       <div style="margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,248,240,0.08);">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Text Color</label>
+        <label for="textColorPicker" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Text Color</label>
         <p style="color: rgba(255,248,240,0.4); font-size: 12px; margin-bottom: 14px;">The color used for all body text and headings across the site.</p>
 
         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -171,7 +171,7 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Accent Color -->
       <div style="margin-bottom: 24px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Accent Color</label>
+        <label for="accentColorPicker" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Accent Color</label>
         <p style="color: rgba(255,248,240,0.4); font-size: 12px; margin-bottom: 14px;">Used for buttons and interactive elements across the site.</p>
 
         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -213,7 +213,7 @@ export function appearancePage(settings: SiteSettings): string {
     <div class="card" style="margin-bottom: 28px;">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <span style="font-size: 20px;">&#9000;</span>
-        <h3 style="font-size: 18px; margin: 0;">Typography</h3>
+        <h2 style="font-size: 18px; margin: 0;">Typography</h2>
       </div>
       <p style="color: rgba(255,248,240,0.5); font-size: 13px; margin-bottom: 28px;">
         Browse and pick fonts for your headings and body text. Click any font to see how it looks.
@@ -228,7 +228,7 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Heading Font Picker -->
       <div style="margin-bottom: 28px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Heading Font</label>
+        <label for="headingFontFilter" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Heading Font</label>
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 0;">
           <span style="font-size: 12px; color: rgba(255,248,240,0.4);">Selected:</span>
           <span id="headingFontLabel" style="font-size: 14px; font-weight: 600; color: #FFF8F0;">${escapeHtml(currentHeadingFont)}</span>
@@ -240,7 +240,7 @@ export function appearancePage(settings: SiteSettings): string {
 
       <!-- Body Font Picker -->
       <div style="margin-bottom: 28px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Body Font</label>
+        <label for="bodyFontFilter" style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Body Font</label>
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 0;">
           <span style="font-size: 12px; color: rgba(255,248,240,0.4);">Selected:</span>
           <span id="bodyFontLabel" style="font-size: 14px; font-weight: 600; color: #FFF8F0;">${escapeHtml(currentBodyFont)}</span>

@@ -42,7 +42,7 @@ function statusBadge(status: string): string {
 
 function adminNav(): string {
   return `
-    <nav class="nav">
+    <nav class="nav" aria-label="Admin navigation">
       <a href="/admin" class="nav-brand">Sunday Sauce <span style="font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 2px; background: rgba(255,248,240,0.1); color: var(--cream); padding: 3px 10px; border-radius: 20px; margin-left: 10px; vertical-align: middle;">ADMIN</span></a>
       <div class="nav-links">
         <a href="/feed">Feed</a>
