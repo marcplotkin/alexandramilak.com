@@ -65,7 +65,7 @@ function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAd
       <div class="comment-body">${linkifyText(escapeHtml(comment.content))}</div>
       <form class="reply-form" id="reply-form-${comment.id}" method="POST" action="/feed/${post.slug}/comments">
         <input type="hidden" name="parent_id" value="${comment.id}">
-        <textarea name="content" placeholder="Write a reply..." required></textarea>
+        <textarea name="content" placeholder="Write a reply..." required aria-label="Write a reply"></textarea>
         <div class="reply-form-actions">
           <button type="submit">Reply</button>
           <button type="button" class="reply-cancel" onclick="toggleReply(${comment.id})">Cancel</button>
@@ -103,6 +103,29 @@ export function postGatePage(post: Post): string {
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      z-index: 1000;
+      background: #FFF8F0;
+      color: #2C1810;
+      padding: 8px 16px;
+      font-size: 14px;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      width: auto;
+      height: auto;
+      overflow: visible;
+    }
     body {
       font-family: 'DM Sans', sans-serif;
       background: #2C1810;
@@ -221,7 +244,8 @@ export function postGatePage(post: Post): string {
   </style>
 </head>
 <body>
-  <main class="gate">
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <main class="gate" id="main-content">
     <div class="brand">Sunday Sauce</div>
     <div class="tagline">Monthly emails from Alexandra Milak</div>
 
@@ -942,7 +966,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
         ${buildCommentsHtml(comments, post, member, isAdmin)}
 
         <form class="comment-form" method="POST" action="/feed/${post.slug}/comments">
-          <textarea name="content" placeholder="Leave a comment..." required></textarea>
+          <textarea name="content" placeholder="Leave a comment..." required aria-label="Leave a comment"></textarea>
           <button type="submit">Post Comment</button>
         </form>
       </div>

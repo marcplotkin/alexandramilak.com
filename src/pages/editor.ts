@@ -889,7 +889,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
       </div>
       <div class="settings-body">
         <div class="settings-group">
-          <label class="settings-label">Cover Image</label>
+          <label class="settings-label" for="coverImageInput">Cover Image</label>
           <input type="text" class="settings-input" id="coverImageInput" placeholder="https://example.com/image.jpg" value="${escapeAttr(postCoverImage)}">
           <div class="cover-drop-zone" id="coverDropZone">
             <div class="upload-icon">&#128247;</div>
@@ -901,18 +901,18 @@ export function editorPage(post: Post | null, isNew: boolean): string {
         </div>
 
         <div class="settings-group">
-          <label class="settings-label">Excerpt / Subtitle</label>
+          <label class="settings-label" for="excerptSettingsInput">Excerpt / Subtitle</label>
           <textarea class="settings-input" id="excerptSettingsInput" rows="3" placeholder="Brief summary shown in feed...">${escapeHtml(postExcerpt)}</textarea>
         </div>
 
         <div class="settings-group">
-          <label class="settings-label">Slug</label>
+          <label class="settings-label" for="slugInput">Slug</label>
           <input type="text" class="settings-input" id="slugInput" placeholder="your-post-slug" value="${escapeAttr(postSlug)}">
           <div class="settings-hint">Auto-generated from title. Edit to customize.</div>
         </div>
 
         <div class="settings-group">
-          <label class="settings-label">Schedule</label>
+          <label class="settings-label" for="scheduledAtInput">Schedule</label>
           <input type="datetime-local" class="settings-input" id="scheduledAtInput" data-utc="${postScheduledAt ? escapeAttr(postScheduledAt.replace(' ', 'T').substring(0, 16)) : ''}" value="">
           <div class="settings-hint">Set a date/time to auto-publish</div>
           ${postStatus !== 'published' ? `<button class="btn btn-blue" id="scheduleBtn" type="button" style="margin-top: 8px; width: 100%; justify-content: center;">Schedule Post</button>` : ''}
