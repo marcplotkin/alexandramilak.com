@@ -98,6 +98,27 @@ export function postGatePage(post: Post): string {
   <meta name="twitter:title" content="${escapeHtml(post.title)}">
   <meta name="twitter:description" content="${post.excerpt ? escapeHtml(post.excerpt) : 'A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.'}">
   ${post.cover_image_url ? `<meta name="twitter:image" content="${escapeHtml(post.cover_image_url)}">` : ''}
+  <link rel="canonical" href="https://alexandramilak.com/feed/${escapeHtml(post.slug)}">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "${escapeHtml(post.title).replace(/"/g, '\\"')}",
+    "url": "https://alexandramilak.com/feed/${escapeHtml(post.slug)}",
+    ${post.excerpt ? `"description": "${escapeHtml(post.excerpt).replace(/"/g, '\\"')}",` : `"description": "A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.",`}
+    ${post.cover_image_url ? `"image": "${escapeHtml(post.cover_image_url)}",` : ''}
+    "datePublished": "${post.published_at || post.created_at}",
+    "author": {
+      "@type": "Person",
+      "name": "Alexandra Milak"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Sunday Sauce",
+      "url": "https://alexandramilak.com"
+    }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
@@ -259,6 +280,8 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${escapeHtml(post.title)} — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="description" content="${post.excerpt ? escapeHtml(post.excerpt) : 'A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.'}">
+  <link rel="canonical" href="https://alexandramilak.com/feed/${escapeHtml(post.slug)}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">

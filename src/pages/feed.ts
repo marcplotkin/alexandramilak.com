@@ -64,6 +64,15 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Feed — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="description" content="Sunday Sauce — a food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
+  <meta property="og:title" content="Feed — Sunday Sauce">
+  <meta property="og:description" content="A food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alexandramilak.com/feed">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Feed — Sunday Sauce">
+  <meta name="twitter:description" content="A food and cooking newsletter by Alexandra Milak. Recipes, stories, and kitchen inspiration.">
+  <link rel="canonical" href="https://alexandramilak.com/feed">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
