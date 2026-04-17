@@ -50,7 +50,9 @@ export function requestMembershipPage(error?: string, refCode?: string, csrfToke
       </div>
     </div>
   `;
-  return layout('Request Membership', content);
+  return layout('Request Membership', content, {
+    headExtra: '<link rel="preconnect" href="https://challenges.cloudflare.com">'
+  });
 }
 
 export function requestSentPage(): string {

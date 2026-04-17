@@ -98,6 +98,7 @@ export function postGatePage(post: Post): string {
   <meta name="twitter:title" content="${escapeHtml(post.title)}">
   <meta name="twitter:description" content="${post.excerpt ? escapeHtml(post.excerpt) : 'A post from Sunday Sauce — a food and cooking newsletter by Alexandra Milak.'}">
   ${post.cover_image_url ? `<meta name="twitter:image" content="${escapeHtml(post.cover_image_url)}">` : ''}
+  <link rel="dns-prefetch" href="https://static.cloudflareinsights.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
@@ -228,7 +229,7 @@ export function postGatePage(post: Post): string {
     <div class="post-preview">
       ${post.cover_image_url ? `
         <div class="preview-image">
-          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" fetchpriority="high" style="aspect-ratio: 16/9;">
+          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" width="680" height="383" fetchpriority="high" style="aspect-ratio: 16/9;">
         </div>
       ` : ''}
       <h1 class="preview-title">${escapeHtml(post.title)}</h1>
@@ -259,9 +260,10 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>${escapeHtml(post.title)} — Sunday Sauce</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <link rel="dns-prefetch" href="https://static.cloudflareinsights.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" fetchpriority="high">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -904,7 +906,7 @@ export function postPage(post: Post, member: Member, isAdmin: boolean, comments:
     <article id="main-content" role="main">
       ${post.cover_image_url ? `
         <div class="cover-image${post.cover_image_caption ? '' : ' cover-image-no-caption'}">
-          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" fetchpriority="high" style="aspect-ratio: 16/9;">
+          <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" width="680" height="383" fetchpriority="high" style="aspect-ratio: 16/9;">
         </div>
         ${post.cover_image_caption ? `<p class="cover-caption">${escapeHtml(post.cover_image_caption)}</p>` : ''}
       ` : ''}
