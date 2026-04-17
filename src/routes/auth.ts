@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, Context } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import type { Env } from '../index';
 import {
@@ -27,7 +27,7 @@ function generateCsrfToken(): string {
   return crypto.randomUUID();
 }
 
-function setCsrfCookie(c: any): string {
+function setCsrfCookie(c: Context<Env>): string {
   const token = generateCsrfToken();
   setCookie(c, 'csrf_token', token, {
     path: '/',
@@ -39,7 +39,7 @@ function setCsrfCookie(c: any): string {
   return token;
 }
 
-function validateCsrf(c: any, body: Record<string, string | File>): boolean {
+function validateCsrf(c: Context<Env>, body: Record<string, string | File>): boolean {
   const cookieToken = getCookie(c, 'csrf_token');
   const formToken = body['_csrf'] as string;
   return !!cookieToken && !!formToken && cookieToken === formToken;
