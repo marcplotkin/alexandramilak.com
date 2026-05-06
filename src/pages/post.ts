@@ -40,7 +40,7 @@ function buildCommentsHtml(comments: Comment[], post: Post, member: Member, isAd
   function renderComment(comment: Comment): string {
     const childReplies = replyMap.get(comment.id) || [];
     const avatar = comment.member_avatar_url
-      ? `<img class="comment-avatar" src="${escapeHtml(comment.member_avatar_url)}" alt="" width="32" height="32">`
+      ? `<img class="comment-avatar" src="${escapeHtml(comment.member_avatar_url)}" alt="" width="32" height="32" loading="lazy" decoding="async">`
       : `<div class="comment-avatar-placeholder">${escapeHtml((comment.member_name || 'M')[0].toUpperCase())}</div>`;
 
     const deleteBtn = (comment.member_id === member.id || isAdmin)
