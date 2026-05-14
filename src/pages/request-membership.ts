@@ -12,7 +12,7 @@ export function requestMembershipPage(error?: string, refCode?: string, csrfToke
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #FFF8F0; text-decoration: none;">Sunday Sauce</a>
           <p style="font-size: 12px; color: rgba(255,248,240,0.65); font-style: italic; margin-top: 6px;">A bimonthly curated newsletter</p>
         </div>
-        <h2 style="text-align: center; font-size: 22px; margin-bottom: 24px;">Request Membership</h2>
+        <h1 style="text-align: center; font-size: 22px; margin-bottom: 24px;">Request Membership</h1>
         ${error ? `<div class="message message-error">${error}</div>` : ''}
         <form method="POST" action="/auth/request">
           <input type="hidden" name="_csrf" value="${csrfToken || ''}">
@@ -63,7 +63,7 @@ export function requestSentPage(): string {
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #FFF8F0; text-decoration: none;">Sunday Sauce</a>
         </div>
         <div style="font-size: 48px; margin-bottom: 16px;">&#10003;</div>
-        <h2 style="font-size: 22px; margin-bottom: 12px;">Request Sent</h2>
+        <h1 style="font-size: 22px; margin-bottom: 12px;">Request Sent</h1>
         <p style="color: rgba(255,248,240,0.75); font-size: 15px; line-height: 1.6;">
           Your membership request has been sent to Alexandra. You'll receive an email when your request is approved.
         </p>

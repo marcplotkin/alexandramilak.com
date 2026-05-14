@@ -40,7 +40,7 @@ export function feedPage(posts: Post[], member: Member, isAdmin: boolean, page: 
       <a href="/feed/${post.slug}" class="post-card">
         ${post.cover_image_url ? `
           <div class="post-card-image">
-            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" width="680" height="383" loading="lazy" style="aspect-ratio: 16/9;">
+            <img src="${escapeHtml(post.cover_image_url)}" alt="${escapeHtml(post.title)}" width="680" height="383" loading="lazy" decoding="async" style="aspect-ratio: 16/9;">
           </div>
         ` : ''}
         <div class="post-card-body">

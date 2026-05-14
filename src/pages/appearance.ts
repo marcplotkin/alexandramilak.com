@@ -72,7 +72,7 @@ export function appearancePage(settings: SiteSettings): string {
       <div style="margin-bottom: 32px;">
         <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Banner Image</label>
         <div id="bannerPreview" style="position: relative; width: 100%; height: 160px; border-radius: 14px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,248,240,0.1); cursor: pointer; transition: border-color 0.2s;" onclick="document.getElementById('bannerFileInput').click()">
-          <img id="bannerImg" src="${escapeAttr(settings.banner_url)}" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;">
+          <img id="bannerImg" src="${escapeAttr(settings.banner_url)}" alt="Banner" width="680" height="160" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;">
           <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
             <span style="color: white; font-size: 14px; font-weight: 500; background: rgba(0,0,0,0.5); padding: 8px 20px; border-radius: 50px;">Click to change</span>
           </div>
@@ -88,7 +88,7 @@ export function appearancePage(settings: SiteSettings): string {
         <label style="display: block; font-size: 13px; font-weight: 600; color: rgba(255,248,240,0.7); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Profile Photo</label>
         <div style="display: flex; align-items: center; gap: 20px;">
           <div id="profilePreview" style="position: relative; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,248,240,0.3); cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;" onclick="document.getElementById('profileFileInput').click()">
-            <img id="profileImg" src="${escapeAttr(settings.profile_photo_url)}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+            <img id="profileImg" src="${escapeAttr(settings.profile_photo_url)}" alt="Profile" width="96" height="96" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;">
             <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
               <span style="color: white; font-size: 11px; font-weight: 500;">Change</span>
             </div>

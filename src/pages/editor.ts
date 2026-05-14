@@ -817,7 +817,7 @@ export function editorPage(post: Post | null, isNew: boolean): string {
     <div class="editor-main">
       <div class="editor-wrapper">
         <div class="cover-image-preview" id="coverPreview">
-          <img id="coverPreviewImg" src="" alt="Cover">
+          <img id="coverPreviewImg" src="" alt="Cover" width="680" height="383" decoding="async">
           <p class="cover-caption-preview" id="coverCaptionPreview"></p>
         </div>
 

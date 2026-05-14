@@ -8,6 +8,7 @@ export function loginPage(error?: string, csrfToken?: string): string {
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; color: #FFF8F0; text-decoration: none; letter-spacing: -0.5px;">Sunday Sauce</a>
           <p style="font-size: 13px; color: rgba(255,248,240,0.6); margin-top: 8px; letter-spacing: 0.3px;">a bimonthly, curated newsletter</p>
         </div>
+        <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Log In</h1>
         ${error ? `<div class="message message-error">${error}</div>` : ''}
 
         <!-- Social Login Buttons -->
@@ -59,7 +60,7 @@ export function checkEmailPage(): string {
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #FFF8F0; text-decoration: none;">Sunday Sauce</a>
         </div>
         <div style="font-size: 48px; margin-bottom: 16px;">&#9993;</div>
-        <h2 style="font-size: 22px; margin-bottom: 12px;">Check your email</h2>
+        <h1 style="font-size: 22px; margin-bottom: 12px;">Check your email</h1>
         <p style="color: rgba(255,248,240,0.75); font-size: 15px; line-height: 1.6;">
           We sent you a magic link. Click it to log in. The link expires in 15 minutes.
         </p>
@@ -80,7 +81,7 @@ export function pendingApprovalPage(): string {
           <a href="/" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #FFF8F0; text-decoration: none;">Sunday Sauce</a>
         </div>
         <div style="font-size: 48px; margin-bottom: 16px;">&#9203;</div>
-        <h2 style="font-size: 22px; margin-bottom: 12px;">Membership Pending</h2>
+        <h1 style="font-size: 22px; margin-bottom: 12px;">Membership Pending</h1>
         <p style="color: rgba(255,248,240,0.75); font-size: 15px; line-height: 1.6;">
           Your membership request has been sent to Alexandra for approval. You'll receive an email when you're approved.
         </p>
